@@ -502,11 +502,11 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                       <div className="inline-flex items-center gap-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3.5 py-2.5 bg-white dark:bg-neutral-900/50 text-xs font-medium text-neutral-700 dark:text-neutral-300">
                         <div className="flex items-center gap-1.5">
                           <Heart className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
-                          <span>{blog.likes_count ?? 0}</span>
+                          <span>{blog.likes_count ?? 0} {tMain(locale, "likes_label")}</span>
                         </div>
                         <div className="flex items-center gap-1.5">
                           <Eye className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
-                          <span>{blog.views_count ?? 0}</span>
+                          <span>{blog.views_count ?? 0} {tMain(locale, "views_label")}</span>
                         </div>
                       </div>
 

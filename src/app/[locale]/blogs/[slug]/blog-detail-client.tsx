@@ -238,7 +238,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             <img
               src={item.image_url}
               alt={itemTitle}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-neutral-400 dark:text-neutral-600">
@@ -353,7 +353,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* Views */}
             <div className={cn(actionBtnClass, "cursor-default")}>
               <Eye className="h-4 w-4 shrink-0" />
-              <span>{viewsCount}</span>
+              <span>{viewsCount} {tMain(locale, "views_label")}</span>
             </div>
 
             {/* Likes */}
@@ -371,7 +371,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
                   isLikePopping ? "scale-140 -rotate-12" : "scale-100"
                 )}
               />
-              <span>{likesCount}</span>
+              <span>{likesCount} {tMain(locale, "likes_label")}</span>
             </button>
 
             {/* Share Dropdown */}
@@ -430,11 +430,11 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           >
             {/* Featured Image */}
             {blog.image_url && (
-              <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900">
+              <div className="group relative w-full aspect-video rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900">
                 <img
                   src={blog.image_url}
                   alt={blogTitle}
-                  className="w-full h-full object-cover"
+                  className="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-105"
                 />
               </div>
             )}
@@ -448,12 +448,12 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 0.2 }}
-            className="lg:col-span-4 text-left space-y-8"
+            className="lg:col-span-4 text-left space-y-8 pt-8 border-t border-neutral-200 dark:border-white/10 lg:border-t-0 lg:pt-0"
           >
             {/* MOST POPULAR */}
             {sidebarData.popular.length > 0 && (
               <div className="space-y-4">
-                <div className="border-b border-neutral-900 dark:border-white pb-1.5 w-fit">
+                <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                     {locale === "id" ? "TERPOPULER" : "MOST POPULAR"}
                   </h3>
@@ -469,7 +469,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* RELATED */}
             {sidebarData.related.length > 0 && (
               <div className="space-y-4">
-                <div className="border-b border-neutral-900 dark:border-white pb-1.5 w-fit">
+                <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                     {locale === "id" ? "TERKAIT" : "RELATED"}
                   </h3>
@@ -485,7 +485,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* LATEST */}
             {sidebarData.latest.length > 0 && (
               <div className="space-y-4">
-                <div className="border-b border-neutral-900 dark:border-white pb-1.5 w-fit">
+                <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                     {locale === "id" ? "TERBARU" : "LATEST"}
                   </h3>
@@ -505,7 +505,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.25 }}
-          className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-6 py-4 border-t border-neutral-200 dark:border-white/10 mt-10"
+          className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-4 pb-0 border-t border-neutral-200 dark:border-white/10 mt-8"
         >
           {/* Left Column: Tags */}
           <div className="space-y-2">
@@ -531,7 +531,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* Views */}
             <div className={cn(actionBtnClass, "cursor-default")}>
               <Eye className="h-4 w-4 shrink-0" />
-              <span>{viewsCount}</span>
+              <span>{viewsCount} {tMain(locale, "views_label")}</span>
             </div>
 
             {/* Likes */}
@@ -549,7 +549,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
                   isLikePopping ? "scale-140 -rotate-12" : "scale-100"
                 )}
               />
-              <span>{likesCount}</span>
+              <span>{likesCount} {tMain(locale, "likes_label")}</span>
             </button>
 
             {/* Share Dropdown */}

@@ -88,7 +88,9 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     blogs_desc: "Thoughts and learnings from my journey in tech",
     view_all_blogs: "View all blogs",
     read_more: "Read more",
-    min_read: "min",
+    min_read: "min read",
+    views_label: "views",
+    likes_label: "likes",
     // Contact
     contact_title: "Get In Touch",
     contact_desc: "Feel free to reach out for collaborations or just a friendly hello",
@@ -241,7 +243,9 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     blogs_desc: "Pemikiran dan pembelajaran dari perjalanan teknologi saya",
     view_all_blogs: "Lihat semua blog",
     read_more: "Baca selengkapnya",
-    min_read: "menit",
+    min_read: "menit baca",
+    views_label: "views",
+    likes_label: "likes",
     // Contact
     contact_title: "Hubungi Saya",
     contact_desc: "Jangan ragu untuk menghubungi saya untuk kolaborasi atau sekadar menyapa",

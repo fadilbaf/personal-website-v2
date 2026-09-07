@@ -744,7 +744,7 @@ const contentAndSyntaxStyles = `
     border-color: rgba(255, 255, 255, 0.12);
   }
 
-  /* Images and Image Wrapper (matching Thumbnail / Featured Image style exactly) */
+  /* Images and Image Wrapper (matching Thumbnail / Featured Image style exactly with hover scale up) */
   .blog-content .content-image-wrapper {
     position: relative;
     width: 100%;
@@ -768,6 +768,11 @@ const contentAndSyntaxStyles = `
     border: none !important;
     border-radius: 0 !important;
     display: block !important;
+    transition: transform 0.5s ease-out !important;
+  }
+  .blog-content .content-image-wrapper:hover img,
+  .blog-content .content-image-wrapper img:hover {
+    transform: scale(1.05);
   }
   .blog-content img:not(.content-image-wrapper img) {
     border-radius: 1rem;
@@ -778,6 +783,10 @@ const contentAndSyntaxStyles = `
     border: 1px solid #e5e5e5;
     overflow: hidden;
     display: block;
+    transition: transform 0.5s ease-out !important;
+  }
+  .blog-content img:not(.content-image-wrapper img):hover {
+    transform: scale(1.05);
   }
   .dark .blog-content img:not(.content-image-wrapper img) {
     border-color: rgba(255, 255, 255, 0.1);
