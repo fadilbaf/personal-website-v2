@@ -476,7 +476,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
                       </span>
 
                       {/* Title */}
-                      <h3 className="text-[16px] font-semibold text-neutral-900 dark:text-white line-clamp-2 leading-snug mb-1">
+                      <h3 className="text-[16px] font-semibold text-neutral-900 dark:text-white line-clamp-2 leading-snug mb-1 group-hover:underline group-active:underline underline-offset-2 transition-all">
                         {title}
                       </h3>
 

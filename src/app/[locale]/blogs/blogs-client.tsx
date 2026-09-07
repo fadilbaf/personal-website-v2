@@ -488,7 +488,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                     </div>
 
                     {/* Title Row */}
-                    <h3 className="text-base sm:text-[18px] font-semibold text-neutral-900 dark:text-white line-clamp-1 leading-snug mt-3">
+                    <h3 className="text-base sm:text-[18px] font-semibold text-neutral-900 dark:text-white line-clamp-1 leading-snug mt-3 group-hover:underline group-active:underline underline-offset-2 transition-all">
                       {title}
                     </h3>
 

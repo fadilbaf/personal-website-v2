@@ -456,7 +456,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
                     {/* Card Content */}
                     <div className="flex flex-1 flex-col p-5 text-left">
                       {/* Project Title */}
-                      <h3 className="text-base font-bold text-neutral-900 dark:text-white leading-tight truncate">
+                      <h3 className="text-base font-bold text-neutral-900 dark:text-white leading-tight truncate group-hover:underline group-active:underline underline-offset-2 transition-all">
                         {title}
                       </h3>
 
