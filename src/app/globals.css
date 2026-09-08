@@ -459,6 +459,14 @@ html.dark {
   scrollbar-color: rgba(255, 255, 255, 0.85) transparent;
 }
 
+/* Disable and hide page scrollbars when modal or overlay is open */
+html:has(body[data-scroll-locked]),
+html:has(body[style*="overflow: hidden"]),
+body[data-scroll-locked],
+body[style*="overflow: hidden"] {
+  overflow: hidden !important;
+}
+
 /* Webkit browser scrollbars (Chrome, Safari, Edge, Chrome-based) */
 ::-webkit-scrollbar {
   width: 10px;
