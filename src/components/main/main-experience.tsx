@@ -215,7 +215,7 @@ export function MainExperience({
   ] as const;
 
   return (
-    <section id="experience" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-4 pb-6 md:pt-6 md:pb-8 bg-transparent">
+    <section id="experiences" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-4 pb-6 md:pt-6 md:pb-8 bg-transparent">
       <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6">
 
         {/* Section Header */}
