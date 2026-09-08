@@ -31,16 +31,18 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
 
   const isHomePage = pathname === `/${locale}` || pathname === "/";
 
-  // Lock body scroll when overlay is open
+  // Lock body and html scroll when overlay is open
   useEffect(() => {
     if (isOpen) {
+      const originalBodyOverflow = document.body.style.overflow;
+      const originalHtmlOverflow = document.documentElement.style.overflow;
       document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = originalBodyOverflow;
+        document.documentElement.style.overflow = originalHtmlOverflow;
+      };
     }
-    return () => {
-      document.body.style.overflow = "";
-    };
   }, [isOpen]);
 
   // Handle Escape key
@@ -135,7 +137,7 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
           className="fixed inset-0 z-40 flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white pt-14"
         >
           {/* Scrollable Navigation Body */}
-          <div className="flex-1 overflow-y-auto scrollbar-custom px-3.5 sm:px-12 md:px-24 lg:px-36 py-6 sm:py-8">
+          <div className="flex-1 overflow-y-auto scrollbar-custom overscroll-contain px-3.5 sm:px-12 md:px-24 lg:px-36 py-6 sm:py-8">
             <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8">
               {/* 1. SECTIONS */}
               <div className="flex flex-col gap-2">
