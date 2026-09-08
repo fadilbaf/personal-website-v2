@@ -24,6 +24,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { toast } from "sonner";
 import type { Project, Contact } from "@/src/types/database";
 import { trackEvent } from "@/src/lib/track-event";
@@ -891,21 +897,33 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
           {/* Close Button (Top-Right) */}
           <div className="absolute top-4 right-4 md:top-6 md:right-6 z-60">
-            <button
-              onClick={() => setVideoOpen(false)}
-              type="button"
-              className={cn(
-                "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
-                "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
-                "border border-neutral-300 dark:border-neutral-600 shadow-lg",
-                "text-neutral-950 dark:text-neutral-50",
-                "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95",
-                "transition-all duration-200 cursor-pointer outline-none group"
-              )}
-              title={locale === "id" ? "Tutup" : "Close"}
-            >
-              <X className="w-5 h-5 stroke-[2.5]" />
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                  <button
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      setVideoOpen(false);
+                    }}
+                    type="button"
+                    className={cn(
+                      "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
+                      "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
+                      "border border-neutral-300 dark:border-neutral-600 shadow-lg",
+                      "text-neutral-950 dark:text-neutral-50",
+                      "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95",
+                      "transition-all duration-200 cursor-pointer outline-none group"
+                    )}
+                    aria-label={locale === "id" ? "Tutup" : "Close"}
+                  >
+                    <X className="w-5 h-5 stroke-[2.5]" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="z-70">
+                  <p>{locale === "id" ? "Tutup" : "Close"}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Video Viewport Container */}
@@ -938,79 +956,114 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
       {/* 6. Fullscreen Image Viewer Modal */}
       {viewerOpen && mounted && createPortal(
-        <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4">
-          {/* Premium Glassmorphic Backdrop */}
-          <div
-            onClick={() => setViewerOpen(false)}
-            className="fixed inset-0 bg-black/10 backdrop-blur-xs cursor-pointer"
-          />
-
-          {/* Floating Control Buttons (Top-Right) */}
-          <div className="absolute top-4 right-4 md:top-6 md:right-6 z-60">
-            <button
+        <TooltipProvider>
+          <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4">
+            {/* Premium Glassmorphic Backdrop */}
+            <div
               onClick={() => setViewerOpen(false)}
-              type="button"
-              className={cn(
-                "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
-                "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
-                "border border-neutral-300 dark:border-neutral-600 shadow-lg",
-                "text-neutral-950 dark:text-neutral-50",
-                "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95",
-                "transition-all duration-200 cursor-pointer outline-none group"
-              )}
-              title={locale === "id" ? "Tutup" : "Close"}
-            >
-              <X className="w-5 h-5 stroke-[2.5]" />
-            </button>
-          </div>
+              className="fixed inset-0 bg-black/10 backdrop-blur-xs cursor-pointer"
+            />
 
-          {/* Floating Left Navigation Chevron */}
-          {hasMultiple && (
-            <div className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-60">
-              <button
-                onClick={() => setViewerIndex((prev) => prev - 1)}
-                disabled={viewerIndex === 0}
-                type="button"
-                className={cn(
-                  "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
-                  "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
-                  "border border-neutral-300 dark:border-neutral-600 shadow-lg",
-                  "text-neutral-950 dark:text-neutral-50",
-                  "transition-all duration-200 outline-none group",
-                  viewerIndex === 0
-                    ? "opacity-30 cursor-not-allowed pointer-events-none"
-                    : "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95 cursor-pointer"
-                )}
-                title={locale === "id" ? "Sebelumnya" : "Previous"}
-              >
-                <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
-              </button>
+            {/* Floating Control Buttons (Top-Right) */}
+            <div className="absolute top-4 right-4 md:top-6 md:right-6 z-60">
+              <Tooltip>
+                <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                  <button
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      setViewerOpen(false);
+                    }}
+                    type="button"
+                    className={cn(
+                      "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
+                      "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
+                      "border border-neutral-300 dark:border-neutral-600 shadow-lg",
+                      "text-neutral-950 dark:text-neutral-50",
+                      "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95",
+                      "transition-all duration-200 cursor-pointer outline-none group"
+                    )}
+                    aria-label={locale === "id" ? "Tutup" : "Close"}
+                  >
+                    <X className="w-5 h-5 stroke-[2.5]" />
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent side="bottom" className="z-70">
+                  <p>{locale === "id" ? "Tutup" : "Close"}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
-          )}
 
-          {/* Floating Right Navigation Chevron */}
-          {hasMultiple && (
-            <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-60">
-              <button
-                onClick={() => setViewerIndex((prev) => prev + 1)}
-                disabled={viewerIndex === images.length - 1}
-                type="button"
-                className={cn(
-                  "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
-                  "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
-                  "border border-neutral-300 dark:border-neutral-600 shadow-lg",
-                  "text-neutral-950 dark:text-neutral-50",
-                  "transition-all duration-200 outline-none group",
-                  viewerIndex === images.length - 1
-                    ? "opacity-30 cursor-not-allowed pointer-events-none"
-                    : "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95 cursor-pointer"
-                )}
-                title={locale === "id" ? "Berikutnya" : "Next"}
-              >
-                <ChevronRight className="w-5 h-5 stroke-[2.5]" />
-              </button>
-            </div>
-          )}
+            {/* Floating Left Navigation Chevron */}
+            {hasMultiple && (
+              <div className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 z-60">
+                <Tooltip>
+                  <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                    <button
+                      onClick={(e) => {
+                        e.currentTarget.blur();
+                        setViewerIndex((prev) => prev - 1);
+                      }}
+                      disabled={viewerIndex === 0}
+                      type="button"
+                      className={cn(
+                        "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
+                        "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
+                        "border border-neutral-300 dark:border-neutral-600 shadow-lg",
+                        "text-neutral-950 dark:text-neutral-50",
+                        "transition-all duration-200 outline-none group",
+                        viewerIndex === 0
+                          ? "opacity-30 cursor-not-allowed pointer-events-none"
+                          : "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95 cursor-pointer"
+                      )}
+                      aria-label={locale === "id" ? "Sebelumnya" : "Previous"}
+                    >
+                      <ChevronLeft className="w-5 h-5 stroke-[2.5]" />
+                    </button>
+                  </TooltipTrigger>
+                  {viewerIndex > 0 && (
+                    <TooltipContent side="right" className="z-70">
+                      <p>{locale === "id" ? "Sebelumnya" : "Previous"}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </div>
+            )}
+
+            {/* Floating Right Navigation Chevron */}
+            {hasMultiple && (
+              <div className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 z-60">
+                <Tooltip>
+                  <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                    <button
+                      onClick={(e) => {
+                        e.currentTarget.blur();
+                        setViewerIndex((prev) => prev + 1);
+                      }}
+                      disabled={viewerIndex === images.length - 1}
+                      type="button"
+                      className={cn(
+                        "relative flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
+                        "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
+                        "border border-neutral-300 dark:border-neutral-600 shadow-lg",
+                        "text-neutral-950 dark:text-neutral-50",
+                        "transition-all duration-200 outline-none group",
+                        viewerIndex === images.length - 1
+                          ? "opacity-30 cursor-not-allowed pointer-events-none"
+                          : "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95 cursor-pointer"
+                      )}
+                      aria-label={locale === "id" ? "Selanjutnya" : "Next"}
+                    >
+                      <ChevronRight className="w-5 h-5 stroke-[2.5]" />
+                    </button>
+                  </TooltipTrigger>
+                  {viewerIndex < images.length - 1 && (
+                    <TooltipContent side="left" className="z-70">
+                      <p>{locale === "id" ? "Selanjutnya" : "Next"}</p>
+                    </TooltipContent>
+                  )}
+                </Tooltip>
+              </div>
+            )}
 
           {/* Primary Image Viewport Container */}
           <div className="relative w-full max-w-[85vw] h-[68vh] flex items-center justify-center z-50 pointer-events-none select-none">
@@ -1078,7 +1131,8 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
               </div>
             </div>
           )}
-        </div>,
+        </div>
+      </TooltipProvider>,
         document.body
       )}
     </div>
