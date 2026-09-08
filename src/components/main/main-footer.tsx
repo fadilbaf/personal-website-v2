@@ -119,8 +119,8 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
   ].filter((link) => link.url);
 
   const navLinks = [
-    { href: `/${locale}#hero`, label: tMain(locale, "nav_home") },
     { href: `/${locale}#about`, label: tMain(locale, "nav_about") },
+    { href: `/${locale}#experiences`, label: tMain(locale, "nav_experiences") },
     { href: `/${locale}#projects`, label: tMain(locale, "nav_projects") },
     { href: `/${locale}#achievements`, label: tMain(locale, "nav_achievements") },
     { href: `/${locale}#blogs`, label: tMain(locale, "nav_blogs") },
@@ -287,7 +287,7 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
       {/* Bottom row - full width divider */}
       <div className="w-full border-t border-neutral-200/60 dark:border-white/10" />
       <motion.div
-        className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 py-6 sm:py-8"
+        className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 py-3.5 sm:py-4"
         variants={footerVariants}
         initial="hidden"
         whileInView="visible"
@@ -297,7 +297,7 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
           <p className="text-xs text-neutral-400 dark:text-neutral-500 text-center sm:text-left">
             © {new Date().getFullYear()} Fadil Bafagih. {tMain(locale, "all_rights")}
           </p>
-          <span className="text-xs text-neutral-400 dark:text-neutral-500">
+          <span className="text-xs text-neutral-400 dark:text-neutral-500 text-center sm:text-right">
             {tMain(locale, "build_with")}{" "}
             <a
               href="https://bafdev.id/"
