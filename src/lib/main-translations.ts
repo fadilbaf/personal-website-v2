@@ -33,10 +33,17 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     // Nav Links
     nav_home: "Home",
     nav_about: "About",
+    nav_experiences: "Experiences",
     nav_projects: "Projects",
     nav_achievements: "Achievements",
     nav_blogs: "Blogs",
     nav_contact: "Contact",
+    nav_sections_header: "Sections",
+    nav_pages_header: "Pages",
+    nav_all_projects: "All Projects",
+    nav_all_achievements: "All Achievements",
+    nav_all_articles: "All Blogs",
+    nav_links: "Links",
 
     // About
     about_me: "About Me",
@@ -188,10 +195,17 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     // Nav Links
     nav_home: "Beranda",
     nav_about: "Tentang",
+    nav_experiences: "Pengalaman",
     nav_projects: "Proyek",
     nav_achievements: "Pencapaian",
     nav_blogs: "Blog",
     nav_contact: "Kontak",
+    nav_sections_header: "Bagian",
+    nav_pages_header: "Halaman",
+    nav_all_projects: "Semua Proyek",
+    nav_all_achievements: "Semua Pencapaian",
+    nav_all_articles: "Semua Blog",
+    nav_links: "Tautan",
 
     // About
     about_me: "Tentang Saya",

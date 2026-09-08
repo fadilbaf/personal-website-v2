@@ -14,6 +14,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { AnimatedHamburger } from "@/components/ui/animated-hamburger";
+import { NavMenu } from "@/src/components/main/nav-menu";
 import { trackEvent } from "@/src/lib/track-event";
 import { toggleThemeWithTransition } from "@/src/app/lib/theme-transition";
 
@@ -142,9 +143,12 @@ export function MainHeader({ locale, hireMeEmail }: MainHeaderProps) {
             {/* Hire Me Button */}
             {hireMeEmail && (
               <Tooltip>
-                <TooltipTrigger asChild>
+                <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
                   <Button
                     asChild
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                    }}
                     className="h-9 rounded-lg px-4 bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 font-medium text-sm hidden sm:flex cursor-pointer border-0 shadow-none gap-1.5"
                   >
                     <a href={`mailto:${hireMeEmail}`}>
@@ -161,10 +165,13 @@ export function MainHeader({ locale, hireMeEmail }: MainHeaderProps) {
 
             {/* Hamburger Menu */}
             <Tooltip>
-              <TooltipTrigger asChild>
+              <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
                 <AnimatedHamburger
                   active={menuOpen}
-                  onClick={() => setMenuOpen(!menuOpen)}
+                  onClick={(e) => {
+                    setMenuOpen(!menuOpen);
+                    e.currentTarget.blur();
+                  }}
                   aria-label={tMain(locale, "menu")}
                 />
               </TooltipTrigger>
@@ -175,6 +182,14 @@ export function MainHeader({ locale, hireMeEmail }: MainHeaderProps) {
           </div>
         </div>
       </motion.header>
+
+      {/* Nav Menu Overlay */}
+      <NavMenu
+        isOpen={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        locale={locale}
+        hireMeEmail={hireMeEmail}
+      />
     </TooltipProvider>
   );
 }
