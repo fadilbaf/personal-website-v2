@@ -307,8 +307,8 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
             )}
 
             {/* Footer Row */}
-            <div className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-12 md:px-24 lg:px-36 py-3.5 sm:py-4">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-4">
+            <div className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 py-3.5 sm:py-4">
+              <div className="w-full max-w-[1440px] mx-auto flex flex-col sm:flex-row items-center justify-between gap-1 sm:gap-4">
                 <p className="text-xs text-neutral-400 dark:text-neutral-500 text-center sm:text-left">
                   © {new Date().getFullYear()} Fadil Bafagih. {tMain(locale, "all_rights")}
                 </p>
