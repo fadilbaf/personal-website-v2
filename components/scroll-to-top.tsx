@@ -55,6 +55,8 @@ export function ScrollToTop() {
           document.body.style.pointerEvents === "none" || 
           document.body.hasAttribute("data-scroll-locked") ||
           document.body.style.overflow === "hidden" ||
+          document.documentElement.style.overflow === "hidden" ||
+          !!document.querySelector('[data-nav-menu="open"]') ||
           !!document.querySelector('[data-state="open"]');
 
         // Show button if scrolled down past 300px and no modals/sidebars are open

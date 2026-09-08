@@ -130,6 +130,8 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
     <AnimatePresence>
       {isOpen && (
         <motion.div
+          data-nav-menu="open"
+          data-state="open"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
