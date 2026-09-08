@@ -101,10 +101,11 @@ export default function AboutPage() {
     try {
       let cv_url = about.cv_url;
       if (cvFile) {
+        const originalBaseName = cvFile.name.replace(/\.[^/.]+$/, "") || "CV";
         const result = await StorageService.uploadPdf(
           STORAGE_PATHS.DOCUMENTS,
           cvFile,
-          "CV-Hasan-Fadlullah"
+          originalBaseName
         );
         cv_url = result.publicUrl;
       }
@@ -583,7 +584,6 @@ export default function AboutPage() {
           isOpen={!!viewPdfUrl}
           onClose={() => setViewPdfUrl(null)}
           pdfUrl={viewPdfUrl}
-          fileName="CV-Hasan-Fadlullah.pdf"
         />
       )}
     </>

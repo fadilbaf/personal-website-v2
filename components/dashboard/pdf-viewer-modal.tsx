@@ -5,6 +5,24 @@ import { X, ExternalLink, FileText, Loader2 } from "lucide-react";
 import { cn } from "@/src/app/lib/utils";
 import { useLanguage } from "@/context/language-context";
 
+export function extractPdfFileName(url: string, fallback = "CV.pdf"): string {
+  if (!url) return fallback;
+  try {
+    const cleanUrl = url.split("?")[0].split("#")[0];
+    const parsed = new URL(cleanUrl, "https://dummy.local");
+    const segments = parsed.pathname.split("/").filter(Boolean);
+    const raw = segments[segments.length - 1];
+    if (!raw) return fallback;
+    const decoded = decodeURIComponent(raw);
+    // Strip leading numeric timestamp prefixes like 1788874078099- or 1788874078099_
+    const clean = decoded.replace(/^\d{10,}[-_]/, "");
+    return clean || decoded || fallback;
+  } catch {
+    const raw = url.split("/").pop()?.split("?")[0]?.split("#")[0] || fallback;
+    return decodeURIComponent(raw);
+  }
+}
+
 interface PdfViewerModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -24,10 +42,11 @@ export function PdfViewerModal({
   isOpen,
   onClose,
   pdfUrl,
-  fileName = "CV-Resume.pdf",
+  fileName,
 }: PdfViewerModalProps) {
   const { t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
+  const displayFileName = fileName || extractPdfFileName(pdfUrl, "CV-Resume.pdf");
 
   // Close on Escape key press
   useEffect(() => {
@@ -100,7 +119,7 @@ export function PdfViewerModal({
               <FileText className="w-4 h-4 text-neutral-600 dark:text-neutral-400" />
             </div>
             <span className="font-sans font-medium text-sm text-neutral-800 dark:text-neutral-200 truncate">
-              {fileName}
+              {displayFileName}
             </span>
           </div>
 
@@ -137,7 +156,7 @@ export function PdfViewerModal({
           <iframe
             src={`${pdfUrl}#toolbar=1`}
             className="w-full h-full border-none"
-            title={fileName}
+            title={displayFileName}
             onLoad={() => setIsLoading(false)}
           />
         </div>

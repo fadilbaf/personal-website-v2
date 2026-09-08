@@ -84,7 +84,28 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (!context) {
-    throw new Error("useLanguage must be used within a LanguageProvider");
+    return {
+      language: "en" as Language,
+      setLanguage: () => {},
+      t: (key: string, replacements?: Record<string, string>) => {
+        const keys = key.split(".");
+        let current: any = translations["en"];
+        for (const k of keys) {
+          if (current && typeof current === "object" && k in current) {
+            current = current[k];
+          } else {
+            return key;
+          }
+        }
+        let result = typeof current === "string" ? current : key;
+        if (replacements) {
+          Object.entries(replacements).forEach(([rKey, rVal]) => {
+            result = result.replace(`{${rKey}}`, rVal);
+          });
+        }
+        return result;
+      },
+    };
   }
   return context;
 }

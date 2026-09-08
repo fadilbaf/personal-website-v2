@@ -10,6 +10,7 @@ import type { Profile, Role, Contact, About, Statistics, Skill, SkillCategory } 
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GitHubCalendar } from "react-github-calendar";
+import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -125,6 +126,7 @@ export function MainAbout({
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
+  const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
   const [maxPreviewSkills, setMaxPreviewSkills] = useState(16);
   const [skillsCardHeight, setSkillsCardHeight] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
@@ -580,24 +582,25 @@ export function MainAbout({
               </motion.div>
             )}
 
-            {/* Download CV Button */}
+            {/* Download / View CV Button */}
             {about?.cv_url && (
-              <motion.a
+              <motion.button
+                type="button"
                 initial={{ filter: "blur(6px)", opacity: 0, y: 20 }}
                 whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: 0.2, ease: "easeOut" }}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                href={about.cv_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={() => trackEvent("cv_download")}
+                onClick={() => {
+                  trackEvent("cv_download");
+                  setIsCvPdfOpen(true);
+                }}
                 className="flex w-full items-center justify-center gap-2.5 rounded-xl bg-black px-4 py-3 text-[15px] font-semibold text-white transition-colors duration-200 dark:bg-white dark:text-neutral-900 cursor-pointer"
               >
                 <Download className="h-5 w-5" />
                 {tMain(locale, "download_cv")}
-              </motion.a>
+              </motion.button>
             )}
           </motion.div>
 
@@ -959,6 +962,16 @@ export function MainAbout({
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* PDF CV Modal viewer */}
+      {about?.cv_url && (
+        <PdfViewerModal
+          isOpen={isCvPdfOpen}
+          onClose={() => setIsCvPdfOpen(false)}
+          pdfUrl={about.cv_url}
+          fileName={extractPdfFileName(about.cv_url, "CV.pdf")}
+        />
+      )}
     </section>
   );
 }
