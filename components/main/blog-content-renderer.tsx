@@ -265,9 +265,9 @@ function enhanceBlogHtml(rawHtml: string): string {
     return `<div class="content-image-wrapper relative w-full aspect-video my-6 rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900"><img ${cleanAttrs.trim()} class="w-full h-full object-cover block" /></div>`;
   });
 
-  // 4. Transform Tables into a horizontally scrollable container with rounded border and scrollbar-custom
+  // 4. Transform Tables into a rounded border container with inner horizontal scrollbar
   processed = processed.replace(/<table\b([^>]*)>([\s\S]*?)<\/table>/gi, (_match, tableAttrs, innerContent) => {
-    return `<div class="table-wrapper my-6 w-full overflow-x-auto rounded-2xl border border-neutral-200 dark:border-white/10 scrollbar-custom bg-white dark:bg-[#121214]"><table ${tableAttrs} class="w-full min-w-[540px] text-left border-collapse">${innerContent}</table></div>`;
+    return `<div class="table-container my-6 w-full rounded-2xl border border-neutral-200 dark:border-white/10 overflow-hidden bg-white dark:bg-[#121214]"><div class="table-scroll-wrapper w-full overflow-x-auto scrollbar-custom"><table ${tableAttrs} class="w-full min-w-[540px] text-left border-collapse">${innerContent}</table></div></div>`;
   });
 
   return processed;
@@ -572,21 +572,33 @@ const contentAndSyntaxStyles = `
   }
 
   /* =======================================================
-     Tables (Zebra Striping, Full Borders, Custom Scrollbar)
+     Tables (Zebra Striping, Full Borders, Enclosed Scrollbar)
      ======================================================= */
-  .blog-content .table-wrapper {
+  .blog-content .table-container {
     width: 100%;
     margin-top: 1.75rem;
     margin-bottom: 1.75rem;
     border-radius: 1rem;
-    overflow-x: auto;
+    overflow: hidden;
     border: 1px solid #e5e5e5;
     background-color: #ffffff;
-    -webkit-overflow-scrolling: touch;
   }
-  .dark .blog-content .table-wrapper {
+  .dark .blog-content .table-container {
     border-color: rgba(255, 255, 255, 0.1);
     background-color: #121214;
+  }
+
+  .blog-content .table-scroll-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    display: block;
+  }
+
+  .blog-content .table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   }
 
   .blog-content table {
