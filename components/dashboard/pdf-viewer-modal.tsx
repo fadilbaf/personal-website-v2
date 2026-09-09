@@ -52,7 +52,22 @@ export function PdfViewerModal({
 }: PdfViewerModalProps) {
   const { language, t } = useLanguage();
   const [isLoading, setIsLoading] = useState(true);
+  const [isMobile, setIsMobile] = useState(false);
   const displayFileName = fileName || extractPdfFileName(pdfUrl, "CV-Resume.pdf");
+
+  // Detect mobile environment for inline PDF compatibility
+  useEffect(() => {
+    const checkMobile = () => {
+      const userAgent = typeof navigator !== "undefined" ? navigator.userAgent : "";
+      const isMobileUA = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent);
+      const isSmallScreen = typeof window !== "undefined" ? window.innerWidth < 768 : false;
+      setIsMobile(isMobileUA || isSmallScreen);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
 
   // Close on Escape key press
   useEffect(() => {
@@ -80,6 +95,21 @@ export function PdfViewerModal({
   }, [isOpen, pdfUrl]);
 
   if (!isOpen) return null;
+
+  // Resolve absolute URL for Google Docs Viewer
+  const getAbsolutePdfUrl = (url: string) => {
+    if (!url) return "";
+    if (url.startsWith("http://") || url.startsWith("https://")) return url;
+    if (typeof window !== "undefined") {
+      return `${window.location.origin}${url.startsWith("/") ? "" : "/"}${url}`;
+    }
+    return url;
+  };
+
+  const absolutePdfUrl = getAbsolutePdfUrl(pdfUrl);
+  const iframeSrc = isMobile
+    ? `https://docs.google.com/viewer?url=${encodeURIComponent(absolutePdfUrl)}&embedded=true`
+    : `${pdfUrl}#toolbar=1`;
 
   return (
     <TooltipProvider>
@@ -177,9 +207,10 @@ export function PdfViewerModal({
               </div>
             )}
 
-            {/* Native PDF Iframe */}
+            {/* PDF Iframe (Native on Desktop, Google Docs Embed on Mobile) */}
             <iframe
-              src={`${pdfUrl}#toolbar=1`}
+              key={iframeSrc}
+              src={iframeSrc}
               className="w-full h-full border-none"
               title={displayFileName}
               onLoad={() => setIsLoading(false)}
