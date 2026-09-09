@@ -435,10 +435,17 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 /* View Transitions API - Custom circular clip-path theme transition */
+::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
   mix-blend-mode: normal;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  display: block;
+  height: 100%;
 }
 
 ::view-transition-old(root) {
