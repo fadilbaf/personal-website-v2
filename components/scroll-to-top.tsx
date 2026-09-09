@@ -45,7 +45,10 @@ export function ScrollToTop() {
     if (typeof window !== "undefined") {
       originalScrollRestoration = window.history.scrollRestoration;
       window.history.scrollRestoration = "manual";
-      window.scrollTo(0, 0);
+      const hasTarget = !!sessionStorage.getItem("scroll-target") || (!!window.location.hash && window.location.hash !== "#");
+      if (!hasTarget) {
+        window.scrollTo(0, 0);
+      }
     }
 
     const toggleVisibility = () => {

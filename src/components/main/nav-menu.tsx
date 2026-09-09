@@ -105,7 +105,7 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
       }
     } else {
       sessionStorage.setItem("scroll-target", id);
-      router.push(`/${locale}`);
+      router.push(`/${locale}#${id}`);
     }
   };
 
@@ -156,12 +156,8 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
                         key={section.id}
                         href={section.href}
                         onClick={(e) => {
-                          if (isHomePage) {
-                            e.preventDefault();
-                            handleSectionClick(section.id);
-                          } else {
-                            onClose();
-                          }
+                          e.preventDefault();
+                          handleSectionClick(section.id);
                         }}
                         className={`group flex items-center justify-between w-full px-4 sm:px-6 py-3.5 sm:py-4 rounded-xl transition-all duration-200 cursor-pointer ${
                           isActive

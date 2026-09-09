@@ -3,7 +3,9 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
+import Image from "next/image";
 import { Mail, ArrowRight } from "lucide-react";
+import { useTheme } from "next-themes";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import {
   Tooltip,
@@ -12,6 +14,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Profile, Contact, About, Role } from "@/src/types/database";
+import fadilbafBlackImage from "@/src/assets/images/fadilbaf-black.png";
+import fadilbafWhiteImage from "@/src/assets/images/fadilbaf-white.png";
 
 /** Inline SVG brand icons — consistent B&W style */
 function LinkedInIcon({ className }: { className?: string }) {
@@ -65,19 +69,33 @@ const containerVariants = {
 };
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 30, filter: "blur(8px)" },
+  hidden: { opacity: 0, y: 30, filter: "blur(8px)", scale: 1 },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    transition: { duration: 0.7, ease: "easeOut" as const },
+    scale: 1,
+    transition: { 
+      duration: 0.7, 
+      ease: "easeOut" as const,
+      scale: { duration: 0.5, ease: "easeOut" }
+    },
   },
 };
 
 export function MainHero({ profile, roles, about, contact, locale }: MainHeroProps) {
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme } = useTheme();
+
   const badgeText = locale === "id" ? about?.badge_id : about?.badge_en;
   const bioText = locale === "id" ? about?.bio_id : about?.bio_en;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const heroImage = mounted && resolvedTheme === "dark" ? fadilbafBlackImage : fadilbafWhiteImage;
   
   // Cycle through roles every 3 seconds
   useEffect(() => {
@@ -88,23 +106,60 @@ export function MainHero({ profile, roles, about, contact, locale }: MainHeroPro
     return () => clearInterval(interval);
   }, [roles.length]);
 
-  // Handle smooth scroll from other pages via sessionStorage
+  // Handle smooth scroll from other pages via sessionStorage or URL hash
   useEffect(() => {
-    if (typeof window !== "undefined") {
-      const target = sessionStorage.getItem("scroll-target");
-      if (target) {
-        sessionStorage.removeItem("scroll-target");
-        // Wait for page to stabilize and render
-        const timer = setTimeout(() => {
-          const element = document.getElementById(target);
-          if (element) {
-            element.scrollIntoView({ behavior: "smooth" });
-          }
-        }, 300);
-        return () => clearTimeout(timer);
+    if (typeof window === "undefined") return;
+
+    const hashTarget = window.location.hash ? window.location.hash.replace("#", "") : null;
+    const target = sessionStorage.getItem("scroll-target") || hashTarget;
+
+    if (!target) return;
+
+    sessionStorage.removeItem("scroll-target");
+
+    const performScroll = () => {
+      const element = document.getElementById(target);
+      if (element) {
+        element.scrollIntoView({ behavior: "smooth" });
       }
-    }
+    };
+
+    // Retry scroll across render lifecycle to guarantee target is reached even while components mount
+    performScroll();
+    const t1 = setTimeout(performScroll, 150);
+    const t2 = setTimeout(performScroll, 400);
+    const t3 = setTimeout(performScroll, 750);
+
+    // Clean URL hash from address bar after smooth scroll has initiated
+    const cleanUrlTimer = setTimeout(() => {
+      if (window.location.hash) {
+        window.history.replaceState(null, "", window.location.pathname);
+      }
+    }, 600);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearTimeout(cleanUrlTimer);
+    };
   }, []);
+
+  const handleScrollToAbout = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById("about");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  const handleScrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    const element = document.getElementById("contact");
+    if (element) {
+      element.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
   const currentRole =
     roles.length > 0
@@ -123,137 +178,148 @@ export function MainHero({ profile, roles, about, contact, locale }: MainHeroPro
   return (
     <motion.section
       id="hero"
-      className="relative min-h-screen flex flex-col items-center justify-center text-center px-3.5 sm:px-12 md:px-24 lg:px-36 pt-24 pb-12 overflow-hidden"
+      className="relative min-h-0 flex flex-col items-center justify-start px-3.5 sm:px-12 md:px-24 lg:px-36 pt-16 md:pt-24 pb-12 overflow-hidden bg-transparent"
       variants={containerVariants}
       initial="hidden"
       animate="visible"
     >
-      <div className="-mt-12 md:-mt-16 w-full flex flex-col items-center justify-center">
-        {/* Badge */}
-        <motion.div variants={fadeUpVariants} className="mb-8">
-          <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white/50 px-4 py-2 text-sm text-neutral-600 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-400 backdrop-blur-sm">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-            </span>
-            {badgeText || tMain(locale, "available")}
-          </span>
-        </motion.div>
-
-        {/* Greeting & Name */}
-        <motion.div variants={fadeUpVariants} className="space-y-2 mb-4 w-full flex flex-col items-center">
-          <p className="text-neutral-500 dark:text-neutral-400 font-medium">
-            {tMain(locale, "hello")}
-          </p>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-tight text-neutral-900 dark:text-white">
-            {profile?.full_name || "Fadil Bafagih"}
-          </h1>
+      <div className="w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-12 items-center h-auto relative z-10">
+        
+        {/* Left Column: Badge, Greeting & Name, Bio, CTAs, Social Icons */}
+        <div className="flex flex-col justify-center items-start text-left order-1 lg:col-span-7 z-10 relative gap-6 py-4">
           
-          {/* Role with cycling animation */}
-          <div className="h-8 md:h-9 overflow-hidden flex items-center justify-center">
-            <AnimatePresence mode="wait">
-              <motion.h2
-                key={currentRoleIndex}
-                initial={{ y: 15, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: -15, opacity: 0 }}
-                transition={{ duration: 0.35, ease: "easeInOut" }}
-                className="text-lg md:text-2xl text-neutral-600 dark:text-neutral-300 font-regular"
-              >
-                {currentRole || "Full-Stack Developer"}
-              </motion.h2>
-            </AnimatePresence>
+          {/* Top: Badge */}
+          <motion.div variants={fadeUpVariants} className="w-fit">
+            <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white/50 px-4 py-2 text-sm text-neutral-600 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-400 backdrop-blur-sm">
+              <span className="relative flex h-2 w-2">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+              </span>
+              {badgeText || tMain(locale, "available")}
+            </span>
+          </motion.div>
+
+          {/* Name & Role Section */}
+          <div className="flex flex-col gap-2 w-full mt-2">
+            <motion.p variants={fadeUpVariants} className="text-neutral-500 dark:text-neutral-400 font-medium text-sm md:text-base">
+              {tMain(locale, "hello")}
+            </motion.p>
+            <motion.h1 variants={fadeUpVariants} className="text-5xl md:text-6xl lg:text-[76px] font-bold tracking-tight text-neutral-900 dark:text-white leading-[1.05] max-w-2xl">
+              {profile?.full_name || "Fadil Bafagih"}
+            </motion.h1>
+            
+            {/* Role with cycling animation */}
+            <motion.div variants={fadeUpVariants} className="h-8 md:h-9 overflow-hidden flex items-center justify-start">
+              <AnimatePresence mode="wait">
+                <motion.h2
+                  key={currentRoleIndex}
+                  initial={{ y: 15, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -15, opacity: 0 }}
+                  transition={{ duration: 0.35, ease: "easeInOut" }}
+                  className="text-lg md:text-xl text-neutral-600 dark:text-neutral-300 font-regular"
+                >
+                  {currentRole || "Full-Stack Developer"}
+                </motion.h2>
+              </AnimatePresence>
+            </motion.div>
           </div>
-        </motion.div>
 
-        {/* Description / Bio */}
-        <motion.div variants={fadeUpVariants} className="max-w-2xl mx-auto mb-6">
-          <p className="text-neutral-500 dark:text-neutral-400 text-base md:text-lg leading-relaxed">
-            {bioText || "Transforming ideas into creative digital solutions that inspire and engage, with a focus on usability, innovation, and human-centered design."}
-          </p>
-        </motion.div>
-
-        {/* Action Buttons */}
-        <motion.div variants={fadeUpVariants} className="flex flex-col sm:flex-row items-center gap-4 mb-8">
-          {contact?.email && (
-            <a
-              href={`mailto:${contact.email}`}
-              className="flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3 rounded-xl bg-neutral-900 text-white font-medium hover:bg-neutral-800 transition-colors dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 text-sm md:text-base"
-            >
-              <Mail className="h-5 w-5" />
-              {tMain(locale, "lets_work")}
-            </a>
-          )}
-          <Link
-            href={`/${locale}/projects`}
-            className="flex items-center justify-center gap-2 w-full sm:w-auto px-7 py-3 rounded-xl border border-neutral-200 bg-transparent text-neutral-700 font-medium hover:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-transparent dark:text-neutral-300 dark:hover:bg-neutral-800 text-sm md:text-base"
+          {/* Bio text */}
+          <motion.p
+            variants={fadeUpVariants}
+            className="hidden md:block text-neutral-500 dark:text-neutral-400 text-sm md:text-[15px] leading-relaxed max-w-[520px] -mt-2"
           >
-            {tMain(locale, "view_projects")}
-            <ArrowRight className="h-5 w-5" />
-          </Link>
-        </motion.div>
+            {bioText || (locale === "id" 
+              ? "Mengubah ide menjadi solusi digital kreatif yang menginspirasi dan menarik, dengan fokus pada kegunaan, inovasi, dan desain yang berpusat pada manusia."
+              : "Transforming ideas into creative digital solutions that inspire and engage, with a focus on usability, innovation, and human-centered design.")
+            }
+          </motion.p>
 
-        {/* Social media icons — copied exactly from links-profile.tsx */}
-        {socialLinks.length > 0 && (
-          <TooltipProvider>
-            <div className="flex items-center gap-3">
-              {socialLinks.map(({ url, icon: Icon, label }, index) => (
-                <Tooltip key={label}>
-                  <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
-                    <motion.a
-                      href={url!}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      initial={{ opacity: 0, y: 16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 1.05 }}
-                      transition={{
-                        duration: 0.35,
-                        ease: "easeOut" as const,
-                        delay: 0.6 + index * 0.06,
-                      }}
-                      className="flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors duration-200 hover:bg-neutral-100 dark:border-white/10 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
-                      aria-label={label}
-                      onClick={(e) => {
-                        e.currentTarget.blur();
-                      }}
-                    >
-                      <Icon className="h-5 w-5" />
-                    </motion.a>
-                  </TooltipTrigger>
-                  <TooltipContent side="bottom">
-                    <p>{label}</p>
-                  </TooltipContent>
-                </Tooltip>
-              ))}
-            </div>
-          </TooltipProvider>
-        )}
+          {/* CTA Buttons */}
+          <motion.div variants={fadeUpVariants} className="flex flex-row flex-wrap items-center gap-3 w-full mt-2 z-20">
+            <Link
+              href="#contact"
+              onClick={handleScrollToContact}
+              className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-xs md:text-sm cursor-pointer w-fit"
+            >
+              <Mail className="h-4 w-4" />
+              <span>{tMain(locale, "lets_work")}</span>
+            </Link>
+
+            <Link
+              href="#about"
+              onClick={handleScrollToAbout}
+              className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-medium hover:bg-neutral-50 active:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 text-xs md:text-sm cursor-pointer w-fit"
+            >
+              <span>{tMain(locale, "more_about_me")}</span>
+              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2.5} />
+            </Link>
+          </motion.div>
+
+          {/* Social links */}
+          {socialLinks.length > 0 && (
+            <TooltipProvider>
+              <div className="flex items-center gap-3 mt-4">
+                {socialLinks.map(({ url, icon: Icon, label }, index) => (
+                  <Tooltip key={label}>
+                    <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                      <motion.a
+                        href={url!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        initial={{ opacity: 0, y: 16 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 1.05 }}
+                        transition={{
+                          duration: 0.35,
+                          ease: "easeOut" as const,
+                          delay: 0.6 + index * 0.06,
+                        }}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors duration-200 hover:bg-neutral-100 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        aria-label={label}
+                        onClick={(e) => {
+                          e.currentTarget.blur();
+                        }}
+                      >
+                        <Icon className="h-5 w-5" />
+                      </motion.a>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p>{label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                ))}
+              </div>
+            </TooltipProvider>
+          )}
+
+        </div>
+
+        {/* Right Column: Photo with Grayscale Filter & Fade-out overlay */}
+        <div className="flex justify-center items-end relative min-h-0 lg:min-h-[580px] w-full order-2 lg:col-span-5 z-20 pointer-events-none mt-2 lg:mt-0">
+          <motion.div
+            variants={fadeUpVariants}
+            whileHover={{ scale: 1.01, transition: { duration: 0.5, ease: "easeOut" } }}
+            whileTap={{ scale: 1.01, transition: { duration: 0.3, ease: "easeOut" } }}
+            className="relative w-full max-w-[320px] sm:max-w-[360px] lg:w-[520px] lg:max-w-none lg:aspect-4/5 flex items-end justify-center overflow-visible lg:absolute lg:bottom-0 lg:left-1/2 lg:-translate-x-1/2 origin-bottom pointer-events-auto"
+          >
+            <Image
+              src={heroImage}
+              alt={profile?.full_name || "Fadil Bafagih"}
+              priority
+              draggable={false}
+              onContextMenu={(e) => e.preventDefault()}
+              className="object-contain max-h-[380px] sm:max-h-[430px] lg:max-h-[620px] w-auto pointer-events-auto select-none profile-image-grayscale"
+            />
+            {/* High-fidelity 13-stop easing gradient to match page background with ultra-smooth transition at both ends */}
+            <div className="absolute bottom-[-2px] left-0 right-0 h-28 lg:h-36 pointer-events-none z-10 bg-[linear-gradient(to_top,#fff_0%,rgba(255,255,255,0.99)_3%,rgba(255,255,255,0.97)_8%,rgba(255,255,255,0.92)_15%,rgba(255,255,255,0.82)_25%,rgba(255,255,255,0.65)_38%,rgba(255,255,255,0.45)_52%,rgba(255,255,255,0.27)_66%,rgba(255,255,255,0.15)_78%,rgba(255,255,255,0.07)_87%,rgba(255,255,255,0.02)_94%,rgba(255,255,255,0.005)_97%,transparent_100%)] dark:bg-[linear-gradient(to_top,#0a0a0a_0%,rgba(10,10,10,0.99)_3%,rgba(10,10,10,0.97)_8%,rgba(10,10,10,0.92)_15%,rgba(10,10,10,0.82)_25%,rgba(10,10,10,0.65)_38%,rgba(10,10,10,0.45)_52%,rgba(10,10,10,0.27)_66%,rgba(10,10,10,0.15)_78%,rgba(10,10,10,0.07)_87%,rgba(10,10,10,0.02)_94%,rgba(10,10,10,0.005)_97%,transparent_100%)]" />
+          </motion.div>
+        </div>
+
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex justify-center"
-      >
-        <div className="w-6 h-10 border-2 border-neutral-300 dark:border-neutral-700 rounded-full flex justify-center p-1">
-          <motion.div
-            animate={{
-              y: [0, 12, 0],
-              opacity: [1, 0, 1],
-            }}
-            transition={{
-              duration: 2,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
-            className="w-1.5 h-1.5 bg-neutral-400 dark:bg-neutral-500 rounded-full"
-          />
-        </div>
-      </motion.div>
     </motion.section>
   );
 }

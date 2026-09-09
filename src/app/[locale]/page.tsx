@@ -8,7 +8,7 @@ import { ProjectService } from "@/src/services/project.service";
 import { AchievementService } from "@/src/services/achievement.service";
 import { BlogService } from "@/src/services/blog.service";
 import { MainHeader } from "@/src/components/main/main-header";
-import { MainHeroV3 } from "@/src/components/main/main-hero-v3";
+import { MainHero } from "@/src/components/main/main-hero";
 import { ScrollIndicator } from "@/src/components/main/scroll-indicator";
 import { MainAbout } from "@/src/components/main/main-about";
 import { MainExperience } from "@/src/components/main/main-experience";
@@ -58,7 +58,7 @@ export default async function Home({
       <MainHeader locale={locale} hireMeEmail={contact?.email ?? null} />
       
       <main className="flex-1 w-full">
-        <MainHeroV3 
+        <MainHero 
           profile={profile}
           roles={roles}
           about={about}
