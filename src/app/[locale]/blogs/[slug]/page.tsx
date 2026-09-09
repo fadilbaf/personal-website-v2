@@ -7,6 +7,32 @@ import { MainFooter } from "@/src/components/main/main-footer";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import type { MainLocale } from "@/src/lib/main-translations";
 
+/**
+ * Extracts a clean plain-text excerpt from blog content for SEO & social media previews.
+ * Strips code blocks, tables, HTML tags, and truncates cleanly at word boundaries (~160 chars).
+ */
+function extractBlogExcerpt(content: string | null, maxLength = 160): string {
+  if (!content) return "";
+  const clean = content
+    .replace(/<pre[\s\S]*?<\/pre>/gi, " ")
+    .replace(/<table[\s\S]*?<\/table>/gi, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&quot;/gi, '"')
+    .replace(/&#39;/gi, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+
+  if (!clean) return "";
+  if (clean.length <= maxLength) return clean;
+  const truncated = clean.slice(0, maxLength);
+  const lastSpace = truncated.lastIndexOf(" ");
+  return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + "...";
+}
+
 export async function generateMetadata({
   params,
 }: {
@@ -22,10 +48,15 @@ export async function generateMetadata({
     const title = locale === "id"
       ? `${blog.title_id} | Blog Fadil Bafagih`
       : `${blog.title_en} | Blog by Fadil Bafagih`;
-    const description = locale === "id"
-      ? blog.title_id
-      : blog.title_en;
+    
+    const rawContent = locale === "id" ? blog.content_id : blog.content_en;
+    const excerpt = extractBlogExcerpt(rawContent);
 
+    const fallbackDesc = locale === "id"
+      ? `Baca artikel "${blog.title_id}" oleh Fadil Bafagih.`
+      : `Read "${blog.title_en}" by Fadil Bafagih.`;
+
+    const description = excerpt || fallbackDesc;
     const ogImage = blog.image_url || "/opengraph-image.png";
 
     return {
@@ -34,7 +65,14 @@ export async function generateMetadata({
       openGraph: {
         title,
         description,
+        type: "article",
         images: [{ url: ogImage }],
+      },
+      twitter: {
+        card: "summary_large_image",
+        title,
+        description,
+        images: [ogImage],
       },
     };
   } catch {
