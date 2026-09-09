@@ -140,19 +140,23 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
                 variants={cardVariants}
-                className={`${visibilityClass} group relative flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm overflow-hidden transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700`}
+                className={`${visibilityClass} group relative flex flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm overflow-hidden transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700 cursor-pointer`}
               >
-                {/* 1. Project Image Container (Clickable) */}
+                {/* Full-Card Stretched Link */}
                 <Link
                   href={`/${locale}/projects/${item.slug}`}
                   onClick={() => sessionStorage.setItem("prev_project_page", "home")}
-                  className="group/img relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden cursor-pointer text-left block focus:outline-none"
-                >
+                  className="absolute inset-0 z-0"
+                  aria-label={title}
+                />
+
+                {/* 1. Project Image Container */}
+                <div className="group/img relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden text-left block">
                   {mainImageUrl ? (
                     <img
                       src={mainImageUrl}
                       alt={title || "Project preview"}
-                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       loading="lazy"
                     />
                   ) : (
@@ -160,17 +164,10 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                       <FolderGit2 className="h-10 w-10 stroke-[1.5]" />
                     </div>
                   )}
-                  {/* Hover Overlay */}
-                  <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1.5px]">
-                    <span className="inline-flex items-center gap-1.5 text-white font-medium text-sm tracking-wide transform translate-y-2 group-hover/img:translate-y-0 transition-all duration-300">
-                      {tMain(locale, "view_project")}
-                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/img:translate-x-0.5" />
-                    </span>
-                  </div>
-                </Link>
+                </div>
 
                 {/* Card Content */}
-                <div className="flex flex-1 flex-col p-5 text-left">
+                <div className="flex flex-1 flex-col p-5 text-left pointer-events-none">
                   {/* 2. Project Title (max 1 line) */}
                   <h3 className="text-base font-bold text-neutral-900 dark:text-white leading-tight truncate group-hover:underline group-active:underline underline-offset-2 transition-all">
                     {title}
@@ -211,13 +208,14 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                   <div className="flex-1 mt-5" />
 
                   {/* 5. Card Bottom Actions */}
-                  <div className="grid grid-cols-2 gap-3 w-full">
+                  <div className="grid grid-cols-2 gap-3 w-full pointer-events-auto relative z-10">
                     {/* Left Button: Live Demo or Source Code */}
                     {item.live_url ? (
                       <a
                         href={item.live_url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="h-10 inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 text-xs font-semibold text-neutral-700 transition-colors duration-200 hover:bg-neutral-50 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-900 cursor-pointer"
                       >
                         <ExternalLink className="h-3.5 w-3.5" />
@@ -228,6 +226,7 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                         href={item.github_url}
                         target="_blank"
                         rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
                         className="h-10 inline-flex items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-white px-3 text-xs font-semibold text-neutral-700 transition-colors duration-200 hover:bg-neutral-50 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-900 cursor-pointer"
                       >
                         <Code2 className="h-3.5 w-3.5" />
@@ -242,10 +241,10 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                     <Link
                       href={`/${locale}/projects/${item.slug}`}
                       onClick={() => sessionStorage.setItem("prev_project_page", "home")}
-                      className="h-10 inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-900 text-white px-3 text-xs font-semibold transition-colors duration-200 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 cursor-pointer"
+                      className="h-10 inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-900 text-white px-3 text-xs font-semibold transition-colors duration-200 group-hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:group-hover:bg-neutral-100 cursor-pointer"
                     >
                       <span>{tMain(locale, "view_project")}</span>
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
                     </Link>
                   </div>
                 </div>

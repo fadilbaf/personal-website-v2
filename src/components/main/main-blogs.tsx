@@ -49,11 +49,27 @@ const calculateReadingTime = (content: string | null): number => {
 const stripMarkdown = (content: string | null): string => {
   if (!content) return "";
   
-  // Replace paragraph ends and line breaks with newlines to preserve "enter"
   let cleaned = content
-    .replace(/<\/p>/gi, "\n")
-    .replace(/<br\s*\/?>/gi, "\n")
-    .replace(/<[^>]*>/g, ""); // Strip other HTML tags
+    // Remove code blocks and tables
+    .replace(/<pre[\s\S]*?<\/pre>/gi, " ")
+    .replace(/```[\s\S]*?```/g, " ")
+    .replace(/<table[\s\S]*?<\/table>/gi, " ")
+    // Replace HTML block tags and line breaks with space
+    .replace(/<\/(p|div|h[1-6]|li|tr|blockquote|section|article)>/gi, " ")
+    .replace(/<(p|div|h[1-6]|li|tr|blockquote|section|article)[^>]*>/gi, " ")
+    .replace(/<br\s*\/?>/gi, " ")
+    .replace(/<hr\s*\/?>/gi, " ")
+    // Remove inline HTML tags without extra spaces (preserves compound words like <strong>Re</strong>mote)
+    .replace(/<[^>]*>/g, "")
+    // Markdown formatting cleanup
+    .replace(/!\[.*?\]\(.*?\)/g, "")
+    .replace(/\[(.*?)\]\(.*?\)/g, "$1")
+    .replace(/(`{1,3})(.*?)\1/g, "$2")
+    .replace(/(\*\*|__)(.*?)\1/g, "$2")
+    .replace(/(\*|_)(.*?)\1/g, "$2")
+    .replace(/~~(.*?)~~/g, "$1")
+    .replace(/^#{1,6}\s+/gm, " ")
+    .replace(/^>\s+/gm, " ");
   
   // Replace HTML entities
   cleaned = cleaned
@@ -68,13 +84,8 @@ const stripMarkdown = (content: string | null): string => {
     .replace(/&ndash;/gi, "–")
     .replace(/&mdash;/gi, "—");
 
-  // Collapse multiple horizontal spaces/tabs but preserve newlines
-  cleaned = cleaned.replace(/[ \t]+/g, " ");
-  
-  // Normalize consecutive newlines to maximum of 2 to avoid huge blank spaces
-  cleaned = cleaned.replace(/\n\s*\n/g, "\n\n");
-
-  return cleaned.trim();
+  // Collapse multiple whitespaces and newlines into a single clean space
+  return cleaned.replace(/\s+/g, " ").trim();
 };
 
 export function MainBlogs({ blogs, locale }: MainBlogsProps) {
@@ -155,8 +166,7 @@ export function MainBlogs({ blogs, locale }: MainBlogsProps) {
         <div className="flex flex-col gap-6">
           {displayedBlogs.map((blog, index) => {
             const content = locale === "id" ? blog.content_id : blog.content_en;
-            const rawExcerpt = stripMarkdown(content);
-            const excerpt = rawExcerpt.length > 200 ? rawExcerpt.slice(0, 200).trim() + "..." : rawExcerpt;
+            const excerpt = stripMarkdown(content);
             const readingTime = calculateReadingTime(content);
             const formattedDate = formatDate(blog.created_at, locale);
 
@@ -168,70 +178,72 @@ export function MainBlogs({ blogs, locale }: MainBlogsProps) {
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
                 variants={cardVariants}
-                className="group relative flex flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm p-5 text-left transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700"
+                className="group relative"
               >
-                {/* 1. Meta Row (Author Profile, Name, Date, Reading Time) */}
-                <div className="flex items-center gap-3">
-                  {blog.author?.photo_url ? (
-                    <img
-                      src={blog.author.photo_url}
-                      alt={blog.author.full_name || "Author"}
-                      className="h-6 w-6 rounded-full object-cover border border-neutral-100 dark:border-neutral-800"
-                    />
-                  ) : (
-                    <div className="h-6 w-6 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-semibold text-neutral-500 dark:text-neutral-400">
-                      {(blog.author?.full_name || "A").charAt(0).toUpperCase()}
-                    </div>
-                  )}
-                  <p className="text-[13px] text-neutral-500 dark:text-neutral-400 leading-normal text-left">
-                    <span className="font-semibold text-neutral-700 dark:text-neutral-300">
-                      {blog.author?.full_name || "Author"}
-                    </span>
-                    <span className="text-[10px] mx-1.5 text-neutral-400 dark:text-neutral-500 select-none relative -top-px">•</span>
-                    <span>
-                      {formattedDate}
-                    </span>
-                    <span className="text-[10px] mx-1.5 text-neutral-400 dark:text-neutral-500 select-none relative -top-px">•</span>
-                    <span>
-                      {readingTime} {tMain(locale, "min_read")}
-                    </span>
-                  </p>
-                </div>
-
-                {/* 2. Title Row (Max 1 Line) */}
-                <h3 className="text-base sm:text-[18px] font-semibold text-neutral-900 dark:text-white line-clamp-1 leading-snug mt-3 group-hover:underline group-active:underline underline-offset-2 transition-all">
-                  {locale === "id" ? blog.title_id : blog.title_en}
-                </h3>
-
-                {/* 3. Spoiler/Content Row (Max 2 Lines) */}
-                <p className="text-[13px] font-normal text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-relaxed whitespace-pre-line mt-2">
-                  {excerpt}
-                </p>
-
-                {/* 4. Action/Engagement Bottom Row */}
-                <div className="flex items-center justify-between gap-4 mt-5">
-                  {/* Views and Likes Badge */}
-                  <div className="inline-flex items-center gap-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3.5 py-2.5 bg-white dark:bg-neutral-900/50 text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                    <div className="flex items-center gap-1.5">
-                      <Eye className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
-                      <span>{blog.views_count ?? 0} {tMain(locale, "views_label")}</span>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <Heart className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
-                      <span>{blog.likes_count ?? 0} {tMain(locale, "likes_label")}</span>
-                    </div>
+                <Link
+                  href={`/${locale}/blogs/${blog.slug}`}
+                  onClick={() => sessionStorage.setItem("prev_blog_page", "home")}
+                  className="flex flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm p-5 text-left transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700 cursor-pointer focus:outline-none"
+                >
+                  {/* 1. Meta Row (Author Profile, Name, Date, Reading Time) */}
+                  <div className="flex items-center gap-3">
+                    {blog.author?.photo_url ? (
+                      <img
+                        src={blog.author.photo_url}
+                        alt={blog.author.full_name || "Author"}
+                        className="h-6 w-6 rounded-full object-cover border border-neutral-100 dark:border-neutral-800"
+                      />
+                    ) : (
+                      <div className="h-6 w-6 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-semibold text-neutral-500 dark:text-neutral-400">
+                        {(blog.author?.full_name || "A").charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                    <p className="text-[13px] text-neutral-500 dark:text-neutral-400 leading-normal text-left">
+                      <span className="font-semibold text-neutral-700 dark:text-neutral-300">
+                        {blog.author?.full_name || "Author"}
+                      </span>
+                      <span className="text-[10px] mx-1.5 text-neutral-400 dark:text-neutral-500 select-none relative -top-px">•</span>
+                      <span>
+                        {formattedDate}
+                      </span>
+                      <span className="text-[10px] mx-1.5 text-neutral-400 dark:text-neutral-500 select-none relative -top-px">•</span>
+                      <span>
+                        {readingTime} {tMain(locale, "min_read")}
+                      </span>
+                    </p>
                   </div>
 
-                  {/* Read More Button */}
-                  <Link
-                    href={`/${locale}/blogs/${blog.slug}`}
-                    onClick={() => sessionStorage.setItem("prev_blog_page", "home")}
-                    className="h-10 inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-100 dark:text-neutral-900 px-4 text-xs font-semibold transition-colors duration-200 cursor-pointer"
-                  >
-                    <span>{tMain(locale, "read_more")}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </Link>
-                </div>
+                  {/* 2. Title Row (Max 1 Line) */}
+                  <h3 className="text-base sm:text-[18px] font-semibold text-neutral-900 dark:text-white line-clamp-1 leading-snug mt-3 group-hover:underline group-active:underline underline-offset-2 transition-all">
+                    {locale === "id" ? blog.title_id : blog.title_en}
+                  </h3>
+
+                  {/* 3. Spoiler/Content Row (Max 2 Lines) */}
+                  <p className="text-[13px] font-normal text-neutral-500 dark:text-neutral-400 line-clamp-2 leading-relaxed whitespace-pre-line mt-2">
+                    {excerpt}
+                  </p>
+
+                  {/* 4. Action/Engagement Bottom Row */}
+                  <div className="flex items-center justify-between gap-4 mt-5">
+                    {/* Views and Likes Badge */}
+                    <div className="inline-flex items-center gap-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3.5 py-2.5 bg-white dark:bg-neutral-900/50 text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                      <div className="flex items-center gap-1.5">
+                        <Eye className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
+                        <span>{blog.views_count ?? 0} {tMain(locale, "views_label")}</span>
+                      </div>
+                      <div className="flex items-center gap-1.5">
+                        <Heart className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
+                        <span>{blog.likes_count ?? 0} {tMain(locale, "likes_label")}</span>
+                      </div>
+                    </div>
+
+                    {/* Read More Button */}
+                    <span className="h-10 inline-flex items-center gap-1.5 rounded-lg bg-neutral-900 group-hover:bg-neutral-800 text-white dark:bg-white dark:group-hover:bg-neutral-100 dark:text-neutral-900 px-4 text-xs font-semibold transition-colors duration-200 shrink-0">
+                      <span>{tMain(locale, "read_more")}</span>
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                    </span>
+                  </div>
+                </Link>
               </motion.div>
             );
           })}

@@ -141,19 +141,16 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
                 whileInView="visible"
                 viewport={{ once: true, margin: "-100px" }}
                 variants={cardVariants}
-                className={`${visibilityClass} group relative flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm overflow-hidden transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700`}
+                onClick={() => setSelectedAchievement(item)}
+                className={`${visibilityClass} group relative flex flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm overflow-hidden transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700 cursor-pointer`}
               >
-                {/* 1. Thumbnail Container (Clickable) */}
-                <button
-                  type="button"
-                  onClick={() => setSelectedAchievement(item)}
-                  className="group/img relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden cursor-pointer text-left block focus:outline-none"
-                >
+                {/* 1. Thumbnail Container */}
+                <div className="relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden text-left block">
                   {item.image_url ? (
                     <img
                       src={item.image_url}
                       alt={locale === "id" ? item.title_id : item.title_en}
-                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover/img:scale-105"
+                      className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       loading="lazy"
                     />
                   ) : (
@@ -161,18 +158,11 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
                       <Award className="h-10 w-10 stroke-[1.5]" />
                     </div>
                   )}
-                  {/* Hover Overlay - Project-style text overlay without box */}
-                  <div className="absolute inset-0 bg-neutral-950/40 opacity-0 group-hover/img:opacity-100 transition-opacity duration-300 flex items-center justify-center backdrop-blur-[1.5px]">
-                    <span className="inline-flex items-center gap-1.5 text-white font-medium text-sm tracking-wide transform translate-y-2 group-hover/img:translate-y-0 transition-all duration-300">
-                      {tMain(locale, "view_achievement")}
-                      <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover/img:translate-x-0.5" />
-                    </span>
-                  </div>
-                </button>
+                </div>
 
                 {/* 2. Content Details */}
                 <div className="flex flex-col p-5 flex-1">
-                  {/* Credential ID (Uses non-breaking space fallback to keep layout heights consistent) */}
+                  {/* Credential ID */}
                   <span className="text-[11px] font-regular text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-1 block truncate">
                     {item.credential_id || "\u00a0"}
                   </span>
@@ -189,7 +179,7 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
                     </span>
                   )}
 
-                  {/* Date (Lightened boldness to font-normal) */}
+                  {/* Date */}
                   {item.issue_date && (
                     <span className="text-[11px] font-normal text-neutral-400 dark:text-neutral-500 uppercase tracking-wider mb-4 block">
                       {tMain(locale, "issued_on")} {formatIssueDate(item.issue_date, locale).toUpperCase()}
@@ -200,14 +190,10 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
                   <div className="flex-1" />
 
                   {/* Button Action */}
-                  <button
-                    type="button"
-                    onClick={() => setSelectedAchievement(item)}
-                    className="w-full h-10 inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-900 text-white px-3 text-xs font-semibold transition-colors duration-200 hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-100 cursor-pointer shrink-0"
-                  >
+                  <span className="w-full h-10 inline-flex items-center justify-center gap-1.5 rounded-lg bg-neutral-900 text-white px-3 text-xs font-semibold transition-colors duration-200 group-hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:group-hover:bg-neutral-100 shrink-0">
                     <span>{tMain(locale, "view_achievement")}</span>
-                    <ArrowRight className="h-3.5 w-3.5" />
-                  </button>
+                    <ArrowRight className="h-3.5 w-3.5 transition-transform duration-200 group-hover:translate-x-0.5" />
+                  </span>
                 </div>
               </motion.div>
             );
