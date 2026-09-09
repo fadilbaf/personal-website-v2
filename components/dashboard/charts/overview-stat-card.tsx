@@ -2,6 +2,7 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 import { cn } from "@/src/app/lib/utils";
 
 interface OverviewStatCardProps {
@@ -44,7 +45,7 @@ export function OverviewStatCard({
               {loading ? (
                 <Skeleton className="h-9 w-16 mt-1" />
               ) : (
-                value.toLocaleString()
+                <AnimatedNumber value={value} />
               )}
             </div>
           </div>

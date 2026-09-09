@@ -29,21 +29,7 @@ function VerifiedBadge() {
   );
 }
 
-function AnimatedNumber({ value }: { value: number }) {
-  const ref = useRef(null);
-  const isInView = useInView(ref, { once: true, margin: "-50px" });
-  const count = useMotionValue(0);
-  const rounded = useTransform(count, Math.round);
-
-  useEffect(() => {
-    if (isInView) {
-      const animation = animate(count, value, { duration: 2, ease: "easeOut" });
-      return animation.stop;
-    }
-  }, [value, count, isInView]);
-
-  return <motion.span ref={ref}>{rounded}</motion.span>;
-}
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 interface MainAboutProps {
   profile: Profile | null;

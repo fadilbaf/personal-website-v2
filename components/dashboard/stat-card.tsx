@@ -3,6 +3,7 @@
 import { cn } from "@/src/app/lib/utils";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { AnimatedNumber } from "@/components/ui/animated-number";
 
 interface StatCardProps {
   title: string;
@@ -35,7 +36,7 @@ export function StatCard({ title, value, icon: Icon, className, loading }: StatC
               {loading ? (
                 <Skeleton className="h-9 w-12 mt-1" />
               ) : (
-                value
+                <AnimatedNumber value={value} />
               )}
             </div>
           </div>
