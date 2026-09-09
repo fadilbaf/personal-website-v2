@@ -263,8 +263,8 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
       <div className="w-full max-w-[1440px] mx-auto flex flex-col">
         {/* 1. Back button */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4 }}
         >
           <Link
@@ -286,8 +286,8 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
         {/* 2. Title & Author Info */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.05 }}
           className="mt-5 text-left"
         >
@@ -323,8 +323,8 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
         {/* 3. Metadata & Action Row */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
           className="flex flex-col gap-6 md:flex-row md:items-center justify-between py-3.5 border-y border-neutral-200 dark:border-white/10 mt-6"
         >
@@ -423,9 +423,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-8">
           {/* Main Article Content Column */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
+            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            transition={{ duration: 0.45, delay: 0.15 }}
             className="lg:col-span-8 text-left space-y-8"
           >
             {/* Featured Image */}
@@ -445,9 +445,10 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
           {/* Sidebar Column */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
+            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45, delay: 0.1 }}
             className="lg:col-span-4 text-left space-y-8 pt-8 border-t border-neutral-200 dark:border-white/10 lg:border-t-0 lg:pt-0"
           >
             {/* MOST POPULAR */}
@@ -502,9 +503,10 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
         {/* 5. Full-Width Bottom Bar: Left Tags, Right Actions */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 0.25 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+          viewport={{ once: true, margin: "-40px" }}
+          transition={{ duration: 0.45 }}
           className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-4 pb-0 border-t border-neutral-200 dark:border-white/10 mt-8"
         >
           {/* Left Column: Tags */}

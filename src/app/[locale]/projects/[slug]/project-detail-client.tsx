@@ -359,8 +359,8 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
       <div className="w-full max-w-[1440px] mx-auto flex flex-col">
         {/* 1. Back button */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4 }}
         >
           <Link
@@ -382,8 +382,8 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
         {/* 2. Title & Bio */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.05 }}
           className="mt-5 text-left"
         >
@@ -399,8 +399,8 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
         {/* 3. Metadata & Action Row */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
           className="flex flex-col gap-6 md:flex-row md:items-center justify-between py-3.5 border-y border-neutral-200 dark:border-white/10 mt-6"
         >
@@ -520,9 +520,10 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
           {/* Kolom Kiri: Deskripsi & Deep Dives */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.15 }}
+            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45, delay: 0.05 }}
             className="lg:col-span-7 text-left space-y-8 order-2 lg:order-1"
           >
             {/* Overview */}
@@ -668,9 +669,10 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
           {/* Kolom Rantai Kanan: Carousel & Card stats */}
           <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.2 }}
+            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            viewport={{ once: true, margin: "-40px" }}
+            transition={{ duration: 0.45, delay: 0.1 }}
             className="lg:col-span-5 space-y-6 order-1 lg:order-2"
           >
             {/* Carousel */}

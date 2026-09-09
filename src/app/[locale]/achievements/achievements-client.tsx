@@ -197,10 +197,10 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
   return (
     <div className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-6 md:pt-8 pb-3 md:pb-4 bg-transparent">
       <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6">
-        {/* Back Button to Home */}
+        {/* Back button */}
         <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
+          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4 }}
         >
           <Link
@@ -219,8 +219,8 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
 
         {/* 1. Header (Icon, Title, Description) */}
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex flex-col gap-1.5 text-left"
@@ -238,8 +238,8 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
 
       {/* 2. Search and Filter Bar */}
       <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        whileInView={{ opacity: 1, y: 0 }}
+        initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+        whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
         className="flex items-center justify-between gap-4"
@@ -521,8 +521,8 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
       {/* 4. Animated Pagination Footer */}
       {filteredAchievements.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, y: 15 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, ease: "easeOut" }}
           className="flex items-center justify-between gap-4 py-2 w-full"
