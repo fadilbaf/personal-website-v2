@@ -91,7 +91,8 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
     } else {
       e.preventDefault();
       sessionStorage.setItem("scroll-target", targetId);
-      router.push(`/${locale}`);
+      sessionStorage.setItem(`scroll_to_${targetId}`, "true");
+      router.push(`/${locale}`, { scroll: false });
     }
   };
 

@@ -97,7 +97,11 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
   }, [isHomePage]);
 
   const handleSectionClick = (id: string) => {
+    // Unlock body/html scroll immediately
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
     onClose();
+
     if (isHomePage) {
       const el = document.getElementById(id);
       if (el) {
@@ -105,7 +109,8 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
       }
     } else {
       sessionStorage.setItem("scroll-target", id);
-      router.push(`/${locale}#${id}`);
+      sessionStorage.setItem(`scroll_to_${id}`, "true");
+      router.push(`/${locale}`, { scroll: false });
     }
   };
 

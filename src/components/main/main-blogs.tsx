@@ -50,9 +50,8 @@ export function MainBlogs({ blogs, locale }: MainBlogsProps) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const scrollFlag = sessionStorage.getItem("scroll_to_blogs");
-      if (scrollFlag === "true") {
-        sessionStorage.removeItem("scroll_to_blogs");
+      const scrollFlag = sessionStorage.getItem("scroll_to_blogs") === "true" || sessionStorage.getItem("scroll-target") === "blogs";
+      if (scrollFlag) {
         setTimeout(() => {
           const element = document.getElementById("blogs");
           if (element) {

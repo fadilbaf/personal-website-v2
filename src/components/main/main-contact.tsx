@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -105,6 +105,20 @@ export function MainContact({ contact, locale }: MainContactProps) {
       message: "",
     },
   });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const scrollFlag = sessionStorage.getItem("scroll_to_contact") === "true" || sessionStorage.getItem("scroll-target") === "contact";
+      if (scrollFlag) {
+        setTimeout(() => {
+          const element = document.getElementById("contact");
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      }
+    }
+  }, []);
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
     const rect = e.currentTarget.getBoundingClientRect();

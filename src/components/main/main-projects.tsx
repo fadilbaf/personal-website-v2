@@ -49,9 +49,8 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const scrollFlag = sessionStorage.getItem("scroll_to_projects");
-      if (scrollFlag === "true") {
-        sessionStorage.removeItem("scroll_to_projects");
+      const scrollFlag = sessionStorage.getItem("scroll_to_projects") === "true" || sessionStorage.getItem("scroll-target") === "projects";
+      if (scrollFlag) {
         setTimeout(() => {
           const element = document.getElementById("projects");
           if (element) {

@@ -58,9 +58,8 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const scrollFlag = sessionStorage.getItem("scroll_to_achievements");
-      if (scrollFlag === "true") {
-        sessionStorage.removeItem("scroll_to_achievements");
+      const scrollFlag = sessionStorage.getItem("scroll_to_achievements") === "true" || sessionStorage.getItem("scroll-target") === "achievements";
+      if (scrollFlag) {
         setTimeout(() => {
           const element = document.getElementById("achievements");
           if (element) {

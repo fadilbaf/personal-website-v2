@@ -214,6 +214,20 @@ export function MainExperience({
     { id: "organizations", label: tMain(locale, "tab_organizations"), icon: Users, count: publishedOrganizations.length },
   ] as const;
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const scrollFlag = sessionStorage.getItem("scroll_to_experiences") === "true" || sessionStorage.getItem("scroll-target") === "experiences";
+      if (scrollFlag) {
+        setTimeout(() => {
+          const element = document.getElementById("experiences");
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      }
+    }
+  }, []);
+
   return (
     <section id="experiences" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-4 pb-6 md:pt-6 md:pb-8 bg-transparent">
       <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6">

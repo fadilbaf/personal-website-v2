@@ -111,11 +111,21 @@ export function MainHero({ profile, roles, about, contact, locale }: MainHeroPro
     if (typeof window === "undefined") return;
 
     const hashTarget = window.location.hash ? window.location.hash.replace("#", "") : null;
-    const target = sessionStorage.getItem("scroll-target") || hashTarget;
+    const target =
+      sessionStorage.getItem("scroll-target") ||
+      (sessionStorage.getItem("scroll_to_about") ? "about" : null) ||
+      (sessionStorage.getItem("scroll_to_experiences") ? "experiences" : null) ||
+      (sessionStorage.getItem("scroll_to_projects") ? "projects" : null) ||
+      (sessionStorage.getItem("scroll_to_achievements") ? "achievements" : null) ||
+      (sessionStorage.getItem("scroll_to_blogs") ? "blogs" : null) ||
+      (sessionStorage.getItem("scroll_to_contact") ? "contact" : null) ||
+      hashTarget;
 
     if (!target) return;
 
-    sessionStorage.removeItem("scroll-target");
+    // Ensure body/html overflow are unlocked
+    document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
 
     const performScroll = () => {
       const element = document.getElementById(target);
@@ -125,23 +135,31 @@ export function MainHero({ profile, roles, about, contact, locale }: MainHeroPro
     };
 
     // Retry scroll across render lifecycle to guarantee target is reached even while components mount
-    performScroll();
-    const t1 = setTimeout(performScroll, 150);
-    const t2 = setTimeout(performScroll, 400);
-    const t3 = setTimeout(performScroll, 750);
+    const t0 = setTimeout(performScroll, 50);
+    const t1 = setTimeout(performScroll, 200);
+    const t2 = setTimeout(performScroll, 500);
+    const t3 = setTimeout(performScroll, 900);
 
-    // Clean URL hash from address bar after smooth scroll has initiated
-    const cleanUrlTimer = setTimeout(() => {
+    // Clean URL hash & sessionStorage after smooth scroll has initiated
+    const cleanTimer = setTimeout(() => {
+      sessionStorage.removeItem("scroll-target");
+      sessionStorage.removeItem("scroll_to_about");
+      sessionStorage.removeItem("scroll_to_experiences");
+      sessionStorage.removeItem("scroll_to_projects");
+      sessionStorage.removeItem("scroll_to_achievements");
+      sessionStorage.removeItem("scroll_to_blogs");
+      sessionStorage.removeItem("scroll_to_contact");
       if (window.location.hash) {
         window.history.replaceState(null, "", window.location.pathname);
       }
-    }, 600);
+    }, 1200);
 
     return () => {
+      clearTimeout(t0);
       clearTimeout(t1);
       clearTimeout(t2);
       clearTimeout(t3);
-      clearTimeout(cleanUrlTimer);
+      clearTimeout(cleanTimer);
     };
   }, []);
 

@@ -380,6 +380,20 @@ export function MainAbout({
     };
   }, []);
 
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const scrollFlag = sessionStorage.getItem("scroll_to_about") === "true" || sessionStorage.getItem("scroll-target") === "about";
+      if (scrollFlag) {
+        setTimeout(() => {
+          const element = document.getElementById("about");
+          if (element) {
+            element.scrollIntoView({ behavior: "smooth" });
+          }
+        }, 100);
+      }
+    }
+  }, []);
+
   // Determine top dynamic preview skills, and use Modal if more than the limit
   const displayedSkillsPreview = displaySkills.slice(0, maxPreviewSkills);
   const hasMoreSkills = displaySkills.length > maxPreviewSkills;
