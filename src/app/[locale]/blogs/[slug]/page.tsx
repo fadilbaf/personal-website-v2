@@ -6,46 +6,7 @@ import { MainHeader } from "@/src/components/main/main-header";
 import { MainFooter } from "@/src/components/main/main-footer";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import type { MainLocale } from "@/src/lib/main-translations";
-
-/**
- * Extracts a clean plain-text excerpt from blog content for SEO & social media previews.
- * Strips code blocks, tables, HTML tags, and truncates cleanly at word boundaries (~160 chars).
- */
-function extractBlogExcerpt(content: string | null, maxLength = 160): string {
-  if (!content) return "";
-  const clean = content
-    .replace(/<pre[\s\S]*?<\/pre>/gi, " ")
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/<table[\s\S]*?<\/table>/gi, " ")
-    .replace(/<\/(p|div|h[1-6]|li|tr|blockquote|section|article)>/gi, " ")
-    .replace(/<(p|div|h[1-6]|li|tr|blockquote|section|article)[^>]*>/gi, " ")
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<hr\s*\/?>/gi, " ")
-    .replace(/<[^>]+>/g, "")
-    .replace(/!\[.*?\]\(.*?\)/g, "")
-    .replace(/\[(.*?)\]\(.*?\)/g, "$1")
-    .replace(/(`{1,3})(.*?)\1/g, "$2")
-    .replace(/(\*\*|__)(.*?)\1/g, "$2")
-    .replace(/(\*|_)(.*?)\1/g, "$2")
-    .replace(/~~(.*?)~~/g, "$1")
-    .replace(/^#{1,6}\s+/gm, " ")
-    .replace(/^>\s+/gm, " ")
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&apos;/gi, "'")
-    .replace(/\s+/g, " ")
-    .trim();
-
-  if (!clean) return "";
-  if (clean.length <= maxLength) return clean;
-  const truncated = clean.slice(0, maxLength);
-  const lastSpace = truncated.lastIndexOf(" ");
-  return (lastSpace > 0 ? truncated.slice(0, lastSpace) : truncated) + "...";
-}
+import { extractBlogExcerpt } from "@/src/lib/blog-utils";
 
 export async function generateMetadata({
   params,

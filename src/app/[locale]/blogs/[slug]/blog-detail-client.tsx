@@ -24,6 +24,7 @@ import { BlogService } from "@/src/services/blog.service";
 import type { Blog } from "@/src/types/database";
 import { BlogContentRenderer } from "@/components/main/blog-content-renderer";
 import { trackEvent } from "@/src/lib/track-event";
+import { calculateReadingTime } from "@/src/lib/blog-utils";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -203,9 +204,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
   const blogCategory = (locale === "id" ? blog.category?.name_id : blog.category?.name_en) || blog.category?.name_en || "-";
 
   // Calculate read time
-  const cleanText = blogContent.replace(/<[^>]*>/g, "");
-  const wordCount = cleanText.trim().split(/\s+/).filter(Boolean).length;
-  const readTimeMinutes = Math.max(1, Math.ceil(wordCount / 200));
+  const readTimeMinutes = calculateReadingTime(blogContent);
 
   const formattedDate = formatDate(blog.created_at, locale);
   const authorName = blog.author?.full_name || "Fadil Bafagih";
@@ -221,8 +220,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
   const SidebarArticleCard = ({ item }: { item: Blog }) => {
     const itemTitle = (locale === "id" ? item.title_id : item.title_en) || item.title_id;
     const itemText = (locale === "id" ? item.content_id : item.content_en) || item.content_id || "";
-    const itemWords = itemText.replace(/<[^>]*>/g, "").trim().split(/\s+/).filter(Boolean).length;
-    const itemReadTime = Math.max(1, Math.ceil(itemWords / 200));
+    const itemReadTime = calculateReadingTime(itemText);
     const itemDate = formatDate(item.created_at, locale);
 
     return (

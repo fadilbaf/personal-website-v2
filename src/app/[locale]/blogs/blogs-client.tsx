@@ -57,53 +57,7 @@ const formatDate = (dateStr: string | null, locale: MainLocale): string => {
   }
 };
 
-const calculateReadingTime = (content: string | null): number => {
-  if (!content) return 1;
-  const words = content.trim().split(/\s+/).length;
-  return Math.max(1, Math.ceil(words / 200));
-};
-
-const stripMarkdown = (content: string | null): string => {
-  if (!content) return "";
-  
-  let cleaned = content
-    // Remove code blocks and tables
-    .replace(/<pre[\s\S]*?<\/pre>/gi, " ")
-    .replace(/```[\s\S]*?```/g, " ")
-    .replace(/<table[\s\S]*?<\/table>/gi, " ")
-    // Replace HTML block tags and line breaks with space
-    .replace(/<\/(p|div|h[1-6]|li|tr|blockquote|section|article)>/gi, " ")
-    .replace(/<(p|div|h[1-6]|li|tr|blockquote|section|article)[^>]*>/gi, " ")
-    .replace(/<br\s*\/?>/gi, " ")
-    .replace(/<hr\s*\/?>/gi, " ")
-    // Remove inline HTML tags without extra spaces (preserves compound words like <strong>Re</strong>mote)
-    .replace(/<[^>]*>/g, "")
-    // Markdown formatting cleanup
-    .replace(/!\[.*?\]\(.*?\)/g, "")
-    .replace(/\[(.*?)\]\(.*?\)/g, "$1")
-    .replace(/(`{1,3})(.*?)\1/g, "$2")
-    .replace(/(\*\*|__)(.*?)\1/g, "$2")
-    .replace(/(\*|_)(.*?)\1/g, "$2")
-    .replace(/~~(.*?)~~/g, "$1")
-    .replace(/^#{1,6}\s+/gm, " ")
-    .replace(/^>\s+/gm, " ");
-  
-  // Replace HTML entities
-  cleaned = cleaned
-    .replace(/&nbsp;/gi, " ")
-    .replace(/&amp;/gi, "&")
-    .replace(/&lt;/gi, "<")
-    .replace(/&gt;/gi, ">")
-    .replace(/&quot;/gi, '"')
-    .replace(/&#39;/gi, "'")
-    .replace(/&apos;/gi, "'")
-    .replace(/&middot;/gi, "•")
-    .replace(/&ndash;/gi, "–")
-    .replace(/&mdash;/gi, "—");
-
-  // Collapse multiple whitespaces and newlines into a single clean space
-  return cleaned.replace(/\s+/g, " ").trim();
-};
+import { stripMarkdown, calculateReadingTime } from "@/src/lib/blog-utils";
 
 export function BlogsClient({ blogs, types, categories, locale }: BlogsClientProps) {
   const [search, setSearch] = useState("");
