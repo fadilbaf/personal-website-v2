@@ -27,6 +27,7 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     subscribing: "Subscribing...",
     newsletter_success: "Thank you for subscribing to my newsletter!",
     newsletter_error: "Please enter a valid email address.",
+    newsletter_required: "Please enter your email address.",
     all_rights: "All Rights Reserved.",
     build_with: "Build with",
     
@@ -189,6 +190,7 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     subscribing: "Memproses...",
     newsletter_success: "Terima kasih telah berlangganan buletin saya!",
     newsletter_error: "Silakan masukkan alamat email yang valid.",
+    newsletter_required: "Silakan masukkan alamat email Anda.",
     all_rights: "Hak Cipta Dilindungi.",
     build_with: "Dibangun dengan",
 

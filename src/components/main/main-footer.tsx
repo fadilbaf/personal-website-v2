@@ -3,9 +3,10 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Mail, MapPin, ArrowUpRight } from "lucide-react";
+import { Mail, MapPin, ArrowUpRight, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Contact, About } from "@/src/types/database";
 import {
@@ -98,18 +99,29 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
 
   const handleSubscribe = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email) {
+    const trimmedEmail = email.trim();
+    if (!trimmedEmail) {
+      toast.error(tMain(locale, "newsletter_required"));
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmedEmail)) {
       toast.error(tMain(locale, "newsletter_error"));
       return;
     }
     
     setLoading(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    
-    toast.success(tMain(locale, "newsletter_success"));
-    setEmail("");
-    setLoading(false);
+    try {
+      // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      toast.success(tMain(locale, "newsletter_success"));
+      setEmail("");
+    } catch {
+      toast.error(tMain(locale, "newsletter_error"));
+    } finally {
+      setLoading(false);
+    }
   };
   
   const socialLinks = [
@@ -257,7 +269,7 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
             <p className="text-sm text-neutral-500 dark:text-neutral-400">
               {tMain(locale, "newsletter_desc")}
             </p>
-            <form className="mt-2 w-full" onSubmit={handleSubscribe}>
+            <form className="mt-2 w-full" onSubmit={handleSubscribe} noValidate>
               <div className="flex h-11 items-center justify-between border border-neutral-200 dark:border-white/10 rounded-lg p-1 bg-transparent w-full focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 transition-all">
                 <div className="flex h-full items-center gap-2.5 pl-2.5 flex-1 min-w-0">
                   <Mail className="h-4 w-4 text-neutral-400 shrink-0" />
@@ -270,13 +282,20 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
                     required
                   />
                 </div>
-                <button 
+                <Button 
                   type="submit"
                   disabled={loading}
-                  className="h-full rounded-md bg-neutral-900 px-4 text-sm font-medium text-white transition-colors hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 whitespace-nowrap cursor-pointer disabled:opacity-50 flex items-center justify-center"
+                  className="h-full rounded-md bg-neutral-900 px-4 text-sm font-semibold text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 whitespace-nowrap cursor-pointer transition-colors duration-200 inline-flex items-center justify-center gap-2"
                 >
-                  {loading ? tMain(locale, "subscribing") : tMain(locale, "subscribe")}
-                </button>
+                  {loading ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>{tMain(locale, "subscribing")}</span>
+                    </>
+                  ) : (
+                    <span>{tMain(locale, "subscribe")}</span>
+                  )}
+                </Button>
               </div>
             </form>
           </div>
