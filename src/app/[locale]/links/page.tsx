@@ -1,7 +1,7 @@
 import { createClient } from "@/src/services/supabase/server";
 import { LinksClient } from "@/src/components/links/links-client";
 import type { LinksLocale } from "@/src/lib/links-translations";
-import type { Profile, Role, Contact, About } from "@/src/types/database";
+import type { Profile, Role, Badge, Contact, About } from "@/src/types/database";
 
 // Keep it dynamic so it always fetches fresh data on requests (essential since database records update)
 export const dynamic = "force-dynamic";
@@ -19,11 +19,16 @@ export default async function LinksPage({ params }: PageProps) {
 
   // Fetch all public data concurrently on the server
   const supabase = await createClient();
-  const [profileRes, rolesRes, contactRes, aboutRes] = await Promise.all([
+  const [profileRes, rolesRes, badgesRes, contactRes, aboutRes] = await Promise.all([
     supabase.from("profiles").select("*").limit(1).single(),
     supabase
       .from("roles")
       .select("id, role_id, role_en, is_active")
+      .eq("is_active", true)
+      .order("created_at", { ascending: true }),
+    supabase
+      .from("badges")
+      .select("id, name_id, name_en, is_active")
       .eq("is_active", true)
       .order("created_at", { ascending: true }),
     supabase.from("contacts").select("*").limit(1).single(),
@@ -33,6 +38,7 @@ export default async function LinksPage({ params }: PageProps) {
   const initialData = {
     profile: (profileRes.data as Profile) ?? null,
     roles: (rolesRes.data as Role[]) ?? [],
+    badges: (badgesRes.data as Badge[]) ?? [],
     contact: (contactRes.data as Contact) ?? null,
     about: (aboutRes.data as About) ?? null,
   };

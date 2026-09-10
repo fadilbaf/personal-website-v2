@@ -36,14 +36,21 @@ export interface About {
   profile_id: string;
   description_id: string | null;
   description_en: string | null;
-  badge_id: string | null;
-  badge_en: string | null;
   bio_id: string | null;
   bio_en: string | null;
   quotes_id: string | null;
   quotes_en: string | null;
   cv_url: string | null;
   years_of_experience: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface Badge {
+  id: string;
+  name_id: string;
+  name_en: string;
+  is_active: boolean;
   created_at: string;
   updated_at: string;
 }

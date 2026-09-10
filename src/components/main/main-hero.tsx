@@ -13,7 +13,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { Profile, Contact, About, Role } from "@/src/types/database";
+import type { Profile, Contact, About, Role, Badge as HeroBadge } from "@/src/types/database";
 import fadilbafBlackImage from "@/src/assets/images/fadilbaf-black.png";
 import fadilbafWhiteImage from "@/src/assets/images/fadilbaf-white.png";
 
@@ -53,6 +53,7 @@ function TikTokIcon({ className }: { className?: string }) {
 interface MainHeroProps {
   profile: Profile | null;
   roles: Role[];
+  badges?: HeroBadge[];
   about: About | null;
   contact: Contact | null;
   locale: MainLocale;
@@ -83,12 +84,18 @@ const fadeUpVariants = {
   },
 };
 
-export function MainHero({ profile, roles, about, contact, locale }: MainHeroProps) {
+export function MainHero({ profile, roles, badges = [], about, contact, locale }: MainHeroProps) {
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
+  const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
   const [mounted, setMounted] = useState(false);
   const { resolvedTheme } = useTheme();
 
-  const badgeText = locale === "id" ? about?.badge_id : about?.badge_en;
+  const currentBadge = badges.length > 0 ? badges[currentBadgeIndex] : null;
+  const badgeText = currentBadge
+    ? locale === "id"
+      ? currentBadge.name_id
+      : currentBadge.name_en
+    : null;
   const bioText = locale === "id" ? about?.bio_id : about?.bio_en;
 
   useEffect(() => {
@@ -105,6 +112,15 @@ export function MainHero({ profile, roles, about, contact, locale }: MainHeroPro
     }, 3000);
     return () => clearInterval(interval);
   }, [roles.length]);
+
+  // Cycle through badges every 3.5 seconds
+  useEffect(() => {
+    if (badges.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentBadgeIndex((prev) => (prev + 1) % badges.length);
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [badges.length]);
 
   // Handle smooth scroll from other pages via sessionStorage or URL hash
   useEffect(() => {
@@ -207,15 +223,28 @@ export function MainHero({ profile, roles, about, contact, locale }: MainHeroPro
         <div className="flex flex-col justify-center items-start text-left order-1 lg:col-span-7 z-10 relative gap-6 py-4">
           
           {/* Top: Badge */}
-          <motion.div variants={fadeUpVariants} className="w-fit">
-            <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white/50 px-4 py-2 text-sm text-neutral-600 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-400 backdrop-blur-sm">
-              <span className="relative flex h-2 w-2">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+          {badges.length > 0 && (
+            <motion.div variants={fadeUpVariants} className="w-fit">
+              <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white/50 px-4 py-2 text-sm text-neutral-600 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-400 backdrop-blur-sm">
+                <span className="relative flex h-2 w-2">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+                <AnimatePresence mode="wait">
+                  <motion.span
+                    key={currentBadgeIndex}
+                    initial={{ y: 5, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -5, opacity: 0 }}
+                    transition={{ duration: 0.25, ease: "easeInOut" }}
+                    className="inline-block"
+                  >
+                    {badgeText || tMain(locale, "available")}
+                  </motion.span>
+                </AnimatePresence>
               </span>
-              {badgeText || tMain(locale, "available")}
-            </span>
-          </motion.div>
+            </motion.div>
+          )}
 
           {/* Name & Role Section */}
           <div className="flex flex-col gap-2 w-full mt-2">

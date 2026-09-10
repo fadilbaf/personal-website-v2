@@ -30,7 +30,7 @@ export default async function Home({
   
   // Fetch all required data concurrently
   const [
-    { profile, roles, about, contact },
+    { profile, roles, badges, about, contact },
     statistics,
     skills,
     skillCategories,
@@ -61,6 +61,7 @@ export default async function Home({
         <MainHero 
           profile={profile}
           roles={roles}
+          badges={badges}
           about={about}
           contact={contact}
           locale={locale}

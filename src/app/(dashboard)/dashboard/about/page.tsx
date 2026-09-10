@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { ImageUpload } from "@/components/dashboard/image-upload";
 import { PdfViewerModal } from "@/components/dashboard/pdf-viewer-modal";
 import { AboutService } from "@/src/services/about.service";
+import { BadgeService } from "@/src/services/badge.service";
 import { RoleService } from "@/src/services/role.service";
 import { StorageService } from "@/src/services/storage.service";
 import { STORAGE_PATHS } from "@/src/lib/constants";
@@ -48,13 +49,11 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import type { Role } from "@/src/types/database";
+import type { Role, Badge as HeroBadge } from "@/src/types/database";
 
 const aboutSchema = z.object({
   description_id: z.string().nullable().optional(),
   description_en: z.string().nullable().optional(),
-  badge_id: z.string().nullable().optional(),
-  badge_en: z.string().nullable().optional(),
   bio_id: z.string().nullable().optional(),
   bio_en: z.string().nullable().optional(),
   quotes_id: z.string().nullable().optional(),
@@ -68,8 +67,8 @@ export default function AboutPage() {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
 
-  // Tab State
-  const [activeTab, setActiveTab] = useState<"general" | "roles">("general");
+  // Tab State: "general" | "badges" | "roles"
+  const [activeTab, setActiveTab] = useState<"general" | "badges" | "roles">("general");
 
   // --- About / General Info States & Queries ---
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -127,6 +126,106 @@ export default function AboutPage() {
       description: t("common.required_field"),
     });
   };
+
+  // --- Badges States & Queries ---
+  const { data: badges = [], isLoading: isBadgesLoading, isError: isBadgesError } = useQuery({
+    queryKey: ["badges"],
+    queryFn: BadgeService.getAll,
+    meta: { resource: "badges.title" },
+  });
+
+  // Badges modal states
+  const [isBadgeModalOpen, setIsBadgeModalOpen] = useState(false);
+  const [isBadgeSubmitting, setIsBadgeSubmitting] = useState(false);
+  const [editingBadge, setEditingBadge] = useState<HeroBadge | null>(null);
+
+  // Badges form state
+  const [badgeFormData, setBadgeFormData] = useState({
+    name_id: "",
+    name_en: "",
+    is_active: true,
+  });
+
+  // Badges delete state
+  const [deleteBadgeId, setDeleteBadgeId] = useState<string | null>(null);
+  const [isBadgeDeleting, setIsBadgeDeleting] = useState(false);
+
+  const openAddBadgeModal = () => {
+    setEditingBadge(null);
+    setBadgeFormData({ name_id: "", name_en: "", is_active: true });
+    setIsBadgeModalOpen(true);
+  };
+
+  const openEditBadgeModal = (badge: HeroBadge) => {
+    setEditingBadge(badge);
+    setBadgeFormData({
+      name_id: badge.name_id,
+      name_en: badge.name_en,
+      is_active: badge.is_active,
+    });
+    setIsBadgeModalOpen(true);
+  };
+
+  const handleBadgeModalSubmit = async () => {
+    if (!badgeFormData.name_id.trim() || !badgeFormData.name_en.trim()) {
+      toast.error(t("skills.fill_all_fields"));
+      return;
+    }
+
+    setIsBadgeSubmitting(true);
+    try {
+      if (editingBadge) {
+        await BadgeService.update(editingBadge.id, badgeFormData);
+        toast.success(t("badges.saved_success"));
+      } else {
+        await BadgeService.create(badgeFormData);
+        toast.success(t("badges.saved_success"));
+      }
+      setIsBadgeModalOpen(false);
+      queryClient.invalidateQueries({ queryKey: ["badges"] });
+    } catch {
+      toast.error(t("badges.saved_failed"));
+    } finally {
+      setIsBadgeSubmitting(false);
+    }
+  };
+
+  const handleBadgeDelete = async () => {
+    if (!deleteBadgeId) return;
+    setIsBadgeDeleting(true);
+    try {
+      await BadgeService.delete(deleteBadgeId);
+      toast.success(t("badges.deleted_success"));
+      queryClient.invalidateQueries({ queryKey: ["badges"] });
+    } catch {
+      toast.error(t("badges.deleted_failed"));
+    } finally {
+      setIsBadgeDeleting(false);
+      setDeleteBadgeId(null);
+    }
+  };
+
+  const badgeColumns: Column<HeroBadge>[] = [
+    {
+      key: "name_en",
+      header: t("badges.name_en"),
+      className: "font-medium",
+    },
+    {
+      key: "name_id",
+      header: t("badges.name_id"),
+      render: (badge) => <Badge variant="secondary">{badge.name_id}</Badge>,
+    },
+    {
+      key: "is_active",
+      header: t("badges.status"),
+      render: (badge) => (
+        <Badge variant={badge.is_active ? "default" : "secondary"}>
+          {badge.is_active ? t("badges.active") : t("badges.inactive")}
+        </Badge>
+      ),
+    },
+  ];
 
   // --- Roles States & Queries ---
   const { data: roles = [], isLoading: isRolesLoading, isError: isRolesError } = useQuery({
@@ -235,6 +334,8 @@ export default function AboutPage() {
         description={
           activeTab === "general"
             ? t("about.description")
+            : activeTab === "badges"
+            ? t("badges.description")
             : t("roles.description")
         }
         icon={User}
@@ -243,7 +344,14 @@ export default function AboutPage() {
           { label: t("sidebar.About") },
         ]}
         actions={
-          activeTab === "roles" ? (
+          activeTab === "badges" ? (
+            <Button
+              onClick={openAddBadgeModal}
+              className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer"
+            >
+              <Plus className="h-4 w-4" /> {t("badges.add_badge")}
+            </Button>
+          ) : activeTab === "roles" ? (
             <Button
               onClick={openAddRoleModal}
               className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer"
@@ -268,6 +376,17 @@ export default function AboutPage() {
           {t("about.title")}
         </button>
         <button
+          onClick={() => setActiveTab("badges")}
+          className={cn(
+            "pb-3 px-4 text-sm font-medium border-b-2 transition-all cursor-pointer outline-none focus:outline-none",
+            activeTab === "badges"
+              ? "border-neutral-900 text-neutral-900 dark:border-white dark:text-white"
+              : "border-transparent text-neutral-500 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white"
+          )}
+        >
+          {t("badges.title")}
+        </button>
+        <button
           onClick={() => setActiveTab("roles")}
           className={cn(
             "pb-3 px-4 text-sm font-medium border-b-2 transition-all cursor-pointer outline-none focus:outline-none",
@@ -280,38 +399,13 @@ export default function AboutPage() {
         </button>
       </div>
 
-      {activeTab === "general" ? (
+      {activeTab === "general" && (
         <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
           <CardContent className="p-6">
             <form
               onSubmit={handleSubmit(onSubmit, onInvalid)}
               className="space-y-6"
             >
-              <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label>{t("about.badge")} (ID)</Label>
-                  {isAboutLoading ? (
-                    <Skeleton className="h-10 w-full" />
-                  ) : (
-                    <Input
-                      {...register("badge_id")}
-                      placeholder="e.g., Full-Stack Developer"
-                    />
-                  )}
-                </div>
-                <div className="space-y-2">
-                  <Label>{t("about.badge")} (EN)</Label>
-                  {isAboutLoading ? (
-                    <Skeleton className="h-10 w-full" />
-                  ) : (
-                    <Input
-                      {...register("badge_en")}
-                      placeholder="e.g., Full-Stack Developer"
-                    />
-                  )}
-                </div>
-              </div>
-
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t("about.bio")} (ID)</Label>
@@ -441,7 +535,60 @@ export default function AboutPage() {
             </form>
           </CardContent>
         </Card>
-      ) : (
+      )}
+
+      {activeTab === "badges" && (
+        <DataTable
+          data={badges}
+          columns={badgeColumns}
+          loading={isBadgesLoading}
+          error={isBadgesError}
+          searchPlaceholder={t("badges.search_placeholder")}
+          filters={[
+            {
+              key: "is_active",
+              label: t("badges.status"),
+              options: [
+                { label: t("badges.active"), value: true },
+                { label: t("badges.inactive"), value: false },
+              ],
+            },
+          ]}
+          actions={(badge) => (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem
+                  className="cursor-pointer"
+                  onClick={() => openEditBadgeModal(badge)}
+                >
+                  <Pencil className="mr-2 h-4 w-4" />
+                  {t("common.edit")}
+                </DropdownMenuItem>
+                <DropdownMenuItem
+                  variant="destructive"
+                  className="cursor-pointer"
+                  onClick={() => setDeleteBadgeId(badge.id)}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  {t("common.delete")}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+        />
+      )}
+
+      {activeTab === "roles" && (
         <DataTable
           data={roles}
           columns={roleColumns}
@@ -491,6 +638,92 @@ export default function AboutPage() {
           )}
         />
       )}
+
+      {/* Badges Add/Edit Dialog Modal */}
+      <Dialog open={isBadgeModalOpen} onOpenChange={setIsBadgeModalOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>
+              {editingBadge ? t("badges.edit_badge") : t("badges.add_badge")}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label>{t("badges.form_name_en")}</Label>
+              <Input
+                placeholder="e.g., Available for Freelance"
+                value={badgeFormData.name_en}
+                onChange={(e) =>
+                  setBadgeFormData({ ...badgeFormData, name_en: e.target.value })
+                }
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label>{t("badges.form_name_id")}</Label>
+              <Input
+                placeholder="e.g., Tersedia untuk Freelance"
+                value={badgeFormData.name_id}
+                onChange={(e) =>
+                  setBadgeFormData({ ...badgeFormData, name_id: e.target.value })
+                }
+              />
+            </div>
+            <div className="flex items-center gap-3 pt-2">
+              <Switch
+                checked={badgeFormData.is_active}
+                onCheckedChange={(v) =>
+                  setBadgeFormData({ ...badgeFormData, is_active: v })
+                }
+              />
+              <Label>{t("badges.form_active")}</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsBadgeModalOpen(false)}
+              className="gap-1.5 cursor-pointer"
+            >
+              <X className="h-4 w-4" /> {t("common.cancel")}
+            </Button>
+            <Button
+              onClick={handleBadgeModalSubmit}
+              disabled={
+                isBadgeSubmitting ||
+                (editingBadge
+                  ? badgeFormData.name_id.trim() === editingBadge.name_id &&
+                    badgeFormData.name_en.trim() === editingBadge.name_en &&
+                    badgeFormData.is_active === editingBadge.is_active
+                  : !badgeFormData.name_id.trim() || !badgeFormData.name_en.trim())
+              }
+              className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isBadgeSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}
+                </>
+              ) : editingBadge ? (
+                <>
+                  <Save className="h-4 w-4" /> {t("common.save_changes")}
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" /> {t("badges.add_badge")}
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Badges Delete Confirmation Dialog */}
+      <DeleteDialog
+        open={!!deleteBadgeId}
+        onOpenChange={() => setDeleteBadgeId(null)}
+        onConfirm={handleBadgeDelete}
+        loading={isBadgeDeleting}
+        itemName={language === "en" ? "badge" : "lencana"}
+      />
 
       {/* Roles Add/Edit Dialog Modal */}
       <Dialog open={isRoleModalOpen} onOpenChange={setIsRoleModalOpen}>
@@ -569,7 +802,7 @@ export default function AboutPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Delete Confirmation Dialog */}
+      {/* Roles Delete Confirmation Dialog */}
       <DeleteDialog
         open={!!deleteRoleId}
         onOpenChange={() => setDeleteRoleId(null)}
