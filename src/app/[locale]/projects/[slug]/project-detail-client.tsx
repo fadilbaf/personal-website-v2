@@ -68,6 +68,14 @@ function XIcon({ className }: { className?: string }) {
   );
 }
 
+function WhatsAppIcon({ className }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M17.472 14.382c-.301-.15-1.782-.879-2.058-.98-.276-.101-.477-.15-.678.15-.201.3-.778.98-.954 1.18-.176.2-.352.226-.653.075-.301-.15-1.272-.469-2.423-1.496-.896-.799-1.501-1.787-1.677-2.088-.176-.301-.019-.464.132-.614.136-.135.301-.352.452-.528.15-.176.201-.301.301-.502.101-.201.05-.377-.025-.528-.075-.15-.678-1.633-.929-2.238-.244-.589-.493-.509-.678-.519l-.578-.01c-.201 0-.528.075-.804.377s-1.055 1.03-1.055 2.512 1.08 2.914 1.231 3.115c.151.201 2.126 3.246 5.15 4.553.719.311 1.281.497 1.719.636.723.23 1.381.197 1.902.12.58-.087 1.782-.728 2.033-1.431.251-.703.251-1.306.176-1.431-.075-.126-.276-.201-.577-.352zm-5.467 7.618a9.98 9.98 0 01-5.1-1.393l-.366-.217-3.791.995 1.013-3.696-.238-.379a9.97 9.97 0 01-1.533-5.31c0-5.523 4.492-10.015 10.015-10.015 2.676 0 5.19 1.042 7.081 2.934a9.96 9.96 0 012.934 7.081c0 5.524-4.492 10.015-10.015 10.015zm8.535-18.55A12.01 12.01 0 0012.005 0C5.38 0 .005 5.375.005 12c0 2.115.553 4.181 1.604 6.002L0 24l6.177-1.62a11.96 11.96 0 005.828 1.62c6.625 0 12-5.375 12-12 0-3.206-1.248-6.22-3.513-8.485z" />
+    </svg>
+  );
+}
+
 function getEmbedUrl(url: string | null | undefined) {
   if (!url) return null;
   const ytRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/i;
@@ -216,21 +224,23 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
     }
   };
 
-  const handleSocialShare = (platform: "X" | "Facebook" | "LinkedIn") => {
+  const handleSocialShare = (platform: "X" | "Facebook" | "LinkedIn" | "WhatsApp") => {
     const url = window.location.href;
     const projectTitle = locale === "id" ? project.title_id : project.title_en;
     const text =
       locale === "id"
-        ? `Lihat proyek ini: ${projectTitle}`
-        : `Check out this project: ${projectTitle}`;
+        ? `"${projectTitle}" oleh Fadil Bafagih`
+        : `"${projectTitle}" by Fadil Bafagih`;
 
     let shareUrl = "";
     if (platform === "X") {
-      shareUrl = `https://x.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(text)}`;
+      shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
     } else if (platform === "Facebook") {
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
     } else if (platform === "LinkedIn") {
       shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+    } else if (platform === "WhatsApp") {
+      shareUrl = `https://api.whatsapp.com/send?text=${encodeURIComponent(`${text}\n${url}`)}`;
     }
 
     if (shareUrl) {
@@ -243,6 +253,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
     { name: "X" as const, icon: XIcon, label: "X" },
     { name: "Facebook" as const, icon: FacebookIcon, label: "Facebook" },
     { name: "LinkedIn" as const, icon: LinkedInIcon, label: "LinkedIn" },
+    { name: "WhatsApp" as const, icon: WhatsAppIcon, label: "WhatsApp" },
   ];
   // Sync scroll on thumbnail reel
   useEffect(() => {
@@ -486,12 +497,12 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-[200px] p-2.5"
+                className="w-[220px] p-2.5"
               >
                 <div className="text-xs font-semibold px-0 pt-0.5 pb-2 text-neutral-500 dark:text-neutral-400">
                   {tLinks(locale as any, "share_links")}
                 </div>
-                <div className="grid grid-cols-3 gap-1.5 mb-2">
+                <div className="grid grid-cols-4 gap-1.5 mb-2">
                   {shareChannels.map(({ name, icon: Icon, label }) => (
                     <button
                       key={name}
