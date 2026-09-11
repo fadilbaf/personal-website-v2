@@ -79,17 +79,6 @@ function LinkCard({ href, title, description, icon: Icon, index, isMain = false 
     e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
   };
 
-  const handleTouchMove = (e: React.TouchEvent<HTMLAnchorElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    if (touch) {
-      const x = touch.clientX - rect.left;
-      const y = touch.clientY - rect.top;
-      e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
-      e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
-    }
-  };
-
   if (isMain) {
     return (
       <motion.a
@@ -107,7 +96,6 @@ function LinkCard({ href, title, description, icon: Icon, index, isMain = false 
           delay: index * 0.08,
         }}
         onMouseEnter={() => setIsShimmering(true)}
-        onTouchStart={() => setIsShimmering(true)}
         className="group relative p-[2px] rounded-[16px] border-none cursor-pointer bg-[radial-gradient(circle_80px_at_80%_-10%,#ffffff,#181b1b)] block w-full"
       >
         {/* Glow behind button (Top-Right) */}
@@ -162,8 +150,6 @@ function LinkCard({ href, title, description, icon: Icon, index, isMain = false 
         delay: index * 0.08,
       }}
       onMouseMove={handleMouseMove}
-      onTouchStart={handleTouchMove}
-      onTouchMove={handleTouchMove}
       className="link-card-custom group relative overflow-hidden flex items-center gap-4 rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm px-4 py-3.5 transition-colors duration-300 hover:shadow-md active:shadow-md dark:border-white/10 dark:bg-neutral-900/80 dark:hover:shadow-white/5 dark:active:shadow-white/5"
     >
       {/* Spotlight cursor overlay */}

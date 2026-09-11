@@ -158,15 +158,6 @@ export function LinksContact({ locale }: LinksContactProps) {
     e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
   };
 
-  const handleTouchMove = (e: React.TouchEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const touch = e.touches[0];
-    const x = touch.clientX - rect.left;
-    const y = touch.clientY - rect.top;
-    e.currentTarget.style.setProperty("--mouse-x", `${x}px`);
-    e.currentTarget.style.setProperty("--mouse-y", `${y}px`);
-  };
-
   return (
     <motion.section
       className="px-3.5 pt-6 pb-6"
@@ -178,8 +169,6 @@ export function LinksContact({ locale }: LinksContactProps) {
       <motion.div 
         variants={cardVariants}
         onMouseMove={handleMouseMove}
-        onTouchStart={handleTouchMove}
-        onTouchMove={handleTouchMove}
         className="link-card-custom group relative overflow-hidden rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm p-5 dark:border-white/10 dark:bg-neutral-900/80"
       >
         {/* Spotlight cursor overlay */}

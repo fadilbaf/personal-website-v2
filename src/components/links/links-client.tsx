@@ -28,7 +28,7 @@ export function LinksClient({ locale, initialData }: LinksClientProps) {
 
       {/* Centered container */}
       <div className="relative min-h-screen flex flex-col md:items-center md:justify-start md:py-8">
-        <div className="w-full max-w-md mx-auto md:border md:border-neutral-200/60 md:bg-white/80 md:shadow-xl md:shadow-black/5 md:backdrop-blur-xl md:dark:border-white/10 md:dark:bg-neutral-900/80 md:dark:shadow-white/5 md:rounded-2xl md:overflow-hidden flex flex-col min-h-screen md:min-h-0">
+        <div className="w-full max-w-md mx-auto md:border md:border-neutral-200/60 md:bg-white/80 md:shadow-xl md:shadow-black/5 md:backdrop-blur-xl md:dark:border-white/10 md:dark:bg-neutral-900/80 md:dark:shadow-white/5 md:rounded-2xl flex flex-col flex-1 md:flex-none">
           {/* Header */}
           <LinksHeader locale={locale} contact={data.contact ?? null} />
 

@@ -126,39 +126,46 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
 
   return (
     <TooltipProvider>
-      <motion.header
-        initial={{ y: -60, opacity: 0 }}
-        animate={{ y: 0, opacity: 1 }}
-        transition={{ duration: 0.5, ease: "easeOut" }}
-        className="sticky top-0 z-30 flex h-14 items-center justify-between px-3.5 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10"
-      >
+      <header className="sticky top-0 z-30 flex h-14 items-center justify-between px-3.5 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10">
         {/* Logo */}
-        <Link
-          href={`/${locale}/links`}
-          prefetch={false}
-          onClick={(e) => {
-            e.preventDefault();
-            window.scrollTo({
-              top: 0,
-              behavior: "smooth",
-            });
-          }}
-          className="relative flex items-center h-7 cursor-pointer outline-none"
+        <motion.div
+          initial={{ opacity: 0, x: -10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-center"
         >
-          <img
-            src={logoBlack.src}
-            alt="Fadil Bafagih"
-            className="dark:hidden h-7 w-auto"
-          />
-          <img
-            src={logoWhite.src}
-            alt="Fadil Bafagih"
-            className="hidden dark:block h-7 w-auto"
-          />
-        </Link>
+          <Link
+            href={`/${locale}/links`}
+            prefetch={false}
+            onClick={(e) => {
+              e.preventDefault();
+              window.scrollTo({
+                top: 0,
+                behavior: "smooth",
+              });
+            }}
+            className="relative flex items-center h-7 cursor-pointer outline-none"
+          >
+            <img
+              src={logoBlack.src}
+              alt="Fadil Bafagih"
+              className="dark:hidden h-7 w-auto"
+            />
+            <img
+              src={logoWhite.src}
+              alt="Fadil Bafagih"
+              className="hidden dark:block h-7 w-auto"
+            />
+          </Link>
+        </motion.div>
 
         {/* Right controls */}
-        <div className="flex items-center gap-2">
+        <motion.div
+          initial={{ opacity: 0, x: 10 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+          className="flex items-center gap-2"
+        >
           {/* 1. Language switch */}
           <Tooltip>
             <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
@@ -282,8 +289,8 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
               <p>{tLinks(locale, "share")}</p>
             </TooltipContent>
           </Tooltip>
-        </div>
-      </motion.header>
+        </motion.div>
+      </header>
     </TooltipProvider>
   );
 }
