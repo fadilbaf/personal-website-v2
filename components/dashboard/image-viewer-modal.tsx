@@ -11,6 +11,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useScrollLock } from "@/src/app/lib/use-scroll-lock";
 
 interface ImageViewerModalProps {
   isOpen: boolean;
@@ -117,10 +118,13 @@ export function ImageViewerModal({
     }
   }, [isOpen, initialIndex]);
 
+  // Scroll lock background
+  useScrollLock(isOpen);
+
   // Handle keyboard arrow keys & Escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && e.isTrusted) {
         onClose();
       } else if (e.key === "ArrowLeft" && currentIndex > 0) {
         setCurrentIndex((prev) => prev - 1);
@@ -131,13 +135,10 @@ export function ImageViewerModal({
 
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      // Prevent background scrolling
-      document.body.style.overflow = "hidden";
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
   }, [isOpen, currentIndex, images.length, onClose]);
 
@@ -187,11 +188,11 @@ export function ImageViewerModal({
 
   return createPortal(
     <TooltipProvider>
-      <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4">
+      <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4 overscroll-contain">
         {/* Premium Glassmorphic Backdrop */}
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/10 backdrop-blur-xs cursor-pointer"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer touch-none"
         />
 
         {/* Floating Filename Display (Top-Left) */}

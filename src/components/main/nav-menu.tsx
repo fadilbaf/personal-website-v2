@@ -13,9 +13,11 @@ import {
   Mail,
   Home,
   Link2,
+  ExternalLink,
   ArrowUpRight,
 } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
+import { useScrollLock, forceUnlockScroll } from "@/src/app/lib/use-scroll-lock";
 
 interface NavMenuProps {
   isOpen: boolean;
@@ -31,24 +33,13 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
 
   const isHomePage = pathname === `/${locale}` || pathname === "/";
 
-  // Lock body and html scroll when overlay is open
-  useEffect(() => {
-    if (isOpen) {
-      const originalBodyOverflow = document.body.style.overflow;
-      const originalHtmlOverflow = document.documentElement.style.overflow;
-      document.body.style.overflow = "hidden";
-      document.documentElement.style.overflow = "hidden";
-      return () => {
-        document.body.style.overflow = originalBodyOverflow;
-        document.documentElement.style.overflow = originalHtmlOverflow;
-      };
-    }
-  }, [isOpen]);
+  // Lock body and html scroll when overlay is open with zero layout shift
+  useScrollLock(isOpen);
 
-  // Handle Escape key
+  // Handle Escape key (only from authentic user keypress)
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
+      if (e.key === "Escape" && e.isTrusted && isOpen) {
         onClose();
       }
     };
@@ -98,8 +89,7 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
 
   const handleSectionClick = (id: string) => {
     // Unlock body/html scroll immediately
-    document.body.style.overflow = "";
-    document.documentElement.style.overflow = "";
+    forceUnlockScroll();
     onClose();
 
     if (isHomePage) {
@@ -237,11 +227,11 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
                               {page.label}
                             </span>
                           </div>
-                          <ArrowUpRight
-                            className={`h-5 w-5 sm:h-5.5 sm:w-5.5 transition-transform duration-200 ${
+                          <ExternalLink
+                            className={`h-4.5 w-4.5 sm:h-5 sm:w-5 transition-transform duration-200 ${
                               isPageActive
                                 ? "text-white dark:text-neutral-900"
-                                : "text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white group-hover:translate-x-1 group-hover:-translate-y-1 group-active:translate-x-1 group-active:-translate-y-1"
+                                : "text-neutral-400 dark:text-neutral-500 group-hover:text-neutral-900 dark:group-hover:text-white group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-active:translate-x-0.5 group-active:-translate-y-0.5"
                             }`}
                           />
                         </a>

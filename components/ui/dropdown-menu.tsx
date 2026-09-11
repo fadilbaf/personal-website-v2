@@ -7,9 +7,10 @@ import { cn } from "@/lib/utils"
 import { CheckIcon, ChevronRightIcon } from "lucide-react"
 
 function DropdownMenu({
+  modal = false,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {
-  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" {...props} />
+  return <DropdownMenuPrimitive.Root data-slot="dropdown-menu" modal={modal} {...props} />
 }
 
 function DropdownMenuPortal({
@@ -35,11 +36,47 @@ function DropdownMenuContent({
   className,
   align = "start",
   sideOffset = 4,
+  autoCloseOnScroll = true,
   ...props
-}: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
+}: React.ComponentProps<typeof DropdownMenuPrimitive.Content> & {
+  autoCloseOnScroll?: boolean
+}) {
+  const contentRef = React.useRef<HTMLDivElement>(null)
+
+  React.useEffect(() => {
+    if (!autoCloseOnScroll) return
+
+    const handleScroll = (e: Event) => {
+      // Don't close if scroll is inside the dropdown content itself
+      if (contentRef.current && contentRef.current.contains(e.target as Node)) {
+        return
+      }
+
+      // Don't trigger if a navigation menu or modal overlay is open
+      if (
+        document.body.hasAttribute("data-scroll-locked") ||
+        document.body.classList.contains("overflow-hidden") ||
+        document.querySelector('[data-nav-menu="open"]')
+      ) {
+        return
+      }
+
+      if (contentRef.current) {
+        // Dispatch only to the dropdown element or dismiss safely
+        contentRef.current.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: false }))
+      }
+    }
+
+    window.addEventListener("scroll", handleScroll, { passive: true, capture: true })
+    return () => {
+      window.removeEventListener("scroll", handleScroll, { capture: true })
+    }
+  }, [autoCloseOnScroll])
+
   return (
     <DropdownMenuPrimitive.Portal>
       <DropdownMenuPrimitive.Content
+        ref={contentRef}
         data-slot="dropdown-menu-content"
         sideOffset={sideOffset}
         align={align}

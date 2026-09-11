@@ -229,7 +229,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
         whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
-        className="flex items-center justify-between gap-4"
+        className="flex items-center justify-between gap-4 relative z-30"
       >
         {/* Search */}
         <div className="relative max-w-sm flex-1">
@@ -246,7 +246,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
         </div>
 
         {/* Filters Trigger and Dropdown */}
-        <div className="relative" ref={dropdownRef}>
+        <div className="relative z-30" ref={dropdownRef}>
           <Button
             variant={activeFilterCount > 0 ? "default" : "outline"}
             size="sm"

@@ -34,6 +34,7 @@ import { toast } from "sonner";
 import type { Project, Contact } from "@/src/types/database";
 import { trackEvent } from "@/src/lib/track-event";
 import { cn } from "@/src/app/lib/utils";
+import { useScrollLock } from "@/src/app/lib/use-scroll-lock";
 import { AnimatedNumber } from "@/components/ui/animated-number";
 
 function GithubIcon({ className }: { className?: string }) {
@@ -172,10 +173,13 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
     }
   }, [viewerIndex]);
 
+  // Lock background scroll when viewer modal or video modal is active
+  useScrollLock(viewerOpen || videoOpen);
+
   // Keyboard navigation inside full screen viewer
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && e.isTrusted) {
         setViewerOpen(false);
       } else if (e.key === "ArrowLeft" && viewerIndex > 0) {
         setViewerIndex((prev) => prev - 1);
@@ -186,12 +190,10 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
     if (viewerOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
   }, [viewerOpen, viewerIndex, images.length]);
 
@@ -259,22 +261,20 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
     }
   }, [currentIndex]);
 
-  // Prevent background scrolling & handle Escape key for Video Modal
+  // Handle Escape key for Video Modal
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
+      if (e.key === "Escape" && e.isTrusted) {
         setVideoOpen(false);
       }
     };
 
     if (videoOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
   }, [videoOpen]);
 
@@ -914,11 +914,11 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
       {/* 6. Fullscreen Image Viewer Modal */}
       {viewerOpen && mounted && createPortal(
         <TooltipProvider>
-          <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4 overscroll-contain">
             {/* Premium Glassmorphic Backdrop */}
             <div
               onClick={() => setViewerOpen(false)}
-              className="fixed inset-0 bg-black/10 backdrop-blur-xs cursor-pointer"
+              className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer touch-none"
             />
 
             {/* Floating Control Buttons (Top-Right) */}

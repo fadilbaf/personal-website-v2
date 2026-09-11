@@ -10,6 +10,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useScrollLock } from "@/src/app/lib/use-scroll-lock";
 
 export function extractPdfFileName(url: string, fallback = "CV.pdf"): string {
   if (!url) return fallback;
@@ -69,21 +70,20 @@ export function PdfViewerModal({
     return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
-  // Close on Escape key press
+  // Scroll lock background
+  useScrollLock(isOpen);
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
+      if (e.key === "Escape" && e.isTrusted) onClose();
     };
 
     if (isOpen) {
       window.addEventListener("keydown", handleKeyDown);
-      // Prevent scrolling of background page when modal is open
-      document.body.style.overflow = "hidden";
     }
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "";
     };
   }, [isOpen, onClose]);
 
@@ -113,11 +113,11 @@ export function PdfViewerModal({
 
   return (
     <TooltipProvider>
-      <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4 sm:p-6 md:p-8">
+      <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4 sm:p-6 md:p-8 overscroll-contain">
         {/* Backdrop Blur */}
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/10 backdrop-blur-xs cursor-pointer"
+          className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer touch-none"
         />
 
         {/* Premium Rounded Square Close Button (floating top-right) */}

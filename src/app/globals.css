@@ -134,6 +134,60 @@
     @apply font-sans;
   }
 
+  /* Prevent background scroll leakage and hide scrollbar completely when modals/drawers/overlays are open */
+  body[data-scroll-locked],
+  body[data-radix-scroll-lock],
+  body.overflow-hidden,
+  html[data-scroll-locked],
+  html[data-radix-scroll-lock],
+  html.overflow-hidden,
+  html:has([data-slot="dialog-overlay"]),
+  body:has([data-slot="dialog-overlay"]),
+  html:has([data-slot="alert-dialog-overlay"]),
+  body:has([data-slot="alert-dialog-overlay"]),
+  html:has([data-slot="sheet-overlay"]),
+  body:has([data-slot="sheet-overlay"]),
+  html:has([data-nav-menu="open"]),
+  body:has([data-nav-menu="open"]) {
+    overflow: hidden !important;
+    overscroll-behavior: none !important;
+    touch-action: none !important;
+    scrollbar-width: none !important;
+  }
+
+  /* Webkit scrollbar complete hide when modal/overlay is open */
+  body[data-scroll-locked]::-webkit-scrollbar,
+  html[data-scroll-locked]::-webkit-scrollbar,
+  body.overflow-hidden::-webkit-scrollbar,
+  html.overflow-hidden::-webkit-scrollbar,
+  html:has([data-slot="dialog-overlay"])::-webkit-scrollbar,
+  body:has([data-slot="dialog-overlay"])::-webkit-scrollbar,
+  html:has([data-slot="alert-dialog-overlay"])::-webkit-scrollbar,
+  body:has([data-slot="alert-dialog-overlay"])::-webkit-scrollbar,
+  html:has([data-slot="sheet-overlay"])::-webkit-scrollbar,
+  body:has([data-slot="sheet-overlay"])::-webkit-scrollbar,
+  html:has([data-nav-menu="open"])::-webkit-scrollbar,
+  body:has([data-nav-menu="open"])::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
+  }
+
+  /* Overlay & Dialog/Sheet Touch Action & Scroll Containment */
+  [data-slot="dialog-overlay"],
+  [data-slot="alert-dialog-overlay"],
+  [data-slot="sheet-overlay"],
+  [data-nav-menu="open"] {
+    touch-action: none;
+    overscroll-behavior: contain !important;
+  }
+
+  [data-slot="dialog-content"],
+  [data-slot="alert-dialog-content"],
+  [data-slot="sheet-content"] {
+    overscroll-behavior: contain !important;
+  }
+
   /* Global text highlight styling */
   ::selection {
     background-color: #000000 !important;
