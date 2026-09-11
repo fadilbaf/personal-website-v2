@@ -456,7 +456,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               <div className="space-y-4">
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
-                    {locale === "id" ? "TERPOPULER" : "MOST POPULAR"}
+                    {tMain(locale, "most_popular")}
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -472,7 +472,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               <div className="space-y-4">
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
-                    {locale === "id" ? "TERKAIT" : "RELATED"}
+                    {tMain(locale, "related")}
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -488,7 +488,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               <div className="space-y-4">
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
-                    {locale === "id" ? "TERBARU" : "LATEST"}
+                    {tMain(locale, "latest")}
                   </h3>
                 </div>
                 <div className="space-y-3">
@@ -512,7 +512,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           {/* Left Column: Tags */}
           <div className="space-y-2">
             <span className="block text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-              TAGS
+              {tMain(locale, "tags")}
             </span>
             <div className="flex flex-wrap items-center gap-2">
               {blog.tags && blog.tags.length > 0 && (

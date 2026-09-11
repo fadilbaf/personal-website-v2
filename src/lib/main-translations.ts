@@ -58,6 +58,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     my_activity: "My Activity",
     all_skills: "All",
     view_all: "View All",
+    no_skills_found: "No skills found in this category.",
+    open_to_remote: "Open to Remote",
 
     // Experiences
     experiences_title: "Experiences",
@@ -75,6 +77,11 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     months: "Months",
     all_skills_title: "All Skills",
     skills_at: "Skills at",
+    no_career_found: "No career history published yet.",
+    no_education_found: "No educational history published yet.",
+    no_organization_found: "No organizational history published yet.",
+
+    // Projects
     projects_title: "Projects",
     projects_desc: "Showcase of my work and side projects",
     view_all_projects: "View all projects",
@@ -82,6 +89,9 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     source_code: "Source Code",
     view_detail: "View Detail",
     view_project: "View Project",
+    no_images_available: "No images available",
+
+    // Achievements
     view_achievement: "View Achievement",
     achievements_title: "Achievements",
     achievements_desc: "My achievement, certificate, licenses, honor and award",
@@ -92,6 +102,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     achievement_type: "Type",
     achievement_category: "Category",
     achievement_issue_date: "Issue Date",
+
+    // Blogs
     blogs_title: "Blogs",
     blogs_desc: "Thoughts and learnings from my journey in tech",
     view_all_blogs: "View all blogs",
@@ -99,6 +111,11 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     min_read: "min read",
     views_label: "views",
     likes_label: "likes",
+    most_popular: "MOST POPULAR",
+    related: "RELATED",
+    latest: "LATEST",
+    tags: "TAGS",
+
     // Contact
     contact_title: "Get In Touch",
     contact_desc: "Feel free to reach out for collaborations or just a friendly hello",
@@ -126,6 +143,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     build_with_bafdev_title: "Build with Bafdev",
     build_with_bafdev_desc: "Develop Your Ideas. Digitize Your Identity.",
     go_to_bafdev: "Go to Bafdev",
+
+    // Filters & Pagination
     search_projects: "Search projects...",
     filter: "Filter",
     filters: "Filters",
@@ -146,6 +165,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     no_blogs_found: "No blogs found",
     blog_type: "Type",
     blog_category: "Category",
+
+    // Details & Modals
     back: "Back",
     type_label: "TYPE",
     category_label: "CATEGORY",
@@ -163,6 +184,9 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     features_stat: "Key Features",
     technologies_stat: "Technologies",
     scroll_to_top: "Scroll to top",
+    close: "Close",
+    previous: "Previous",
+    next: "Next",
   },
   id: {
     // Header
@@ -221,6 +245,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     my_activity: "Aktivitas Saya",
     all_skills: "Semua",
     view_all: "Lihat Semua",
+    no_skills_found: "Tidak ada keahlian di kategori ini.",
+    open_to_remote: "Open to Remote",
 
     // Experiences
     experiences_title: "Pengalaman",
@@ -238,6 +264,11 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     months: "Bulan",
     all_skills_title: "Semua Keahlian",
     skills_at: "Keahlian di",
+    no_career_found: "Belum ada riwayat karir yang dipublikasikan.",
+    no_education_found: "Belum ada riwayat pendidikan yang dipublikasikan.",
+    no_organization_found: "Belum ada riwayat organisasi yang dipublikasikan.",
+
+    // Projects
     projects_title: "Proyek",
     projects_desc: "Kumpulan karya terbaru dan proyek sampingan saya",
     view_all_projects: "Lihat semua proyek",
@@ -245,6 +276,9 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     source_code: "Kode Sumber",
     view_detail: "Lihat Detail",
     view_project: "Lihat Proyek",
+    no_images_available: "Tidak ada gambar tersedia",
+
+    // Achievements
     view_achievement: "Lihat Pencapaian",
     achievements_title: "Pencapaian",
     achievements_desc: "Kumpulan pencapaian, sertifikat, lisensi, penghargaan, dan apresiasi saya",
@@ -255,13 +289,20 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     achievement_type: "Tipe",
     achievement_category: "Kategori",
     achievement_issue_date: "Tanggal Terbit",
+
+    // Blogs
     blogs_title: "Blog",
     blogs_desc: "Pemikiran dan pembelajaran dari perjalanan teknologi saya",
     view_all_blogs: "Lihat semua blog",
     read_more: "Baca selengkapnya",
     min_read: "menit baca",
-    views_label: "views",
-    likes_label: "likes",
+    views_label: "dilihat",
+    likes_label: "suka",
+    most_popular: "TERPOPULER",
+    related: "TERKAIT",
+    latest: "TERBARU",
+    tags: "TAG",
+
     // Contact
     contact_title: "Hubungi Saya",
     contact_desc: "Jangan ragu untuk menghubungi saya untuk kolaborasi atau sekadar menyapa",
@@ -289,6 +330,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     build_with_bafdev_title: "Bangun bersama Bafdev",
     build_with_bafdev_desc: "Kembangkan Ide Anda. Digitalkan Identitas Anda.",
     go_to_bafdev: "Kunjungi Bafdev",
+
+    // Filters & Pagination
     search_projects: "Cari proyek...",
     filter: "Filter",
     filters: "Filter",
@@ -309,6 +352,8 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     no_blogs_found: "Blog tidak ditemukan",
     blog_type: "Tipe",
     blog_category: "Kategori",
+
+    // Details & Modals
     back: "Kembali",
     type_label: "TIPE",
     category_label: "KATEGORI",
@@ -326,6 +371,9 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     features_stat: "Fitur Utama",
     technologies_stat: "Teknologi",
     scroll_to_top: "Kembali ke atas",
+    close: "Tutup",
+    previous: "Sebelumnya",
+    next: "Selanjutnya",
   },
 };
 

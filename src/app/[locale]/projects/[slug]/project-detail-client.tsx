@@ -735,7 +735,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                 ) : (
                   <div className="flex flex-col items-center justify-center p-8 gap-3 text-center">
                     <ImageIcon className="w-10 h-10 text-neutral-300 dark:text-neutral-700 stroke-[1.5]" />
-                    <span className="text-xs text-neutral-400">No images available</span>
+                    <span className="text-xs text-neutral-400">{tMain(locale, "no_images_available")}</span>
                   </div>
                 )}
               </div>

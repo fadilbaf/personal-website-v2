@@ -503,7 +503,7 @@ export function MainAbout({
                   )}
                   <span className="inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-600 border border-neutral-200 dark:text-neutral-400 dark:border-white/10">
                     <Globe className="h-3.5 w-3.5" />
-                    Open to Remote
+                    {tMain(locale, "open_to_remote")}
                   </span>
                 </div>
 
@@ -520,7 +520,7 @@ export function MainAbout({
               )}
               <span className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-600 border border-neutral-200 dark:text-neutral-400 dark:border-white/10 w-full">
                 <Globe className="h-3.5 w-3.5" />
-                Open to Remote
+                {tMain(locale, "open_to_remote")}
               </span>
             </div>
 
@@ -955,7 +955,7 @@ export function MainAbout({
               ))}
               {modalSkills.length === 0 && (
                 <p className="text-sm text-neutral-500 italic w-full text-center py-8">
-                  No skills found in this category.
+                  {tMain(locale, "no_skills_found")}
                 </p>
               )}
             </motion.div>

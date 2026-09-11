@@ -579,7 +579,7 @@ export function MainExperience({
 
                   {publishedCareers.length === 0 && (
                     <p className="text-sm text-neutral-500 italic text-center py-12">
-                      No career history published yet.
+                      {tMain(locale, "no_career_found")}
                     </p>
                   )}
                 </motion.div>
@@ -773,7 +773,7 @@ export function MainExperience({
 
                   {publishedEducations.length === 0 && (
                     <p className="text-sm text-neutral-500 italic text-center py-12">
-                      No educational history published yet.
+                      {tMain(locale, "no_education_found")}
                     </p>
                   )}
                 </motion.div>
@@ -958,7 +958,7 @@ export function MainExperience({
 
                   {publishedOrganizations.length === 0 && (
                     <p className="text-sm text-neutral-500 italic text-center py-12">
-                      No organizational history published yet.
+                      {tMain(locale, "no_organization_found")}
                     </p>
                   )}
                 </motion.div>
