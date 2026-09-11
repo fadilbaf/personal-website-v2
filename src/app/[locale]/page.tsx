@@ -54,10 +54,10 @@ export default async function Home({
   ]);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 font-sans transition-colors duration-300">
+    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 font-sans transition-colors duration-300 overflow-x-hidden max-w-full">
       <MainHeader locale={locale} hireMeEmail={contact?.email ?? null} />
       
-      <main className="flex-1 w-full">
+      <main className="flex-1 w-full overflow-x-hidden">
         <MainHero 
           profile={profile}
           roles={roles}

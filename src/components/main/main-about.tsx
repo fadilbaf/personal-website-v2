@@ -403,7 +403,7 @@ export function MainAbout({
     : activeSkills.filter((s) => s.category_id === selectedModalCategory);
 
   return (
-    <section id="about" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-12 pb-6 md:pt-24 md:pb-8">
+    <section id="about" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-12 pb-6 md:pt-24 md:pb-8 overflow-hidden">
       <div className="w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         
         {/* ========================================================= */}
@@ -637,8 +637,8 @@ export function MainAbout({
               </div>
             </div>
 
-            <div className="p-5 rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50">
-              <div className="w-full py-2 min-h-[140px] flex items-center">
+            <div className="p-5 rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 overflow-hidden">
+              <div className="w-full py-2 min-h-[140px] flex items-center overflow-x-auto max-w-full scrollbar-custom">
                 {mounted ? (
                   <GitHubCalendar
                     username={githubUsername}
