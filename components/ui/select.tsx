@@ -155,7 +155,7 @@ function SelectValue({
     <span
       data-slot="select-value"
       className={cn(
-        selectedLabel ? "text-neutral-900 dark:text-white" : "text-muted-foreground",
+        selectedLabel ? "text-neutral-900 dark:text-white font-normal text-sm" : "text-neutral-400 dark:text-neutral-500 text-sm font-normal",
         className
       )}
       {...props}
@@ -211,7 +211,7 @@ function SelectTrigger({
             onChange={(e) => setSearch(e.target.value)}
             placeholder={selectedLabel || placeholder}
             className={cn(
-              "flex w-full items-center justify-between gap-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent py-2 pr-8 pl-2.5 text-base md:text-sm shadow-xs outline-none focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 dark:bg-input/30 text-neutral-900 dark:text-white placeholder:text-neutral-500 dark:placeholder:text-neutral-400",
+              "flex w-full items-center justify-between gap-1.5 rounded-md border border-neutral-300 dark:border-neutral-700 bg-transparent py-2 pr-8 pl-3 text-sm shadow-xs outline-none focus:outline-none focus:border-neutral-400 dark:focus:border-neutral-600 dark:bg-input/30 text-neutral-900 dark:text-white placeholder:text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500",
               size === "default" ? "h-9" : "h-8",
               className
             )}
@@ -225,7 +225,7 @@ function SelectTrigger({
           data-size={size}
           onClick={() => setOpen(!open)}
           className={cn(
-            "group flex w-full items-center justify-between gap-1.5 rounded-md border border-input bg-transparent py-2 pr-8 pl-2.5 text-base md:text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+            "group flex w-full items-center justify-between gap-1.5 rounded-md border border-input bg-transparent py-2 pr-8 pl-3 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 cursor-pointer disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-3 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 dark:bg-input/30 dark:hover:bg-input/50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
             className
           )}
           {...props}
