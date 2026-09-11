@@ -171,13 +171,17 @@ export default function LoginPage() {
                 </Button>
 
                 <div className="flex justify-center">
-                  <Link
-                    href={`/${language}`}
+                  <a
+                    href={
+                      typeof window !== "undefined" && window.location.hostname.startsWith("admin.")
+                        ? `https://fadil.bafagih.id/${language}`
+                        : `/${language}`
+                    }
                     className="flex items-center text-sm text-neutral-500 transition-colors hover:text-neutral-900 active:text-neutral-900 dark:text-neutral-400 dark:hover:text-white dark:active:text-white"
                   >
                     <ArrowLeft className="mr-1 h-4 w-4" />
                     {t("login.back_to_home")}
-                  </Link>
+                  </a>
                 </div>
               </div>
             </form>
