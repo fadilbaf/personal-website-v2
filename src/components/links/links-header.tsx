@@ -126,7 +126,7 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
 
   return (
     <TooltipProvider>
-      <header className="sticky top-0 z-30 flex h-14 items-center justify-between px-3.5 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10">
+      <header className="sticky max-md:top-0 md:relative z-30 flex h-14 items-center justify-between px-3.5 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 md:rounded-t-2xl">
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, x: -10 }}
