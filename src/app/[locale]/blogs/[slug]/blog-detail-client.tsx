@@ -163,18 +163,19 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
   const handleSocialShare = (platform: "X" | "Facebook" | "LinkedIn" | "WhatsApp") => {
     const url = window.location.href;
-    const blogTitle = locale === "id" ? blog.title_id : blog.title_en;
-    const author = blog.author?.full_name || "Fadil Bafagih";
+    const rawTitle = (locale === "id" ? blog.title_id : blog.title_en) || "";
+    const cleanTitle = rawTitle.replace(/[\r\n]+/g, " ").trim();
+    const author = (blog.author?.full_name || "Fadil Bafagih").replace(/[\r\n]+/g, " ").trim();
     const text =
       locale === "id"
-        ? `"${blogTitle}" oleh ${author}`
-        : `"${blogTitle}" by ${author}`;
+        ? `"${cleanTitle}" oleh ${author}`
+        : `"${cleanTitle}" by ${author}`;
 
     let shareUrl = "";
     if (platform === "X") {
-      shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text.trim())}&url=${encodeURIComponent(url)}`;
     } else if (platform === "Facebook") {
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     } else if (platform === "LinkedIn") {
       shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
     } else if (platform === "WhatsApp") {

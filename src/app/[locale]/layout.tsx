@@ -11,6 +11,7 @@ import NextTopLoader from "nextjs-toploader";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://fadilbafagih.com"),
   title: "Fadil Bafagih | Personal Website",
   description: "Personal website and portfolio of Fadil Bafagih.",
 };

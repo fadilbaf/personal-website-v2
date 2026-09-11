@@ -226,17 +226,18 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
   const handleSocialShare = (platform: "X" | "Facebook" | "LinkedIn" | "WhatsApp") => {
     const url = window.location.href;
-    const projectTitle = locale === "id" ? project.title_id : project.title_en;
+    const rawTitle = (locale === "id" ? project.title_id : project.title_en) || "";
+    const cleanTitle = rawTitle.replace(/[\r\n]+/g, " ").trim();
     const text =
       locale === "id"
-        ? `"${projectTitle}" oleh Fadil Bafagih`
-        : `"${projectTitle}" by Fadil Bafagih`;
+        ? `"${cleanTitle}" oleh Fadil Bafagih`
+        : `"${cleanTitle}" by Fadil Bafagih`;
 
     let shareUrl = "";
     if (platform === "X") {
-      shareUrl = `https://x.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`;
+      shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text.trim())}&url=${encodeURIComponent(url)}`;
     } else if (platform === "Facebook") {
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}&quote=${encodeURIComponent(text)}`;
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`;
     } else if (platform === "LinkedIn") {
       shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
     } else if (platform === "WhatsApp") {
