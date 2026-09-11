@@ -150,7 +150,7 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                 />
 
                 {/* 1. Project Image Container */}
-                <div className="group/img relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden text-left block">
+                <div className="group/img relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden text-left block pointer-events-none">
                   {mainImageUrl ? (
                     <img
                       src={mainImageUrl}

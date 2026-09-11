@@ -173,9 +173,11 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
     }
 
     if (shareUrl) {
-      window.open(shareUrl, "_blank", "noopener,noreferrer");
       setDropdownOpen(false);
       setBottomDropdownOpen(false);
+      setTimeout(() => {
+        window.open(shareUrl, "_blank", "noopener,noreferrer");
+      }, 50);
     }
   };
 
@@ -291,6 +293,22 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           transition={{ duration: 0.4, delay: 0.05 }}
           className="mt-5 text-left"
         >
+          {/* Badges (Type & Category) */}
+          {(blogType || blogCategory) && (
+            <div className="flex items-center gap-1.5 flex-wrap mb-3">
+              {blogType && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                  {blogType}
+                </span>
+              )}
+              {blogCategory && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                  {blogCategory}
+                </span>
+              )}
+            </div>
+          )}
+
           <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-neutral-900 dark:text-white">
             {blogTitle}
           </h1>
@@ -326,32 +344,12 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
           animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex flex-col gap-6 md:flex-row md:items-center justify-between py-3.5 border-y border-neutral-200 dark:border-white/10 mt-6"
+          className="flex items-center justify-between py-4 border-y border-neutral-200 dark:border-white/10 mt-6"
         >
-          {/* Left: Metadata (TYPE, CATEGORY) */}
-          <div className="flex items-center gap-8 sm:gap-12 w-full md:w-auto">
-            <div>
-              <span className="block text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                {tMain(locale, "type_label")}
-              </span>
-              <span className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200 mt-1 block">
-                {blogType}
-              </span>
-            </div>
-            <div>
-              <span className="block text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                {tMain(locale, "category_label")}
-              </span>
-              <span className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200 mt-1 block">
-                {blogCategory}
-              </span>
-            </div>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 w-full md:w-auto md:flex-row md:items-center md:gap-6">
+          {/* Left: Views and Likes */}
+          <div className="flex items-center gap-4 sm:gap-6">
             {/* Views */}
-            <div className={cn(actionBtnClass, "cursor-default")}>
+            <div className={cn(actionBtnClass, "cursor-default select-none")}>
               <Eye className="h-4 w-4 shrink-0" />
               <span>{viewsCount} {tMain(locale, "views_label")}</span>
             </div>
@@ -361,7 +359,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               onClick={handleLikeToggle}
               className={cn(
                 actionBtnClass,
-                hasLiked ? "text-red-600 dark:text-red-500 font-semibold" : ""
+                hasLiked
+                  ? "text-red-600 hover:text-red-600 dark:text-red-500 dark:hover:text-red-500 font-semibold"
+                  : ""
               )}
             >
               <Heart
@@ -373,50 +373,52 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               />
               <span>{likesCount} {tMain(locale, "likes_label")}</span>
             </button>
-
-            {/* Share Dropdown */}
-            <DropdownMenu onOpenChange={setDropdownOpen} open={dropdownOpen}>
-              <DropdownMenuTrigger asChild>
-                <button
-                  onClick={() => trackEvent("blog_click", blogTitle + "-share")}
-                  className={cn(
-                    actionBtnClass,
-                    "data-[state=open]:text-neutral-900 dark:data-[state=open]:text-white outline-none"
-                  )}
-                >
-                  <Share2 className="h-4 w-4 shrink-0" />
-                  <span>{tMain(locale, "share")}</span>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-[210px] p-2.5"
-              >
-                <div className="text-xs font-semibold px-0 pt-0.5 pb-2 text-neutral-500 dark:text-neutral-400">
-                  {tLinks(locale as any, "share_links")}
-                </div>
-                <div className="grid grid-cols-3 gap-1.5 mb-2">
-                  {shareChannels.map(({ name, icon: Icon, label }) => (
-                    <button
-                      key={name}
-                      onClick={() => handleSocialShare(name)}
-                      className="flex h-9 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 transition-all duration-200 hover:bg-neutral-100 hover:scale-105 active:bg-neutral-100 active:scale-105 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:active:bg-neutral-700 cursor-pointer"
-                      aria-label={label}
-                    >
-                      <Icon className="h-4 w-4" />
-                    </button>
-                  ))}
-                </div>
-                <button
-                  onClick={handleCopyUrl}
-                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs font-medium text-neutral-700 transition-all hover:bg-neutral-100 active:bg-neutral-100 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:active:bg-neutral-700 cursor-pointer"
-                >
-                  <Copy className="h-3.5 w-3.5" />
-                  {tLinks(locale as any, "copy_url")}
-                </button>
-              </DropdownMenuContent>
-            </DropdownMenu>
           </div>
+
+          {/* Right: Share Button */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <button
+                onClick={() => trackEvent("blog_click", blogTitle + "-share")}
+                className={cn(
+                  actionBtnClass,
+                  "data-[state=open]:text-neutral-900 dark:data-[state=open]:text-white outline-none"
+                )}
+              >
+                <Share2 className="h-4 w-4 shrink-0" />
+                <span>{tMain(locale, "share")}</span>
+              </button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent
+              align="end"
+              collisionPadding={16}
+              sideOffset={8}
+              className="w-[210px] p-2.5"
+            >
+              <div className="text-xs font-semibold px-0 pt-0.5 pb-2 text-neutral-500 dark:text-neutral-400">
+                {tLinks(locale as any, "share_links")}
+              </div>
+              <div className="grid grid-cols-3 gap-1.5 mb-2">
+                {shareChannels.map(({ name, icon: Icon, label }) => (
+                  <button
+                    key={name}
+                    onClick={() => handleSocialShare(name)}
+                    className="flex h-9 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 transition-all duration-200 hover:bg-neutral-100 hover:scale-105 active:bg-neutral-100 active:scale-105 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:active:bg-neutral-700 cursor-pointer"
+                    aria-label={label}
+                  >
+                    <Icon className="h-4 w-4" />
+                  </button>
+                ))}
+              </div>
+              <button
+                onClick={handleCopyUrl}
+                className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs font-medium text-neutral-700 transition-all hover:bg-neutral-100 active:bg-neutral-100 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:active:bg-neutral-700 cursor-pointer"
+              >
+                <Copy className="h-3.5 w-3.5" />
+                {tLinks(locale as any, "copy_url")}
+              </button>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </motion.div>
 
         {/* 4. Two-Column Layout Grid */}
@@ -541,7 +543,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               onClick={handleLikeToggle}
               className={cn(
                 actionBtnClass,
-                hasLiked ? "text-red-600 dark:text-red-500 font-semibold" : ""
+                hasLiked
+                  ? "text-red-600 hover:text-red-600 dark:text-red-500 dark:hover:text-red-500 font-semibold"
+                  : ""
               )}
             >
               <Heart
@@ -570,6 +574,8 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
+                collisionPadding={16}
+                sideOffset={8}
                 className="w-[210px] p-2.5"
               >
                 <div className="text-xs font-semibold px-0 pt-0.5 pb-2 text-neutral-500 dark:text-neutral-400">

@@ -15,13 +15,16 @@ import {
   ChevronLeft,
   ChevronRight,
   X,
-  Copy
+  Copy,
+  Calendar,
+  MoreHorizontal
 } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import { tLinks } from "@/src/lib/links-translations";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -94,7 +97,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
   const images = project.project_images || [];
   const hasMultiple = images.length > 1;
 
-  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const [videoOpen, setVideoOpen] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
   const bottomStripRef = useRef<HTMLDivElement>(null);
@@ -203,7 +206,6 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
       toast.success(tLinks(locale as any, "copied"), {
         description: tLinks(locale as any, "copied_desc"),
       });
-      setDropdownOpen(false);
     } catch {
       const textArea = document.createElement("textarea");
       textArea.value = window.location.href;
@@ -214,7 +216,6 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
       toast.success(tLinks(locale as any, "copied"), {
         description: tLinks(locale as any, "copied_desc"),
       });
-      setDropdownOpen(false);
     }
   };
 
@@ -237,9 +238,18 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
     }
 
     if (shareUrl) {
-      window.open(shareUrl, "_blank", "noopener,noreferrer");
-      setDropdownOpen(false);
+      setTimeout(() => {
+        window.open(shareUrl, "_blank", "noopener,noreferrer");
+      }, 50);
     }
+  };
+
+  const handleOpenExternal = (url: string, eventName: string) => {
+    setMoreMenuOpen(false);
+    trackEvent("project_click", project.slug + "-" + eventName);
+    setTimeout(() => {
+      window.open(url, "_blank", "noopener,noreferrer");
+    }, 50);
   };
 
   const shareChannels = [
@@ -388,6 +398,22 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
           transition={{ duration: 0.4, delay: 0.05 }}
           className="mt-5 text-left"
         >
+          {/* Badges (Type & Category) */}
+          {(project.type || project.category) && (
+            <div className="flex items-center gap-1.5 flex-wrap mb-3">
+              {project.type && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                  {locale === "id" ? project.type.name_id : project.type.name_en}
+                </span>
+              )}
+              {project.category && (
+                <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                  {locale === "id" ? project.category.name_id : project.category.name_en}
+                </span>
+              )}
+            </div>
+          )}
+
           <h1 className="text-[28px] leading-tight font-semibold tracking-tight text-neutral-900 dark:text-white">
             {title}
           </h1>
@@ -403,38 +429,16 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
           initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
           animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.1 }}
-          className="flex flex-col gap-6 md:flex-row md:items-center justify-between py-3.5 border-y border-neutral-200 dark:border-white/10 mt-6"
+          className="flex items-center justify-between py-4 border-y border-neutral-200 dark:border-white/10 mt-6"
         >
-          {/* Left: Metadata */}
-          <div className="grid grid-cols-3 gap-4 md:flex md:flex-row md:items-center md:gap-12 w-full md:w-auto">
-            <div>
-              <span className="block text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                {tMain(locale, "type_label")}
-              </span>
-              <span className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200 mt-1 block">
-                {(locale === "id" ? project.type?.name_id : project.type?.name_en) || "-"}
-              </span>
-            </div>
-            <div>
-              <span className="block text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                {tMain(locale, "category_label")}
-              </span>
-              <span className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200 mt-1 block">
-                {(locale === "id" ? project.category?.name_id : project.category?.name_en) || "-"}
-              </span>
-            </div>
-            <div>
-              <span className="block text-[10px] font-semibold text-neutral-400 dark:text-neutral-500 uppercase tracking-wider">
-                {tMain(locale, "date_label")}
-              </span>
-              <span className="text-[13px] font-medium text-neutral-800 dark:text-neutral-200 mt-1 block">
-                {formattedDate || "-"}
-              </span>
-            </div>
+          {/* Left: Date with Calendar Icon (Exactly matching Views & Likes styling) */}
+          <div className={cn(actionBtnClass, "cursor-default select-none")}>
+            <Calendar className="h-4 w-4 shrink-0" />
+            <span>{formattedDate || "-"}</span>
           </div>
 
-          {/* Right: Actions */}
-          <div className="flex flex-wrap items-center gap-x-6 gap-y-3 w-full md:w-auto md:flex-row md:items-center md:gap-6">
+          {/* Right: Desktop Actions (Source, Live, Video, Share) */}
+          <div className="hidden md:flex md:items-center md:gap-6">
             {project.github_url && (
               <a
                 href={project.github_url}
@@ -472,7 +476,106 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                 <span>{tMain(locale, "video_demo")}</span>
               </button>
             )}
-            <DropdownMenu onOpenChange={setDropdownOpen} open={dropdownOpen}>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button
+                  onClick={() => trackEvent("project_click", project.slug + "-share")}
+                  className={cn(
+                    actionBtnClass,
+                    "data-[state=open]:text-neutral-900 dark:data-[state=open]:text-white outline-none"
+                  )}
+                >
+                  <Share2 className="h-4 w-4 shrink-0" />
+                  <span>{tMain(locale, "share")}</span>
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-[210px] p-2.5"
+              >
+                <div className="text-xs font-semibold px-0 pt-0.5 pb-2 text-neutral-500 dark:text-neutral-400">
+                  {tLinks(locale as any, "share_links")}
+                </div>
+                <div className="grid grid-cols-3 gap-1.5 mb-2">
+                  {shareChannels.map(({ name, icon: Icon, label }) => (
+                    <button
+                      key={name}
+                      onClick={() => handleSocialShare(name)}
+                      className="flex h-9 items-center justify-center rounded-lg border border-neutral-200 bg-neutral-50 text-neutral-600 transition-all duration-200 hover:bg-neutral-100 hover:scale-105 active:bg-neutral-100 active:scale-105 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-400 dark:hover:bg-neutral-700 dark:active:bg-neutral-700 cursor-pointer"
+                      aria-label={label}
+                    >
+                      <Icon className="h-4 w-4" />
+                    </button>
+                  ))}
+                </div>
+                <button
+                  onClick={handleCopyUrl}
+                  className="flex w-full items-center justify-center gap-1.5 rounded-lg border border-neutral-200 bg-neutral-50 px-3 py-2 text-xs font-medium text-neutral-700 transition-all hover:bg-neutral-100 active:bg-neutral-100 dark:border-white/10 dark:bg-neutral-800 dark:text-neutral-300 dark:hover:bg-neutral-700 dark:active:bg-neutral-700 cursor-pointer"
+                >
+                  <Copy className="h-3.5 w-3.5" />
+                  {tLinks(locale as any, "copy_url")}
+                </button>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Right: Mobile Actions (3-dots Dropdown for extra links + Share Button on the far right) */}
+          <div className="flex md:hidden items-center gap-4">
+            {(project.github_url || project.live_url || project.video_url) && (
+              <DropdownMenu open={moreMenuOpen} onOpenChange={setMoreMenuOpen}>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    className={cn(
+                      actionBtnClass,
+                      "p-0 data-[state=open]:text-neutral-900 dark:data-[state=open]:text-white outline-none"
+                    )}
+                    aria-label="More actions"
+                  >
+                    <MoreHorizontal className="h-4 w-4 shrink-0" />
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-auto min-w-[165px] p-1.5 space-y-1">
+                  {project.github_url && (
+                    <DropdownMenuItem
+                      className="cursor-pointer whitespace-nowrap py-2.5 px-3 gap-3 text-sm font-medium rounded-md"
+                      onSelect={() => {
+                        handleOpenExternal(project.github_url!, "source");
+                      }}
+                    >
+                      <GithubIcon className="h-4 w-4 shrink-0" />
+                      <span>{tMain(locale, "source_code")}</span>
+                    </DropdownMenuItem>
+                  )}
+                  {project.live_url && (
+                    <DropdownMenuItem
+                      className="cursor-pointer whitespace-nowrap py-2.5 px-3 gap-3 text-sm font-medium rounded-md"
+                      onSelect={() => {
+                        handleOpenExternal(project.live_url!, "live");
+                      }}
+                    >
+                      <Globe className="h-4 w-4 shrink-0" />
+                      <span>{tMain(locale, "live_demo")}</span>
+                    </DropdownMenuItem>
+                  )}
+                  {project.video_url && (
+                    <DropdownMenuItem
+                      className="cursor-pointer whitespace-nowrap py-2.5 px-3 gap-3 text-sm font-medium rounded-md"
+                      onSelect={() => {
+                        setMoreMenuOpen(false);
+                        setVideoOpen(true);
+                        trackEvent("project_click", project.slug + "-video");
+                      }}
+                    >
+                      <PlayCircle className="h-4 w-4 shrink-0" />
+                      <span>{tMain(locale, "video_demo")}</span>
+                    </DropdownMenuItem>
+                  )}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            {/* Share Button (Always on the far right) */}
+            <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button
                   onClick={() => trackEvent("project_click", project.slug + "-share")}

@@ -249,51 +249,45 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
 
               {/* Text details content wrapper */}
               <div className="px-6 pt-5 pb-6 flex flex-col gap-5">
-                {/* Title and Issuer */}
-                <div className="text-left">
+                {/* Badges + Title and Issuer */}
+                <div className="text-left space-y-2">
+                  {/* Badges (Top of Title) */}
+                  {(selectedAchievement.type || selectedAchievement.category) && (
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {selectedAchievement.type && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                          {locale === "id" ? selectedAchievement.type.name_id : selectedAchievement.type.name_en}
+                        </span>
+                      )}
+                      {selectedAchievement.category && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                          {locale === "id" ? selectedAchievement.category.name_id : selectedAchievement.category.name_en}
+                        </span>
+                      )}
+                    </div>
+                  )}
+
                   <DialogTitle className="text-lg sm:text-xl font-bold text-neutral-900 dark:text-white leading-tight">
                     {locale === "id" ? selectedAchievement.title_id : selectedAchievement.title_en}
                   </DialogTitle>
                   
                   {selectedAchievement.publisher && (
-                    <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400 mt-1">
+                    <p className="text-sm font-normal text-neutral-500 dark:text-neutral-400">
                       {selectedAchievement.publisher}
                     </p>
                   )}
                 </div>
 
-                {/* Metadata Details Stacked List (Icon-free) */}
+                {/* Metadata Details Stacked List (Credential ID & Issue Date) */}
                 <div className="flex flex-col gap-4 text-left">
                   {/* Credential ID */}
-                  <div>
-                    <h4 className="text-[10px] font-semibold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-                      {tMain(locale, "credential_id")}
-                    </h4>
-                    <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200 mt-0.5 break-all select-all">
-                      {selectedAchievement.credential_id || "-"}
-                    </p>
-                  </div>
-
-                  {/* Type */}
-                  {selectedAchievement.type && (
+                  {selectedAchievement.credential_id && (
                     <div>
                       <h4 className="text-[10px] font-semibold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-                        {tMain(locale, "achievement_type")}
+                        {tMain(locale, "credential_id")}
                       </h4>
-                      <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200 mt-0.5">
-                        {locale === "id" ? selectedAchievement.type.name_id : selectedAchievement.type.name_en}
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Category */}
-                  {selectedAchievement.category && (
-                    <div>
-                      <h4 className="text-[10px] font-semibold tracking-wider text-neutral-400 dark:text-neutral-500 uppercase">
-                        {tMain(locale, "achievement_category")}
-                      </h4>
-                      <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200 mt-0.5">
-                        {locale === "id" ? selectedAchievement.category.name_id : selectedAchievement.category.name_en}
+                      <p className="text-sm font-medium text-neutral-800 dark:text-neutral-200 mt-0.5 break-all select-all">
+                        {selectedAchievement.credential_id}
                       </p>
                     </div>
                   )}

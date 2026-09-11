@@ -254,6 +254,8 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
               </TooltipTrigger>
               <DropdownMenuContent
                 align="end"
+                collisionPadding={16}
+                sideOffset={8}
                 className="w-[210px] p-2.5"
                 onCloseAutoFocus={(e) => e.preventDefault()}
               >
