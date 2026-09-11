@@ -329,7 +329,7 @@ export function MainContact({ contact, locale }: MainContactProps) {
 
           {/* Social Links Row */}
           {socialLinks.length > 0 && (
-            <div className="flex flex-row items-center gap-4 pt-2 text-left">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 pt-2 text-left">
               <motion.span
                 initial={{ opacity: 0, y: 10 }}
                 whileInView={{ opacity: 1, y: 0 }}
@@ -340,7 +340,7 @@ export function MainContact({ contact, locale }: MainContactProps) {
                 {tMain(locale, "find_me_socmed")}
               </motion.span>
               <TooltipProvider>
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-wrap">
                   {socialLinks.map(({ url, icon: Icon, label }, index) => (
                     <Tooltip key={label}>
                       <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
