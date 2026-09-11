@@ -196,7 +196,7 @@ export function DashboardHeader({
   return (
     <TooltipProvider>
       <header
-        className="fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between border-b border-neutral-200/60 bg-white/70 pl-3.5 pr-[calc(0.875rem+var(--removed-body-scroll-bar-size,0px))] backdrop-blur-xl transition-colors dark:border-white/10 dark:bg-neutral-950/70"
+        className="fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between border-b border-neutral-200/60 bg-white/70 px-3.5 backdrop-blur-xl dark:border-white/10 dark:bg-neutral-950/70"
       >
         {/* Left Side: Mobile/Desktop Toggle and Logo */}
         <div className="flex items-center gap-4">

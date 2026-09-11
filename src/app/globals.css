@@ -155,6 +155,12 @@
     scrollbar-width: none !important;
   }
 
+  /* Zero-shift fixed header alignment when scroll lock is active */
+  body[data-scroll-locked] header.fixed,
+  html[data-scroll-locked] header.fixed {
+    right: var(--removed-body-scroll-bar-size, 0px) !important;
+  }
+
   /* Webkit scrollbar complete hide when modal/overlay is open */
   body[data-scroll-locked]::-webkit-scrollbar,
   html[data-scroll-locked]::-webkit-scrollbar,

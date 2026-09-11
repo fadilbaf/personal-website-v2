@@ -45,7 +45,7 @@ export function MainHeader({ locale, hireMeEmail }: MainHeaderProps) {
         initial={{ y: -60, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.5, ease: "easeOut" }}
-        className="fixed top-0 inset-x-0 z-50 flex h-14 items-center bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 pl-3.5 sm:pl-12 md:pl-24 lg:pl-36 pr-[calc(0.875rem+var(--removed-body-scroll-bar-size,0px))] sm:pr-[calc(3rem+var(--removed-body-scroll-bar-size,0px))] md:pr-[calc(6rem+var(--removed-body-scroll-bar-size,0px))] lg:pr-[calc(9rem+var(--removed-body-scroll-bar-size,0px))]"
+        className="fixed top-0 inset-x-0 z-50 flex h-14 items-center bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 px-3.5 sm:px-12 md:px-24 lg:px-36"
       >
         <div className="w-full max-w-[1440px] mx-auto flex items-center justify-between">
           {/* Logo */}
