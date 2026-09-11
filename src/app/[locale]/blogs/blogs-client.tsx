@@ -442,16 +442,32 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                       }}
                       className="flex flex-col rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 backdrop-blur-sm p-5 text-left transition-colors duration-200 hover:border-neutral-300 dark:hover:border-neutral-700 active:border-neutral-300 dark:active:border-neutral-700 cursor-pointer focus:outline-none"
                     >
-                      {/* Meta Row */}
-                      <div className="flex items-center gap-3">
+                      {/* 1. Type & Category Badges Row (Top) */}
+                      {(blog.type || blog.category) && (
+                        <div className="flex items-center gap-1.5 flex-wrap mb-3">
+                          {blog.type && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                              {locale === "id" ? blog.type.name_id : blog.type.name_en}
+                            </span>
+                          )}
+                          {blog.category && (
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-md text-[11px] font-medium tracking-tight bg-neutral-100 dark:bg-neutral-800/80 text-neutral-700 dark:text-neutral-300 border border-neutral-200/60 dark:border-white/10 shrink-0">
+                              {locale === "id" ? blog.category.name_id : blog.category.name_en}
+                            </span>
+                          )}
+                        </div>
+                      )}
+
+                      {/* 2. Meta Row (Author Profile, Name, Date, Reading Time) */}
+                      <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                         {blog.author?.photo_url ? (
                           <img
                             src={blog.author.photo_url}
                             alt={blog.author.full_name || "Author"}
-                            className="h-6 w-6 rounded-full object-cover border border-neutral-100 dark:border-neutral-800"
+                            className="h-6 w-6 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 shrink-0"
                           />
                         ) : (
-                          <div className="h-6 w-6 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-semibold text-neutral-500 dark:text-neutral-400">
+                          <div className="h-6 w-6 rounded-full bg-neutral-100 dark:bg-neutral-800 flex items-center justify-center text-[10px] font-semibold text-neutral-500 dark:text-neutral-400 shrink-0">
                             {(blog.author?.full_name || "A").charAt(0).toUpperCase()}
                           </div>
                         )}
@@ -468,7 +484,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                         </p>
                       </div>
 
-                      {/* Title Row */}
+                      {/* 3. Title Row */}
                       <h3 className="text-base sm:text-[18px] font-semibold text-neutral-900 dark:text-white line-clamp-1 leading-snug mt-3 group-hover:underline group-active:underline underline-offset-2 transition-all">
                         {title}
                       </h3>
@@ -480,14 +496,14 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
 
                       {/* Action Row */}
                       <div className="flex items-center justify-between gap-4 mt-5">
-                        <div className="inline-flex items-center gap-4 rounded-lg border border-neutral-200 dark:border-white/10 px-3.5 py-2.5 bg-white dark:bg-neutral-900/50 text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                        <div className="inline-flex items-center gap-3.5 rounded-lg border border-neutral-200 dark:border-white/10 px-3 py-2 bg-white dark:bg-neutral-900/50 text-xs font-medium text-neutral-700 dark:text-neutral-300">
                           <div className="flex items-center gap-1.5">
                             <Eye className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
-                            <span>{blog.views_count ?? 0} {tMain(locale, "views_label")}</span>
+                            <span>{blog.views_count ?? 0}</span>
                           </div>
                           <div className="flex items-center gap-1.5">
                             <Heart className="h-3.5 w-3.5 text-neutral-700 dark:text-neutral-300" />
-                            <span>{blog.likes_count ?? 0} {tMain(locale, "likes_label")}</span>
+                            <span>{blog.likes_count ?? 0}</span>
                           </div>
                         </div>
 

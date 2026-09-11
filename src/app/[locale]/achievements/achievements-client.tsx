@@ -456,6 +456,22 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
                           <Award className="h-10 w-10 stroke-[1.5]" />
                         </div>
                       )}
+
+                      {/* Badges Overlay (Type & Category) */}
+                      {(item.type || item.category) && (
+                        <div className="absolute bottom-2.5 left-2.5 z-10 flex flex-wrap items-center gap-1.5 pointer-events-none">
+                          {item.type && (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium tracking-tight bg-white/90 dark:bg-neutral-950/80 backdrop-blur-md text-neutral-800 dark:text-neutral-200 border border-neutral-200/60 dark:border-white/10 shadow-xs">
+                              {locale === "id" ? item.type.name_id : item.type.name_en}
+                            </span>
+                          )}
+                          {item.category && (
+                            <span className="inline-flex items-center px-2.5 py-1 rounded-md text-[11px] font-medium tracking-tight bg-white/90 dark:bg-neutral-950/80 backdrop-blur-md text-neutral-800 dark:text-neutral-200 border border-neutral-200/60 dark:border-white/10 shadow-xs">
+                              {locale === "id" ? item.category.name_id : item.category.name_en}
+                            </span>
+                          )}
+                        </div>
+                      )}
                     </div>
 
                     {/* Content Details */}
