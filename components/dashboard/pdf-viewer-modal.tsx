@@ -11,6 +11,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useScrollLock } from "@/src/app/lib/use-scroll-lock";
+import { trackEvent } from "@/src/lib/track-event";
 
 export function extractPdfFileName(url: string, fallback = "CV.pdf"): string {
   if (!url) return fallback;
@@ -179,7 +180,10 @@ export function PdfViewerModal({
                     href={pdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    onClick={(e) => e.currentTarget.blur()}
+                    onClick={(e) => {
+                      e.currentTarget.blur();
+                      trackEvent("cv_download", "pdf_modal_open_tab");
+                    }}
                     className={cn(
                       "flex items-center justify-center p-2.5 rounded-xl border transition-all duration-200 cursor-pointer outline-none",
                       "border-neutral-200 hover:bg-neutral-100 active:bg-neutral-100 text-neutral-600",
