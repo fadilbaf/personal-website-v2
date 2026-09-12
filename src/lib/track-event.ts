@@ -1,3 +1,5 @@
+import { AnalyticsService } from "@/src/services/analytics.service";
+
 declare global {
   interface Window {
     umami?: {
@@ -27,8 +29,11 @@ export async function getVisitorHash(): Promise<string> {
 }
 
 /**
- * Track an analytics event via Umami. Fails silently to never break UX.
- * @param eventType - 'project_click' | 'blog_click' | 'language_switch' | 'cv_download' | custom
+ * Track an analytics event.
+ * Synchronously records to both Umami Cloud (if available) and Supabase database.
+ * Fails silently to never break visitor UX.
+ *
+ * @param eventType - 'page_view' | 'project_click' | 'blog_click' | 'language_switch' | 'cv_download'
  * @param eventKey  - Additional identifier (slug, locale code, etc.)
  * @param customData - Any additional key-value payload
  */
@@ -38,6 +43,7 @@ export async function trackEvent(
   customData?: Record<string, any>
 ): Promise<void> {
   try {
+    // 1. Send to Umami Cloud tracker
     if (typeof window !== "undefined" && window.umami) {
       window.umami.track(eventType, {
         name: eventKey,
@@ -45,7 +51,17 @@ export async function trackEvent(
         ...customData,
       });
     }
+
+    // 2. Send to Supabase database (powers local & deployed Admin Dashboard)
+    const visitorHash = await getVisitorHash();
+    await AnalyticsService.trackEvent({
+      event_type: eventType,
+      event_key: eventKey,
+      page_path: typeof window !== "undefined" ? window.location.pathname : undefined,
+      referrer: typeof document !== "undefined" ? document.referrer || undefined : undefined,
+      visitor_hash: visitorHash,
+    });
   } catch {
-    // Silent fail — analytics should never break the visitor experience
+    // Silent fail — analytics should never break user experience
   }
 }

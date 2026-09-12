@@ -27,9 +27,20 @@ export interface AnalyticsOverviewResponse {
  * and Supabase SQL views (content catalog metrics).
  */
 export const AnalyticsService = {
-  // ─── UMAMI HYBRID API READS ───────────────────────────────────
+  // ─── EVENT TRACKING (called from public site) ────────────────
+  async trackEvent(payload: {
+    event_type: string;
+    event_key?: string;
+    page_path?: string;
+    referrer?: string;
+    visitor_hash?: string;
+  }) {
+    const supabase = createClient();
+    return supabase.from("analytics_events").insert(payload);
+  },
 
-  /** Fetch complete unified traffic & engagement overview from Umami. */
+  // ─── HYBRID OVERVIEW QUERY ──────────────────────────────────
+  /** Fetch complete unified traffic & engagement overview. */
   async getOverviewData(): Promise<AnalyticsOverviewResponse> {
     try {
       const res = await fetch("/api/analytics/overview", {
