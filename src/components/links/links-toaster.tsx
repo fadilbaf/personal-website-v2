@@ -2,13 +2,9 @@
 
 import { useTheme } from "next-themes";
 import { Toaster as SonnerToaster } from "sonner";
-import { usePathname } from "next/navigation";
 
 export function LinksToaster() {
   const { resolvedTheme } = useTheme();
-  const pathname = usePathname() || "";
-  const isLinksPage = pathname === "/links" || pathname.endsWith("/links");
-  const hasNavbar = !isLinksPage;
 
   return (
     <SonnerToaster
@@ -17,8 +13,10 @@ export function LinksToaster() {
       closeButton
       expand={true}
       theme={resolvedTheme as "light" | "dark" | "system"}
+      offset={{ top: "76px", right: "16px" }}
+      mobileOffset={{ top: "76px", left: "16px", right: "16px" }}
       style={{
-        top: hasNavbar ? "76px" : "16px",
+        top: "76px",
       }}
       toastOptions={{
         className: "font-sans pr-10",
