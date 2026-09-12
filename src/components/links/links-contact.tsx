@@ -103,7 +103,7 @@ export function LinksContact({ locale }: LinksContactProps) {
 
   const onSubmit = async (data: ContactFormData) => {
     try {
-      const accessKey = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
+      const accessKey = process.env.WEB3FORMS_ACCESS_KEY || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
       if (!accessKey) {
         toast.error(tLinks(locale, "message_failed"));
         return;

@@ -72,7 +72,7 @@ export const AnalyticsService = {
           { name: "Indonesia", value: 0 },
           { name: "English", value: 0 },
         ],
-        shareUrl: `https://cloud.umami.is/share/${process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73"}`,
+        shareUrl: `https://cloud.umami.is/share/${process.env.UMAMI_SHARE_ID || process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73"}`,
       };
     }
   },

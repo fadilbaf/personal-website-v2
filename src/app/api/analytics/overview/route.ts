@@ -3,7 +3,7 @@ import { createClient } from "@/src/services/supabase/client";
 
 export const dynamic = "force-dynamic";
 
-const SHARE_ID = process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73";
+const SHARE_ID = process.env.UMAMI_SHARE_ID || process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73";
 
 export async function GET() {
   try {

@@ -542,7 +542,7 @@ export default function ProfilePage() {
                     {t("profile.version")}
                   </span>
                   <span className="font-medium text-neutral-900 dark:text-white">
-                    v{process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0"}
+                    v{process.env.APP_VERSION || process.env.NEXT_PUBLIC_APP_VERSION || "0.1.0"}
                   </span>
                 </div>
               </div>

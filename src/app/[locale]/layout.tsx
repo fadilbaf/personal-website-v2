@@ -12,7 +12,7 @@ import NextTopLoader from "nextjs-toploader";
 const inter = Inter({ subsets: ["latin"], variable: "--font-sans" });
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://fadilbafagih.com"),
+  metadataBase: new URL(process.env.SITE_URL || process.env.NEXT_PUBLIC_SITE_URL || "https://fadilbafagih.com"),
   title: "Fadil Bafagih | Personal Website",
   description: "Personal website and portfolio of Fadil Bafagih.",
 };
@@ -43,7 +43,7 @@ export default function RootLayout({
           <Script
             defer
             src="https://cloud.umami.is/script.js"
-            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || "1296ad69-d818-4bc9-8148-ae27f265e324"}
+            data-website-id={process.env.UMAMI_WEBSITE_ID || process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || "1296ad69-d818-4bc9-8148-ae27f265e324"}
             strategy="afterInteractive"
           />
           <PageTracker />
