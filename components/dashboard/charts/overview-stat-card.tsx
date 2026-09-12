@@ -11,6 +11,9 @@ interface OverviewStatCardProps {
   icon: React.ComponentType<{ className?: string }>;
   loading?: boolean;
   className?: string;
+  suffix?: string;
+  formatValue?: (val: number) => string;
+  badge?: React.ReactNode;
 }
 
 /**
@@ -23,6 +26,9 @@ export function OverviewStatCard({
   icon: Icon,
   loading,
   className,
+  suffix,
+  formatValue,
+  badge,
 }: OverviewStatCardProps) {
   return (
     <Card
@@ -38,18 +44,26 @@ export function OverviewStatCard({
       <CardContent className="relative px-6 py-5">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
-            <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
-              {title}
-            </p>
-            <div className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white">
+            <div className="flex items-center gap-2">
+              <p className="text-sm font-medium text-neutral-500 dark:text-neutral-400">
+                {title}
+              </p>
+              {badge}
+            </div>
+            <div className="text-3xl font-bold tracking-tight text-neutral-900 dark:text-white flex items-baseline gap-1">
               {loading ? (
                 <Skeleton className="h-9 w-16 mt-1" />
+              ) : formatValue ? (
+                <span>{formatValue(value)}</span>
               ) : (
-                <AnimatedNumber value={value} />
+                <>
+                  <AnimatedNumber value={value} />
+                  {suffix && <span className="text-xl font-medium text-neutral-400 dark:text-neutral-500">{suffix}</span>}
+                </>
               )}
             </div>
           </div>
-          <div className="rounded-xl bg-neutral-100 p-3 transition-colors group-hover:bg-neutral-900 group-hover:text-white dark:bg-white/10 dark:group-hover:bg-white dark:group-hover:text-neutral-900">
+          <div className="rounded-xl bg-neutral-100 p-3 transition-colors group-hover:bg-neutral-900 group-hover:text-white dark:bg-white/10 dark:group-hover:bg-white dark:group-hover:text-neutral-900 shrink-0">
             <Icon className="h-5 w-5" />
           </div>
         </div>

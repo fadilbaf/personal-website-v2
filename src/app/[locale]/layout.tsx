@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
+import Script from "next/script";
 import "../globals.css";
 import { cn } from "@/src/app/lib/utils";
 import { ThemeProvider } from "@/components/dashboard/theme-provider";
@@ -39,6 +40,12 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <NextTopLoader color="var(--foreground)" showSpinner={false} shadow={false} showForHashAnchor={false} />
+          <Script
+            defer
+            src="https://cloud.umami.is/script.js"
+            data-website-id={process.env.NEXT_PUBLIC_UMAMI_WEBSITE_ID || "1296ad69-d818-4bc9-8148-ae27f265e324"}
+            strategy="afterInteractive"
+          />
           <PageTracker />
           {children}
           <LinksToaster />

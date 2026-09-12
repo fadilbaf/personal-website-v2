@@ -1,137 +1,72 @@
 import { createClient } from "@/src/services/supabase/client";
 
+export interface AnalyticsOverviewResponse {
+  success: boolean;
+  stats: {
+    pageviews: number;
+    uniqueVisitors: number;
+    liveVisitors: number;
+    bounceRate: number;
+    avgDurationSeconds: number;
+    cvDownloads: number;
+  };
+  viewsTrend: Array<{ date: string; views: number; visitors: number }>;
+  countries: Array<{ country: string; visitors: number }>;
+  referrers: Array<{ source: string; visitors: number }>;
+  devices: Array<{ name: string; value: number }>;
+  osList: Array<{ name: string; value: number }>;
+  browsers: Array<{ name: string; value: number }>;
+  topProjects: Array<{ name: string; clicks: number }>;
+  topBlogs: Array<{ name: string; clicks: number }>;
+  languageRatio: Array<{ name: string; value: number }>;
+  shareUrl: string;
+}
+
 /**
- * Analytics service — handles event tracking (public site) and
- * aggregated data fetching (admin dashboard charts).
+ * Analytics service — integrates with Umami Cloud (traffic & visitor analytics)
+ * and Supabase SQL views (content catalog metrics).
  */
 export const AnalyticsService = {
-  // ─── TRACKING (called from public site) ─────────────────────
+  // ─── UMAMI HYBRID API READS ───────────────────────────────────
 
-  /** Insert a single analytics event. */
-  async trackEvent(payload: {
-    event_type: string;
-    event_key?: string;
-    page_path?: string;
-    referrer?: string;
-    visitor_hash?: string;
-  }) {
-    const supabase = createClient();
-    return supabase.from("analytics_events").insert(payload);
+  /** Fetch complete unified traffic & engagement overview from Umami. */
+  async getOverviewData(): Promise<AnalyticsOverviewResponse> {
+    try {
+      const res = await fetch("/api/analytics/overview", {
+        headers: { Accept: "application/json" },
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error("Failed to fetch analytics");
+      return await res.json();
+    } catch {
+      return {
+        success: false,
+        stats: {
+          pageviews: 0,
+          uniqueVisitors: 0,
+          liveVisitors: 0,
+          bounceRate: 0,
+          avgDurationSeconds: 0,
+          cvDownloads: 0,
+        },
+        viewsTrend: [],
+        countries: [],
+        referrers: [],
+        devices: [],
+        osList: [],
+        browsers: [],
+        topProjects: [],
+        topBlogs: [],
+        languageRatio: [
+          { name: "Indonesia", value: 0 },
+          { name: "English", value: 0 },
+        ],
+        shareUrl: `https://cloud.umami.is/share/${process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73"}`,
+      };
+    }
   },
 
-  // ─── DASHBOARD READS ────────────────────────────────────────
-
-  /** Total page views (all time). */
-  async getPageViews(): Promise<number> {
-    const supabase = createClient();
-    const { count } = await supabase
-      .from("analytics_events")
-      .select("*", { count: "exact", head: true })
-      .eq("event_type", "page_view");
-    return count ?? 0;
-  },
-
-  /** Unique visitors (distinct visitor_hash for page_view). */
-  async getUniqueVisitors(): Promise<number> {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("analytics_events")
-      .select("visitor_hash")
-      .eq("event_type", "page_view")
-      .not("visitor_hash", "is", null);
-    const unique = new Set(data?.map((d) => d.visitor_hash));
-    return unique.size;
-  },
-
-  /** CV download count. */
-  async getCvDownloads(): Promise<number> {
-    const supabase = createClient();
-    const { count } = await supabase
-      .from("analytics_events")
-      .select("*", { count: "exact", head: true })
-      .eq("event_type", "cv_download");
-    return count ?? 0;
-  },
-
-  /** Top projects by click count. */
-  async getTopProjects(limit = 5) {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("analytics_events")
-      .select("event_key")
-      .eq("event_type", "project_click");
-
-    const map: Record<string, number> = {};
-    data?.forEach((d) => {
-      if (d.event_key) map[d.event_key] = (map[d.event_key] || 0) + 1;
-    });
-    return Object.entries(map)
-      .map(([name, clicks]) => ({ name, clicks }))
-      .sort((a, b) => b.clicks - a.clicks)
-      .slice(0, limit);
-  },
-
-  /** Top blogs by click count. */
-  async getTopBlogs(limit = 5) {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("analytics_events")
-      .select("event_key")
-      .eq("event_type", "blog_click");
-
-    const map: Record<string, number> = {};
-    data?.forEach((d) => {
-      if (d.event_key) map[d.event_key] = (map[d.event_key] || 0) + 1;
-    });
-    return Object.entries(map)
-      .map(([name, clicks]) => ({ name, clicks }))
-      .sort((a, b) => b.clicks - a.clicks)
-      .slice(0, limit);
-  },
-
-  /** Language preference ratio (id vs en). */
-  async getLanguageRatio() {
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("analytics_events")
-      .select("page_path")
-      .eq("event_type", "page_view");
-
-    const map: Record<string, number> = { id: 0, en: 0 };
-    data?.forEach((d) => {
-      if (d.page_path) {
-        const parts = d.page_path.split("/").filter(Boolean);
-        const locale = parts[0]?.toLowerCase();
-        if (locale && locale in map) map[locale]++;
-      }
-    });
-    return [
-      { name: "Indonesia", value: map.id },
-      { name: "English", value: map.en },
-    ];
-  },
-
-  /** Page views per day (last N days) for trend chart. */
-  async getViewsTrend(days = 30) {
-    const supabase = createClient();
-    const since = new Date();
-    since.setDate(since.getDate() - days);
-
-    const { data } = await supabase
-      .from("analytics_events")
-      .select("created_at")
-      .eq("event_type", "page_view")
-      .gte("created_at", since.toISOString())
-      .order("created_at", { ascending: true });
-
-    // Group by date string
-    const map: Record<string, number> = {};
-    data?.forEach((d) => {
-      const date = d.created_at.split("T")[0];
-      map[date] = (map[date] || 0) + 1;
-    });
-    return Object.entries(map).map(([date, views]) => ({ date, views }));
-  },
+  // ─── SUPABASE CONTENT READS ─────────────────────────────────
 
   /** Tech stack distribution (from SQL view). */
   async getTechStackDistribution() {

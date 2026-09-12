@@ -62,39 +62,85 @@ export const BlogService = {
     return data as Blog;
   },
 
-  async incrementViews(id: string) {
+  /**
+   * Increment blog views using PostgreSQL Atomic Function (RPC)
+   * to avoid race conditions.
+   */
+  async incrementViews(id: string): Promise<void> {
     const supabase = createClient();
-    const { data: blog } = await supabase
-      .from("blogs")
-      .select("views_count")
-      .eq("id", id)
-      .single();
-
-    if (blog) {
-      await supabase
+    const { error } = await supabase.rpc("increment_blog_views", {
+      target_id: id,
+    });
+    if (error) {
+      // Fallback if RPC is not installed or errors
+      const { data: blog } = await supabase
         .from("blogs")
-        .update({ views_count: (blog.views_count || 0) + 1 })
-        .eq("id", id);
+        .select("views_count")
+        .eq("id", id)
+        .single();
+      if (blog) {
+        await supabase
+          .from("blogs")
+          .update({ views_count: (blog.views_count || 0) + 1 })
+          .eq("id", id);
+      }
     }
   },
 
-  async incrementLikes(id: string, delta: number = 1): Promise<number> {
+  /**
+   * Check if a specific visitor has already liked this blog.
+   */
+  async getLikeStatus(blogId: string, visitorHash: string): Promise<boolean> {
     const supabase = createClient();
+    const { data } = await supabase
+      .from("blog_likes")
+      .select("id")
+      .eq("blog_id", blogId)
+      .eq("visitor_hash", visitorHash)
+      .maybeSingle();
+    return !!data;
+  },
+
+  /**
+   * Toggle like for a specific visitor hash.
+   * Inserts or deletes from blog_likes; DB trigger automatically keeps likes_count in sync.
+   */
+  async toggleLike(
+    blogId: string,
+    visitorHash: string
+  ): Promise<{ hasLiked: boolean; likesCount: number }> {
+    const supabase = createClient();
+    
+    // Check existing like
+    const { data: existing } = await supabase
+      .from("blog_likes")
+      .select("id")
+      .eq("blog_id", blogId)
+      .eq("visitor_hash", visitorHash)
+      .maybeSingle();
+
+    if (existing) {
+      // Unlike
+      await supabase.from("blog_likes").delete().eq("id", existing.id);
+    } else {
+      // Like
+      await supabase.from("blog_likes").insert({
+        blog_id: blogId,
+        visitor_hash: visitorHash,
+      });
+    }
+
+    // Fetch updated likes_count
     const { data: blog } = await supabase
       .from("blogs")
       .select("likes_count")
-      .eq("id", id)
+      .eq("id", blogId)
       .single();
 
-    if (blog) {
-      const newCount = Math.max(0, (blog.likes_count || 0) + delta);
-      await supabase
-        .from("blogs")
-        .update({ likes_count: newCount })
-        .eq("id", id);
-      return newCount;
-    }
-    return 0;
+    return {
+      hasLiked: !existing,
+      likesCount: blog?.likes_count ?? 0,
+    };
   },
 
   async getSidebarBlogs(currentId: string, categoryId?: string | null) {

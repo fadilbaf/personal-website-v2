@@ -23,7 +23,7 @@ import { cn } from "@/src/app/lib/utils";
 import { BlogService } from "@/src/services/blog.service";
 import type { Blog } from "@/src/types/database";
 import { BlogContentRenderer } from "@/components/main/blog-content-renderer";
-import { trackEvent } from "@/src/lib/track-event";
+import { trackEvent, getVisitorHash } from "@/src/lib/track-event";
 import { calculateReadingTime } from "@/src/lib/blog-utils";
 
 function LinkedInIcon({ className }: { className?: string }) {
@@ -87,16 +87,33 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
     }
   }, [locale]);
 
-  // 1. Increment views on mount & check localStorage like state
+  // 1. Increment views once per session & check like status with visitor hash
   useEffect(() => {
-    BlogService.incrementViews(blog.id)
-      .then(() => setViewsCount((prev) => prev + 1))
-      .catch(() => {});
-
-    const likedStorage = localStorage.getItem(`blog_liked_${blog.id}`);
-    if (likedStorage === "true") {
-      setHasLiked(true);
+    if (typeof window !== "undefined") {
+      const sessionKey = `viewed_blog_${blog.id}`;
+      if (!sessionStorage.getItem(sessionKey)) {
+        sessionStorage.setItem(sessionKey, "true");
+        BlogService.incrementViews(blog.id)
+          .then(() => setViewsCount((prev) => prev + 1))
+          .catch(() => {});
+      }
     }
+
+    // Check like status via visitor hash & localStorage
+    getVisitorHash().then((hash) => {
+      const likedStorage = localStorage.getItem(`blog_liked_${blog.id}`);
+      if (likedStorage === "true") {
+        setHasLiked(true);
+      }
+      BlogService.getLikeStatus(blog.id, hash)
+        .then((liked) => {
+          if (liked) {
+            setHasLiked(true);
+            localStorage.setItem(`blog_liked_${blog.id}`, "true");
+          }
+        })
+        .catch(() => {});
+    });
 
     BlogService.getSidebarBlogs(blog.id, blog.category_id)
       .then(setSidebarData)
@@ -105,12 +122,15 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
   // 2. Handle Likes toggle with custom toast & popup animation
   const handleLikeToggle = async () => {
-    const delta = hasLiked ? -1 : 1;
-    const newLiked = !hasLiked;
-    setHasLiked(newLiked);
+    const hash = await getVisitorHash();
+    const nextLiked = !hasLiked;
+    const delta = nextLiked ? 1 : -1;
+
+    // Optimistic update
+    setHasLiked(nextLiked);
     setLikesCount((prev) => Math.max(0, prev + delta));
 
-    if (newLiked) {
+    if (nextLiked) {
       localStorage.setItem(`blog_liked_${blog.id}`, "true");
       setIsLikePopping(true);
       setTimeout(() => setIsLikePopping(false), 450);
@@ -122,9 +142,17 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
     }
 
     try {
-      await BlogService.incrementLikes(blog.id, delta);
+      const res = await BlogService.toggleLike(blog.id, hash);
+      setHasLiked(res.hasLiked);
+      setLikesCount(res.likesCount);
+      if (res.hasLiked) {
+        localStorage.setItem(`blog_liked_${blog.id}`, "true");
+      } else {
+        localStorage.removeItem(`blog_liked_${blog.id}`);
+      }
     } catch {
-      setHasLiked(!newLiked);
+      // Revert on error
+      setHasLiked(!nextLiked);
       setLikesCount((prev) => Math.max(0, prev - delta));
     }
   };

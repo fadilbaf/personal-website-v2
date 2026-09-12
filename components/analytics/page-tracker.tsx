@@ -1,20 +1,11 @@
 "use client";
 
-import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { trackEvent } from "@/src/lib/track-event";
+import { useEffect } from "react";
 
 /**
- * Invisible client component that tracks page views on mount / route change.
- * Drop this into any layout to automatically log 'page_view' events.
- *
- * Usage:
- *   <PageTracker />
+ * Client component for global client utilities (such as enabling touch :active state on iOS).
  */
 export function PageTracker() {
-  const pathname = usePathname();
-  const lastTracked = useRef<string | null>(null);
-
   useEffect(() => {
     // Enable CSS :active states globally on touch/iOS devices
     const handleTouchStart = () => {};
@@ -24,13 +15,6 @@ export function PageTracker() {
     };
   }, []);
 
-  useEffect(() => {
-    // Avoid double-tracking on the same pathname (React strict mode)
-    if (pathname && pathname !== lastTracked.current) {
-      lastTracked.current = pathname;
-      trackEvent("page_view");
-    }
-  }, [pathname]);
-
   return null;
 }
+
