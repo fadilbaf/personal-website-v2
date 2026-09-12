@@ -14,8 +14,33 @@ interface LanguageRatioChartProps {
 }
 
 /**
+ * Custom floating tooltip that renders slice information cleanly
+ */
+function CustomDonutTooltip({ active, payload, total, isDark }: any) {
+  if (!active || !payload || !payload.length) return null;
+  const item = payload[0];
+  const value = Number(item.value) || 0;
+  const pct = total > 0 ? Math.round((value / total) * 100) : 0;
+
+  return (
+    <div className="rounded-lg border px-3 py-2 text-xs shadow-xl backdrop-blur-md transition-all duration-150 border-neutral-200/80 bg-white/95 text-neutral-900 dark:border-white/10 dark:bg-neutral-900/95 dark:text-white">
+      <div className="flex items-center gap-2">
+        <span
+          className="inline-block h-2 w-2 rounded-full"
+          style={{ backgroundColor: item.payload?.fill || (isDark ? "#ffffff" : "#171717") }}
+        />
+        <span className="font-semibold">{item.name}</span>
+      </div>
+      <div className="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400 font-mono">
+        {value} views ({pct}%)
+      </div>
+    </div>
+  );
+}
+
+/**
  * Donut chart showing language preference ratio (ID vs EN).
- * Features center label with total count and animated segments.
+ * Features a floating tooltip and centered total views count.
  */
 export function LanguageRatioChart({
   data,
@@ -27,14 +52,10 @@ export function LanguageRatioChart({
   const isDark = resolvedTheme === "dark";
 
   const colors = isDark
-    ? ["#e5e5e5", "#525252"]
+    ? ["#ffffff", "#525252"]
     : ["#171717", "#a3a3a3"];
 
   const total = data.reduce((sum, d) => sum + d.value, 0);
-
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full rounded-xl" />;
-  }
 
   return (
     <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
@@ -47,20 +68,22 @@ export function LanguageRatioChart({
         </div>
       </CardHeader>
       <CardContent>
-        {total === 0 ? (
+        {loading ? (
+          <Skeleton className="h-[220px] w-full rounded-lg" />
+        ) : total === 0 ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
             {noDataLabel}
           </div>
         ) : (
           <div className="relative">
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
+            <ResponsiveContainer width="100%" height={220} className="outline-none select-none">
+              <PieChart className="outline-none">
                 <Pie
                   data={data}
                   cx="50%"
                   cy="50%"
-                  innerRadius={60}
-                  outerRadius={85}
+                  innerRadius={58}
+                  outerRadius={84}
                   paddingAngle={4}
                   dataKey="value"
                   stroke="none"
@@ -75,31 +98,25 @@ export function LanguageRatioChart({
                   ))}
                 </Pie>
                 <Tooltip
-                  contentStyle={{
-                    background: isDark ? "#262626" : "#ffffff",
-                    border: `1px solid ${isDark ? "#404040" : "#e5e5e5"}`,
-                    borderRadius: "8px",
-                    fontSize: "12px",
-                    color: isDark ? "#e5e5e5" : "#171717",
-                  }}
-                  formatter={(value: any, name: any) => [
-                    `${value} (${total > 0 ? Math.round((Number(value) / total) * 100) : 0}%)`,
-                    name,
-                  ]}
+                  content={<CustomDonutTooltip total={total} isDark={isDark} />}
+                  wrapperStyle={{ zIndex: 40, outline: "none" }}
+                  offset={15}
                 />
               </PieChart>
             </ResponsiveContainer>
-            {/* Center label */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+
+            {/* Centered Total Label */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none pb-7">
               <div className="text-center">
-                <div className="text-2xl font-bold text-neutral-900 dark:text-white">
+                <div className="text-2xl font-bold text-neutral-900 dark:text-white leading-tight">
                   {total}
                 </div>
-                <div className="text-[11px] text-neutral-500 dark:text-neutral-400">
+                <div className="text-[11px] font-medium text-neutral-500 dark:text-neutral-400">
                   Total
                 </div>
               </div>
             </div>
+
             {/* Legend */}
             <div className="flex items-center justify-center gap-6 mt-2">
               {data.map((entry, index) => (
@@ -110,7 +127,7 @@ export function LanguageRatioChart({
                   />
                   <span className="text-xs text-neutral-600 dark:text-neutral-400">
                     {entry.name}{" "}
-                    <span className="font-medium text-neutral-900 dark:text-white">
+                    <span className="font-semibold text-neutral-900 dark:text-white">
                       {entry.value}
                     </span>
                   </span>

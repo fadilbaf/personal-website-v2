@@ -6,7 +6,6 @@ import {
   Users,
   Radio,
   Clock,
-  Percent,
   Download,
   Package,
   FolderKanban,
@@ -24,7 +23,6 @@ import { DevicesBrowsersChart } from "@/components/dashboard/charts/devices-brow
 import { TopItemsChart } from "@/components/dashboard/charts/top-items-chart";
 import { LanguageRatioChart } from "@/components/dashboard/charts/language-ratio-chart";
 import { TechStackChart } from "@/components/dashboard/charts/tech-stack-chart";
-import { ContentStatusChart } from "@/components/dashboard/charts/content-status-chart";
 import { ContentOverviewChart } from "@/components/dashboard/charts/content-overview-chart";
 import { AnalyticsService } from "@/src/services/analytics.service";
 import { StatisticsService } from "@/src/services/statistics.service";
@@ -55,24 +53,6 @@ export default function DashboardPage() {
   const { data: techStack = [], isLoading: isTechLoading } = useQuery({
     queryKey: ["analytics", "techStack"],
     queryFn: AnalyticsService.getTechStackDistribution,
-    meta: { silent: true },
-  });
-
-  const { data: projectStatus = [], isLoading: isProjStatusLoading } = useQuery({
-    queryKey: ["analytics", "projectStatus"],
-    queryFn: AnalyticsService.getProjectStatusBreakdown,
-    meta: { silent: true },
-  });
-
-  const { data: blogStatus = [], isLoading: isBlogStatusLoading } = useQuery({
-    queryKey: ["analytics", "blogStatus"],
-    queryFn: AnalyticsService.getBlogStatusBreakdown,
-    meta: { silent: true },
-  });
-
-  const { data: achievementStatus = [], isLoading: isAchStatusLoading } = useQuery({
-    queryKey: ["analytics", "achievementStatus"],
-    queryFn: AnalyticsService.getAchievementStatusBreakdown,
     meta: { silent: true },
   });
 
@@ -112,6 +92,8 @@ export default function DashboardPage() {
     cvDownloads: 0,
   };
 
+  const isCardsLoading = isAnalyticsLoading || isStatsLoading;
+
   return (
     <>
       <PageHeader
@@ -133,25 +115,25 @@ export default function DashboardPage() {
         }
       />
 
-      {/* ─── Row 1: Primary Traffic & Live Stat Cards ────────── */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 mb-4">
+      {/* ─── Row 1: Primary Traffic & Live Stat Cards (3 Cards) ── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">
         <OverviewStatCard
           title={t("dashboard.page_views")}
           value={overviewStats.pageviews}
           icon={Eye}
-          loading={isAnalyticsLoading}
+          loading={isCardsLoading}
         />
         <OverviewStatCard
           title={t("dashboard.unique_visitors")}
           value={overviewStats.uniqueVisitors}
           icon={Users}
-          loading={isAnalyticsLoading}
+          loading={isCardsLoading}
         />
         <OverviewStatCard
           title={t("dashboard.live_visitors")}
           value={overviewStats.liveVisitors}
           icon={Radio}
-          loading={isAnalyticsLoading}
+          loading={isCardsLoading}
           badge={
             <span className="relative flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -159,39 +141,32 @@ export default function DashboardPage() {
             </span>
           }
         />
-        <OverviewStatCard
-          title={t("dashboard.bounce_rate")}
-          value={overviewStats.bounceRate}
-          suffix="%"
-          icon={Percent}
-          loading={isAnalyticsLoading}
-        />
       </div>
 
-      {/* ─── Row 2: Secondary Metric Stat Cards ──────────────── */}
-      <div className="grid gap-4 sm:grid-cols-3 mb-6">
+      {/* ─── Row 2: Secondary Metric Stat Cards (3 Cards) ────────── */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-6">
         <OverviewStatCard
           title={t("dashboard.avg_duration")}
           value={overviewStats.avgDurationSeconds}
           formatValue={formatDuration}
           icon={Clock}
-          loading={isAnalyticsLoading}
+          loading={isCardsLoading}
         />
         <OverviewStatCard
           title={t("dashboard.cv_downloads")}
           value={overviewStats.cvDownloads}
           icon={Download}
-          loading={isAnalyticsLoading}
+          loading={isCardsLoading}
         />
         <OverviewStatCard
           title={t("dashboard.total_content")}
           value={totalContent}
           icon={Package}
-          loading={isStatsLoading}
+          loading={isCardsLoading}
         />
       </div>
 
-      {/* ─── Row 3: Views & Visitor Trend (30 Days Full Width) ─ */}
+      {/* ─── Row 3: Views & Visitor Trend (Full Width) ─────────── */}
       <div className="mb-6">
         <ViewsTrendChart
           data={analytics?.viewsTrend || []}
@@ -229,7 +204,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* ─── Row 6: Top Projects & Top Blogs ────────────────── */}
+      {/* ─── Row 6: Top Projects & Top Blogs (Side by Side in 1 Row) ── */}
       <div className="grid gap-6 lg:grid-cols-2 mb-6">
         <TopItemsChart
           data={analytics?.topProjects || []}
@@ -263,19 +238,7 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* ─── Row 8: Content Status (Draft vs Published) ─────── */}
-      <div className="mb-6">
-        <ContentStatusChart
-          projectData={projectStatus}
-          blogData={blogStatus}
-          achievementData={achievementStatus}
-          loading={isProjStatusLoading || isBlogStatusLoading || isAchStatusLoading}
-          title={t("dashboard.content_status")}
-          noDataLabel={noData}
-        />
-      </div>
-
-      {/* ─── Row 9: Content Overview ────────────────────────── */}
+      {/* ─── Row 8: Content Overview (Full Width, Unified Total & Status) ── */}
       <div className="mb-6">
         <ContentOverviewChart
           data={contentOverview}

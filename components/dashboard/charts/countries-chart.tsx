@@ -11,7 +11,6 @@ interface CountriesChartProps {
   noDataLabel?: string;
 }
 
-// Map common ISO country codes to country names
 const COUNTRY_NAMES: Record<string, string> = {
   ID: "Indonesia",
   US: "United States",
@@ -36,10 +35,6 @@ export function CountriesChart({
   title,
   noDataLabel = "No data yet",
 }: CountriesChartProps) {
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full rounded-xl" />;
-  }
-
   const maxVisitors = data.length > 0 ? Math.max(...data.map((d) => d.visitors)) : 1;
   const totalVisitors = data.reduce((sum, d) => sum + d.visitors, 0);
 
@@ -54,12 +49,24 @@ export function CountriesChart({
         </div>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-3 py-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-1.5">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-28" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <Skeleton className="h-1.5 w-full rounded-full" />
+              </div>
+            ))}
+          </div>
+        ) : data.length === 0 ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
             {noDataLabel}
           </div>
         ) : (
-          <div className="flex flex-col gap-3 py-1 max-h-[220px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-3 py-1 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
             {data.map((item) => {
               const countryName = COUNTRY_NAMES[item.country.toUpperCase()] || item.country;
               const percentage = totalVisitors > 0 ? Math.round((item.visitors / totalVisitors) * 100) : 0;
@@ -68,11 +75,8 @@ export function CountriesChart({
               return (
                 <div key={item.country} className="space-y-1">
                   <div className="flex items-center justify-between text-xs font-medium">
-                    <span className="text-neutral-900 dark:text-white flex items-center gap-1.5 truncate">
-                      <span className="font-mono text-[10px] px-1.5 py-0.5 rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-300">
-                        {item.country}
-                      </span>
-                      <span className="truncate">{countryName}</span>
+                    <span className="text-neutral-900 dark:text-white truncate font-medium">
+                      {countryName}
                     </span>
                     <span className="text-neutral-500 dark:text-neutral-400 shrink-0 ml-2 font-mono">
                       {item.visitors} ({percentage}%)

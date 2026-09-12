@@ -17,10 +17,6 @@ export function TrafficSourcesChart({
   title,
   noDataLabel = "No data yet",
 }: TrafficSourcesChartProps) {
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full rounded-xl" />;
-  }
-
   const maxVisitors = data.length > 0 ? Math.max(...data.map((d) => d.visitors)) : 1;
   const totalVisitors = data.reduce((sum, d) => sum + d.visitors, 0);
 
@@ -35,12 +31,24 @@ export function TrafficSourcesChart({
         </div>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {loading ? (
+          <div className="flex flex-col gap-3 py-1">
+            {[1, 2, 3, 4].map((i) => (
+              <div key={i} className="space-y-1.5">
+                <div className="flex justify-between">
+                  <Skeleton className="h-4 w-32" />
+                  <Skeleton className="h-4 w-12" />
+                </div>
+                <Skeleton className="h-1.5 w-full rounded-full" />
+              </div>
+            ))}
+          </div>
+        ) : data.length === 0 ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
             {noDataLabel}
           </div>
         ) : (
-          <div className="flex flex-col gap-3 py-1 max-h-[220px] overflow-y-auto pr-1">
+          <div className="flex flex-col gap-3 py-1 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
             {data.map((item) => {
               const percentage = totalVisitors > 0 ? Math.round((item.visitors / totalVisitors) * 100) : 0;
               const barWidth = Math.max(8, Math.round((item.visitors / maxVisitors) * 100));

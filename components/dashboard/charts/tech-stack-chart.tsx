@@ -38,10 +38,6 @@ export function TechStackChart({
   const barColor = isDark ? "#d4d4d4" : "#262626";
   const gridColor = isDark ? "#333333" : "#e5e5e5";
 
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full rounded-xl" />;
-  }
-
   return (
     <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
       <CardHeader className="pb-2">
@@ -53,15 +49,18 @@ export function TechStackChart({
         </div>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {loading ? (
+          <Skeleton className="h-[220px] w-full rounded-lg" />
+        ) : data.length === 0 ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
             {noDataLabel}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={220} className="outline-none select-none">
             <BarChart
               data={data}
               margin={{ top: 5, right: 10, left: -20, bottom: 0 }}
+              className="outline-none"
             >
               <XAxis
                 dataKey="name"
@@ -86,13 +85,22 @@ export function TechStackChart({
               />
               <Tooltip
                 contentStyle={{
-                  background: isDark ? "#262626" : "#ffffff",
-                  border: `1px solid ${isDark ? "#404040" : "#e5e5e5"}`,
+                  background: isDark ? "#171717" : "#ffffff",
+                  border: isDark ? "1px solid #383838" : "1px solid #e5e5e5",
                   borderRadius: "8px",
-                  fontSize: "12px",
-                  color: isDark ? "#e5e5e5" : "#171717",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                 }}
-                cursor={{ fill: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}
+                itemStyle={{
+                  color: isDark ? "#ffffff" : "#171717",
+                  fontSize: "12px",
+                }}
+                labelStyle={{
+                  color: isDark ? "#ffffff" : "#0a0a0a",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  marginBottom: "4px",
+                }}
+                cursor={false}
               />
               <Bar dataKey="value" radius={[4, 4, 0, 0]} maxBarSize={32}>
                 {data.map((_, index) => {

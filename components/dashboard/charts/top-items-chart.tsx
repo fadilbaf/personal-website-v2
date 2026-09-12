@@ -41,10 +41,6 @@ export function TopItemsChart({
     ? ["#e5e5e5", "#d4d4d4", "#a3a3a3", "#737373", "#525252"]
     : ["#171717", "#262626", "#404040", "#525252", "#737373"];
 
-  if (loading) {
-    return <Skeleton className="h-[300px] w-full rounded-xl" />;
-  }
-
   return (
     <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
       <CardHeader className="pb-2">
@@ -56,48 +52,60 @@ export function TopItemsChart({
         </div>
       </CardHeader>
       <CardContent>
-        {data.length === 0 ? (
+        {loading ? (
+          <Skeleton className="h-[220px] w-full rounded-lg" />
+        ) : data.length === 0 ? (
           <div className="flex h-[220px] items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
             {noDataLabel}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={240} className="outline-none select-none">
             <BarChart
               data={data}
-              layout="vertical"
-              margin={{ top: 0, right: 20, left: 0, bottom: 0 }}
+              margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+              className="outline-none"
             >
               <XAxis
-                type="number"
+                dataKey="name"
+                fontSize={10}
+                tickLine={false}
+                axisLine={false}
+                stroke={textColor}
+                angle={-25}
+                textAnchor="end"
+                height={55}
+                interval={0}
+                tickFormatter={(val) =>
+                  val.length > 14 ? val.slice(0, 14) + "…" : val
+                }
+              />
+              <YAxis
                 fontSize={11}
                 tickLine={false}
                 axisLine={false}
                 stroke={textColor}
                 allowDecimals={false}
               />
-              <YAxis
-                type="category"
-                dataKey="name"
-                fontSize={11}
-                tickLine={false}
-                axisLine={false}
-                stroke={textColor}
-                width={100}
-                tickFormatter={(val) =>
-                  val.length > 14 ? val.slice(0, 14) + "…" : val
-                }
-              />
               <Tooltip
                 contentStyle={{
-                  background: isDark ? "#262626" : "#ffffff",
-                  border: `1px solid ${isDark ? "#404040" : "#e5e5e5"}`,
+                  background: isDark ? "#171717" : "#ffffff",
+                  border: isDark ? "1px solid #383838" : "1px solid #e5e5e5",
                   borderRadius: "8px",
-                  fontSize: "12px",
-                  color: isDark ? "#e5e5e5" : "#171717",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                 }}
-                cursor={{ fill: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}
+                itemStyle={{
+                  color: isDark ? "#ffffff" : "#171717",
+                  fontSize: "12px",
+                }}
+                labelStyle={{
+                  color: isDark ? "#ffffff" : "#0a0a0a",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  marginBottom: "4px",
+                }}
+                cursor={false}
               />
-              <Bar dataKey="clicks" radius={[0, 4, 4, 0]} maxBarSize={28}>
+              <Bar dataKey="clicks" radius={[4, 4, 0, 0]} maxBarSize={32}>
                 {data.map((_, index) => (
                   <Cell
                     key={`cell-${index}`}

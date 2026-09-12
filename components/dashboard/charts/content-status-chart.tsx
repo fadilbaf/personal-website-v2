@@ -9,43 +9,29 @@ import {
 import { GitCompareArrows } from "lucide-react";
 
 interface ContentStatusChartProps {
-  projectData: { name: string; value: number }[];
-  blogData: { name: string; value: number }[];
-  achievementData: { name: string; value: number }[];
+  data: { module: string; total: number; active: number; inactive: number }[];
   loading: boolean;
   title: string;
   noDataLabel?: string;
 }
 
 export function ContentStatusChart({
-  projectData, blogData, achievementData, loading, title,
+  data,
+  loading,
+  title,
   noDataLabel = "No data yet",
 }: ContentStatusChartProps) {
   const { resolvedTheme } = useTheme();
   const isDark = resolvedTheme === "dark";
   const textColor = isDark ? "#a3a3a3" : "#737373";
 
-  const chartData = [
-    {
-      module: "Projects",
-      Published: projectData.find((d) => d.name === "Published")?.value ?? 0,
-      Draft: projectData.find((d) => d.name === "Draft")?.value ?? 0,
-    },
-    {
-      module: "Blogs",
-      Published: blogData.find((d) => d.name === "Published")?.value ?? 0,
-      Draft: blogData.find((d) => d.name === "Draft")?.value ?? 0,
-    },
-    {
-      module: "Achievements",
-      Published: achievementData.find((d) => d.name === "Published")?.value ?? 0,
-      Draft: achievementData.find((d) => d.name === "Draft")?.value ?? 0,
-    },
-  ];
+  const chartData = data.map((d) => ({
+    module: d.module.charAt(0).toUpperCase() + d.module.slice(1),
+    Active: d.active,
+    Inactive: d.inactive,
+  }));
 
-  const hasData = chartData.some((d) => d.Published > 0 || d.Draft > 0);
-
-  if (loading) return <Skeleton className="h-[350px] w-full rounded-xl" />;
+  const hasData = chartData.some((d) => d.Active > 0 || d.Inactive > 0);
 
   return (
     <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
@@ -58,27 +44,39 @@ export function ContentStatusChart({
         </div>
       </CardHeader>
       <CardContent>
-        {!hasData ? (
+        {loading ? (
+          <Skeleton className="h-[260px] w-full rounded-lg" />
+        ) : !hasData ? (
           <div className="flex h-[260px] items-center justify-center text-sm text-neutral-400 dark:text-neutral-500">
             {noDataLabel}
           </div>
         ) : (
-          <ResponsiveContainer width="100%" height={260}>
-            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-              <XAxis dataKey="module" fontSize={12} tickLine={false} axisLine={false} stroke={textColor} />
+          <ResponsiveContainer width="100%" height={260} className="outline-none select-none">
+            <BarChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} className="outline-none">
+              <XAxis dataKey="module" fontSize={11} tickLine={false} axisLine={false} stroke={textColor} />
               <YAxis fontSize={11} tickLine={false} axisLine={false} stroke={textColor} allowDecimals={false} />
               <Tooltip
                 contentStyle={{
-                  background: isDark ? "#262626" : "#ffffff",
-                  border: `1px solid ${isDark ? "#404040" : "#e5e5e5"}`,
-                  borderRadius: "8px", fontSize: "12px",
-                  color: isDark ? "#e5e5e5" : "#171717",
+                  background: isDark ? "#171717" : "#ffffff",
+                  border: isDark ? "1px solid #383838" : "1px solid #e5e5e5",
+                  borderRadius: "8px",
+                  boxShadow: "0 4px 12px rgba(0,0,0,0.25)",
                 }}
-                cursor={{ fill: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)" }}
+                itemStyle={{
+                  color: isDark ? "#ffffff" : "#171717",
+                  fontSize: "12px",
+                }}
+                labelStyle={{
+                  color: isDark ? "#ffffff" : "#0a0a0a",
+                  fontWeight: 600,
+                  fontSize: "12px",
+                  marginBottom: "4px",
+                }}
+                cursor={false}
               />
-              <Legend wrapperStyle={{ fontSize: "12px", color: textColor }} iconType="circle" iconSize={8} />
-              <Bar dataKey="Published" fill={isDark ? "#e5e5e5" : "#171717"} radius={[4, 4, 0, 0]} maxBarSize={36} />
-              <Bar dataKey="Draft" fill={isDark ? "#525252" : "#a3a3a3"} radius={[4, 4, 0, 0]} maxBarSize={36} />
+              <Legend wrapperStyle={{ fontSize: "12px", color: textColor, paddingTop: "8px" }} iconType="circle" iconSize={8} />
+              <Bar dataKey="Active" fill={isDark ? "#ffffff" : "#171717"} radius={[4, 4, 0, 0]} maxBarSize={32} minPointSize={3} />
+              <Bar dataKey="Inactive" fill={isDark ? "#525252" : "#a3a3a3"} radius={[4, 4, 0, 0]} maxBarSize={32} minPointSize={3} />
             </BarChart>
           </ResponsiveContainer>
         )}
