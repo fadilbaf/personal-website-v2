@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Skill, SkillCategory } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Skill service — CRUD operations for skills and their categories.
@@ -13,7 +14,7 @@ export const SkillService = {
       .select("*, category:skill_categories(*)")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return data as Skill[];
+    return sanitizeStorageUrls(data as Skill[]);
   },
 
   async getById(id: string): Promise<Skill> {
@@ -24,7 +25,7 @@ export const SkillService = {
       .eq("id", id)
       .single();
     if (error) throw error;
-    return data as Skill;
+    return sanitizeStorageUrls(data as Skill);
   },
 
   async create(payload: Partial<Skill>) {

@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Career } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Career service — CRUD operations for career/work experience records.
@@ -12,7 +13,7 @@ export const CareerService = {
       .select("*, career_skills(skill_id, skill:skills(*))")
       .order("start_date", { ascending: false });
     if (error) throw error;
-    return data as Career[];
+    return sanitizeStorageUrls(data as Career[]);
   },
 
   async getById(id: string): Promise<Career> {
@@ -23,7 +24,7 @@ export const CareerService = {
       .eq("id", id)
       .single();
     if (error) throw error;
-    return data as Career;
+    return sanitizeStorageUrls(data as Career);
   },
 
   async create(payload: Partial<Career>, skill_ids?: string[]) {

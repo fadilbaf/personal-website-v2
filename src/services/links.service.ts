@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Profile, Role, Badge, Contact, About } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Public data needed for the /links page and main layout.
@@ -36,12 +37,12 @@ export const LinksService = {
       supabase.from("about").select("*").limit(1).single(),
     ]);
 
-    return {
+    return sanitizeStorageUrls({
       profile: (profileRes.data as Profile) ?? null,
       roles: (rolesRes.data as Role[]) ?? [],
       badges: (badgesRes.data as Badge[]) ?? [],
       contact: (contactRes.data as Contact) ?? null,
       about: (aboutRes.data as About) ?? null,
-    };
+    });
   },
 };

@@ -31,11 +31,7 @@ export const StorageService = {
 
   /** Get the public URL for a file in storage */
   getPublicUrl(path: string) {
-    const supabase = createClient();
-    const { data } = supabase.storage
-      .from(STORAGE_BUCKETS.ASSETS)
-      .getPublicUrl(path);
-    return data.publicUrl;
+    return `/storage/${path.replace(/^\/+/, "")}`;
   },
 
   /** Delete a file from storage */
@@ -78,13 +74,8 @@ async function upload(folder: string, file: File, fileName?: string) {
 
   if (error) throw error;
 
-  // Return the public URL
-  const { data: urlData } = supabase.storage
-    .from(STORAGE_BUCKETS.ASSETS)
-    .getPublicUrl(data.path);
-
   return {
     path: data.path,
-    publicUrl: urlData.publicUrl,
+    publicUrl: `/storage/${data.path.replace(/^\/+/, "")}`,
   };
 }

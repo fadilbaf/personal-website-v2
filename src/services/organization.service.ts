@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Organization } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Organization service — CRUD operations for organization records.
@@ -12,7 +13,7 @@ export const OrganizationService = {
       .select("*")
       .order("start_date", { ascending: false });
     if (error) throw error;
-    return data as Organization[];
+    return sanitizeStorageUrls(data as Organization[]);
   },
 
   async getById(id: string): Promise<Organization> {
@@ -23,7 +24,7 @@ export const OrganizationService = {
       .eq("id", id)
       .single();
     if (error) throw error;
-    return data as Organization;
+    return sanitizeStorageUrls(data as Organization);
   },
 
   async create(payload: Partial<Organization>) {

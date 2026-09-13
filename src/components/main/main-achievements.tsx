@@ -7,6 +7,7 @@ import { ArrowRight, Award, ExternalLink, X } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Achievement } from "@/src/types/database";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface MainAchievementsProps {
   achievements: Achievement[];
@@ -147,7 +148,7 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
                 <div className="relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden text-left block">
                   {item.image_url ? (
                     <img
-                      src={item.image_url}
+                      src={toStorageUrl(item.image_url)}
                       alt={locale === "id" ? item.title_id : item.title_en}
                       className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                       loading="lazy"
@@ -225,7 +226,7 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
               <div className="relative aspect-video w-full bg-neutral-100 dark:bg-neutral-950">
                 {selectedAchievement.image_url ? (
                   <img
-                    src={selectedAchievement.image_url}
+                    src={toStorageUrl(selectedAchievement.image_url)}
                     alt={locale === "id" ? selectedAchievement.title_id : selectedAchievement.title_en}
                     className="h-full w-full object-cover"
                   />

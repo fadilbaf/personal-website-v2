@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Career, Education, Organization } from "@/src/types/database";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface MainExperienceProps {
   careers: Career[];
@@ -352,7 +353,7 @@ export function MainExperience({
                                 >
                                   {item.logo_url ? (
                                     <img
-                                      src={item.logo_url}
+                                      src={toStorageUrl(item.logo_url)}
                                       alt={item.company}
                                       className="h-full w-full object-contain transition-transform duration-300 ease-out group-hover/logo-link:scale-105"
                                     />
@@ -364,7 +365,7 @@ export function MainExperience({
                                 <div className="h-14 w-14 sm:h-18 sm:w-18 p-1.5 sm:p-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center overflow-hidden shrink-0">
                                   {item.logo_url ? (
                                     <img
-                                      src={item.logo_url}
+                                      src={toStorageUrl(item.logo_url)}
                                       alt={item.company}
                                       className="h-full w-full object-contain"
                                     />
@@ -492,7 +493,7 @@ export function MainExperience({
                                             >
                                               {cs.skill.icon_url ? (
                                                 <img
-                                                  src={cs.skill.icon_url}
+                                                  src={toStorageUrl(cs.skill.icon_url)}
                                                   alt={cs.skill.name}
                                                   className="w-3 h-3 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover:scale-110"
                                                 />
@@ -535,7 +536,7 @@ export function MainExperience({
                                             >
                                               {cs.skill.icon_url ? (
                                                 <img
-                                                  src={cs.skill.icon_url}
+                                                  src={toStorageUrl(cs.skill.icon_url)}
                                                   alt={cs.skill.name}
                                                   className="w-3 h-3 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover:scale-110"
                                                 />
@@ -641,7 +642,7 @@ export function MainExperience({
                                 >
                                   {item.logo_url ? (
                                     <img
-                                      src={item.logo_url}
+                                      src={toStorageUrl(item.logo_url)}
                                       alt={item.school}
                                       className="h-full w-full object-contain transition-transform duration-300 ease-out group-hover/logo-link:scale-105"
                                     />
@@ -653,7 +654,7 @@ export function MainExperience({
                                 <div className="h-14 w-14 sm:h-18 sm:w-18 p-1.5 sm:p-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center overflow-hidden shrink-0">
                                   {item.logo_url ? (
                                     <img
-                                      src={item.logo_url}
+                                      src={toStorageUrl(item.logo_url)}
                                       alt={item.school}
                                       className="h-full w-full object-contain"
                                     />
@@ -835,7 +836,7 @@ export function MainExperience({
                                 >
                                   {item.logo_url ? (
                                     <img
-                                      src={item.logo_url}
+                                      src={toStorageUrl(item.logo_url)}
                                       alt={item.organization}
                                       className="h-full w-full object-contain transition-transform duration-300 ease-out group-hover/logo-link:scale-105"
                                     />
@@ -847,7 +848,7 @@ export function MainExperience({
                                 <div className="h-14 w-14 sm:h-18 sm:w-18 p-1.5 sm:p-2 rounded-xl border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center overflow-hidden shrink-0">
                                   {item.logo_url ? (
                                     <img
-                                      src={item.logo_url}
+                                      src={toStorageUrl(item.logo_url)}
                                       alt={item.organization}
                                       className="h-full w-full object-contain"
                                     />
@@ -1034,7 +1035,7 @@ export function MainExperience({
                       >
                         {cs.skill.icon_url ? (
                           <img
-                            src={cs.skill.icon_url}
+                            src={toStorageUrl(cs.skill.icon_url)}
                             alt={cs.skill.name}
                             className="w-3.5 h-3.5 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover:scale-110"
                           />

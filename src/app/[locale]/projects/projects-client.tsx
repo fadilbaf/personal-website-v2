@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/src/app/lib/utils";
 import { trackEvent } from "@/src/lib/track-event";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface ProjectsClientProps {
   projects: Project[];
@@ -400,7 +401,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
               {paginatedProjects.map((item, index) => {
                 // Extract sorted images and first image url
                 const images = [...(item.project_images || [])].sort((a, b) => a.sort_order - b.sort_order);
-                const mainImageUrl = images[0]?.image_url;
+                const mainImageUrl = toStorageUrl(images[0]?.image_url);
 
                 // Extract technologies
                 const skills = (item.project_skills?.map((ps) => ps.skill).filter((s): s is Skill => !!s) || []);
@@ -487,7 +488,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
                           >
                             {skill.icon_url ? (
                               <img
-                                src={skill.icon_url}
+                                src={toStorageUrl(skill.icon_url)}
                                 alt={skill.name}
                                 className="w-3 h-3 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover/pill:scale-110 shrink-0"
                               />

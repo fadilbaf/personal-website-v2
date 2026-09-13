@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { About } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * About service — single-record CRUD for the About section.
@@ -13,7 +14,7 @@ export const AboutService = {
       .limit(1)
       .single();
     if (error && error.code !== "PGRST116") throw error;
-    return data as About | null;
+    return sanitizeStorageUrls(data as About | null);
   },
 
   async update(id: string, payload: Partial<About>) {

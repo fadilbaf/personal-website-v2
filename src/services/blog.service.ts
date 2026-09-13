@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Blog, BlogType, BlogCategory } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Blog service — CRUD for blogs, types, and categories.
@@ -12,7 +13,7 @@ export const BlogService = {
       .select("*, type:blog_types(*), category:blog_categories(*), author:profiles(*)")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return data as Blog[];
+    return sanitizeStorageUrls(data as Blog[]);
   },
 
   async getById(id: string): Promise<Blog> {
@@ -34,7 +35,7 @@ export const BlogService = {
       }
     }
 
-    return data as Blog;
+    return sanitizeStorageUrls(data as Blog);
   },
 
   async getBySlug(slug: string): Promise<Blog | null> {
@@ -59,7 +60,7 @@ export const BlogService = {
       }
     }
 
-    return data as Blog;
+    return sanitizeStorageUrls(data as Blog);
   },
 
   /**

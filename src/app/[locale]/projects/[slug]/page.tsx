@@ -6,6 +6,7 @@ import { MainHeader } from "@/src/components/main/main-header";
 import { MainFooter } from "@/src/components/main/main-footer";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import type { MainLocale } from "@/src/lib/main-translations";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 export async function generateMetadata({
   params,
@@ -26,7 +27,7 @@ export async function generateMetadata({
       ? project.bio_id || `Detail proyek ${project.title_id}`
       : project.bio_en || `Project details of ${project.title_en}`;
 
-    const ogImage = project.project_images?.[0]?.image_url || "/opengraph-image.png";
+    const ogImage = toStorageUrl(project.project_images?.[0]?.image_url) || "/opengraph-image.png";
 
     return {
       title,

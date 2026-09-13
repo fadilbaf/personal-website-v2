@@ -25,6 +25,7 @@ import type { Blog } from "@/src/types/database";
 import { BlogContentRenderer } from "@/components/main/blog-content-renderer";
 import { trackEvent, getVisitorHash } from "@/src/lib/track-event";
 import { calculateReadingTime } from "@/src/lib/blog-utils";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -240,7 +241,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
   const formattedDate = formatDate(blog.created_at, locale);
   const authorName = blog.author?.full_name || "Fadil Bafagih";
-  const authorAvatar = blog.author?.photo_url;
+  const authorAvatar = toStorageUrl(blog.author?.photo_url);
 
   const actionBtnClass = cn(
     "inline-flex items-center gap-1.5",
@@ -266,7 +267,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
         <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden shrink-0 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10">
           {item.image_url ? (
             <img
-              src={item.image_url}
+              src={toStorageUrl(item.image_url)}
               alt={itemTitle}
               className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
             />
@@ -462,7 +463,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {blog.image_url && (
               <div className="group relative w-full aspect-video rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-50 dark:bg-neutral-900">
                 <img
-                  src={blog.image_url}
+                  src={toStorageUrl(blog.image_url)}
                   alt={blogTitle}
                   className="w-full h-full object-cover transition-transform duration-500 ease-out hover:scale-105"
                 />

@@ -6,6 +6,7 @@ import Link from "next/link";
 import { FolderGit2, Code2, ExternalLink, ArrowRight } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Project, Skill } from "@/src/types/database";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface MainProjectsProps {
   projects: Project[];
@@ -119,7 +120,7 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
 
             // Extract sorted images and first image url
             const images = [...(item.project_images || [])].sort((a, b) => a.sort_order - b.sort_order);
-            const mainImageUrl = images[0]?.image_url;
+            const mainImageUrl = toStorageUrl(images[0]?.image_url);
 
             // Extract technologies
             const skills = (item.project_skills?.map((ps) => ps.skill).filter((s): s is Skill => !!s) || []);
@@ -202,7 +203,7 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
                       >
                         {skill.icon_url ? (
                           <img
-                            src={skill.icon_url}
+                            src={toStorageUrl(skill.icon_url)}
                             alt={skill.name}
                             className="w-3 h-3 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover/pill:scale-110 shrink-0"
                           />

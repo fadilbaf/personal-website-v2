@@ -33,6 +33,8 @@ export async function proxy(request: NextRequest) {
 
   const hasLocale = pathname.startsWith("/en") || pathname.startsWith("/id");
   const isApiRoute = pathname.startsWith("/api");
+  const isStorageRoute = pathname.startsWith("/storage") || pathname.startsWith("/storage/");
+  const isCvRoute = pathname === "/cv" || pathname === "/cv.pdf";
   const isStaticFile = pathname.includes(".");
 
   // 3. MAIN DOMAIN (Production non-admin): Block /login, /dashboard, and /admin routes with 404
@@ -48,6 +50,8 @@ export async function proxy(request: NextRequest) {
       pathname === "/" ||
       isAdminOnlyRoute ||
       isApiRoute ||
+      isStorageRoute ||
+      isCvRoute ||
       isStaticFile;
 
     if (!isAllowedAdminPath || hasLocale) {
@@ -58,7 +62,15 @@ export async function proxy(request: NextRequest) {
   }
 
   // 5. PUBLIC DOMAIN / LOCAL DEV: Locale redirection for public routes
-  if (!isAdminSubdomain && !hasLocale && !isAdminOnlyRoute && !isApiRoute && !isStaticFile) {
+  if (
+    !isAdminSubdomain &&
+    !hasLocale &&
+    !isAdminOnlyRoute &&
+    !isApiRoute &&
+    !isStorageRoute &&
+    !isCvRoute &&
+    !isStaticFile
+  ) {
     const cookieLanguage = request.cookies.get("admin-language")?.value;
     let locale = "en";
     if (cookieLanguage === "en" || cookieLanguage === "id") {

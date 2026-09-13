@@ -7,6 +7,7 @@ import { BookOpen, ArrowRight, Heart, Eye } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Blog } from "@/src/types/database";
 import { stripMarkdown, calculateReadingTime } from "@/src/lib/blog-utils";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface MainBlogsProps {
   blogs: Blog[];
@@ -157,7 +158,7 @@ export function MainBlogs({ blogs, locale }: MainBlogsProps) {
                   <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                     {blog.author?.photo_url ? (
                       <img
-                        src={blog.author.photo_url}
+                        src={toStorageUrl(blog.author.photo_url)}
                         alt={blog.author.full_name || "Author"}
                         className="h-6 w-6 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 shrink-0"
                       />

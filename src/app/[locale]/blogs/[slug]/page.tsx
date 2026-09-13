@@ -7,6 +7,7 @@ import { MainFooter } from "@/src/components/main/main-footer";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import type { MainLocale } from "@/src/lib/main-translations";
 import { extractBlogExcerpt } from "@/src/lib/blog-utils";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 export async function generateMetadata({
   params,
@@ -32,7 +33,7 @@ export async function generateMetadata({
       : `Read "${blog.title_en}" by Fadil Bafagih.`;
 
     const description = excerpt || fallbackDesc;
-    const ogImage = blog.image_url || "/opengraph-image.png";
+    const ogImage = toStorageUrl(blog.image_url) || "/opengraph-image.png";
 
     return {
       title,

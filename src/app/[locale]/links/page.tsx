@@ -2,6 +2,7 @@ import { createClient } from "@/src/services/supabase/server";
 import { LinksClient } from "@/src/components/links/links-client";
 import type { LinksLocale } from "@/src/lib/links-translations";
 import type { Profile, Role, Badge, Contact, About } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 // Keep it dynamic so it always fetches fresh data on requests (essential since database records update)
 export const dynamic = "force-dynamic";
@@ -35,13 +36,13 @@ export default async function LinksPage({ params }: PageProps) {
     supabase.from("about").select("*").limit(1).single(),
   ]);
 
-  const initialData = {
+  const initialData = sanitizeStorageUrls({
     profile: (profileRes.data as Profile) ?? null,
     roles: (rolesRes.data as Role[]) ?? [],
     badges: (badgesRes.data as Badge[]) ?? [],
     contact: (contactRes.data as Contact) ?? null,
     about: (aboutRes.data as About) ?? null,
-  };
+  });
 
   return <LinksClient locale={locale} initialData={initialData} />;
 }

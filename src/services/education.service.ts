@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Education } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Education service — CRUD operations for education records.
@@ -12,7 +13,7 @@ export const EducationService = {
       .select("*")
       .order("start_date", { ascending: false });
     if (error) throw error;
-    return data as Education[];
+    return sanitizeStorageUrls(data as Education[]);
   },
 
   async getById(id: string): Promise<Education> {
@@ -23,7 +24,7 @@ export const EducationService = {
       .eq("id", id)
       .single();
     if (error) throw error;
-    return data as Education;
+    return sanitizeStorageUrls(data as Education);
   },
 
   async create(payload: Partial<Education>) {

@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/src/app/lib/utils";
 import { trackEvent } from "@/src/lib/track-event";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface AchievementsClientProps {
   achievements: Achievement[];
@@ -446,7 +447,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
                     <div className="relative aspect-video w-full bg-neutral-100 dark:bg-neutral-900 overflow-hidden text-left block">
                       {item.image_url ? (
                         <img
-                          src={item.image_url}
+                          src={toStorageUrl(item.image_url)}
                           alt={title}
                           className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
                           loading="lazy"
@@ -579,7 +580,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
               <div className="relative aspect-video w-full bg-neutral-100 dark:bg-neutral-950">
                 {selectedAchievement.image_url ? (
                   <img
-                    src={selectedAchievement.image_url}
+                    src={toStorageUrl(selectedAchievement.image_url)}
                     alt={locale === "id" ? selectedAchievement.title_id : selectedAchievement.title_en}
                     className="h-full w-full object-cover"
                   />

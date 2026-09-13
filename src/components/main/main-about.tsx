@@ -11,6 +11,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { GitHubCalendar } from "react-github-calendar";
 import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 function GitHubIcon({ className }: { className?: string }) {
   return (
@@ -445,7 +446,7 @@ export function MainAbout({
                       <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800 animate-pulse z-10" />
                     )}
                     <Image
-                      src={profile.photo_url}
+                      src={toStorageUrl(profile.photo_url)}
                       alt={profile.full_name || "Profile"}
                       fill
                       className="object-cover select-none profile-image-grayscale"
@@ -821,7 +822,7 @@ export function MainAbout({
                   >
                     {skill.icon_url ? (
                       <img 
-                        src={skill.icon_url} 
+                        src={toStorageUrl(skill.icon_url)} 
                         alt={skill.name} 
                         className="w-3.5 h-3.5 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover:scale-110" 
                       />
@@ -943,7 +944,7 @@ export function MainAbout({
                 >
                   {skill.icon_url ? (
                     <img 
-                      src={skill.icon_url} 
+                      src={toStorageUrl(skill.icon_url)} 
                       alt={skill.name} 
                       className="w-3.5 h-3.5 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover:scale-110" 
                     />
@@ -968,8 +969,8 @@ export function MainAbout({
         <PdfViewerModal
           isOpen={isCvPdfOpen}
           onClose={() => setIsCvPdfOpen(false)}
-          pdfUrl={about.cv_url}
-          fileName={extractPdfFileName(about.cv_url, "CV.pdf")}
+          pdfUrl="/cv"
+          fileName="Hasan-Fadlullah-CV.pdf"
         />
       )}
     </section>

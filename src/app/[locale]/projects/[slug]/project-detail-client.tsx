@@ -39,6 +39,7 @@ import { trackEvent } from "@/src/lib/track-event";
 import { cn } from "@/src/app/lib/utils";
 import { useScrollLock } from "@/src/app/lib/use-scroll-lock";
 import { AnimatedNumber } from "@/components/ui/animated-number";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 function GithubIcon({ className }: { className?: string }) {
   return (
@@ -113,7 +114,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
     setMounted(true);
   }, []);
 
-  const activeViewerUrl = images[viewerIndex]?.image_url || "";
+  const activeViewerUrl = toStorageUrl(images[viewerIndex]?.image_url) || "";
 
   // Transparency check helper
   useEffect(() => {
@@ -755,7 +756,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                       >
                         {skill.icon_url ? (
                           <img
-                            src={skill.icon_url}
+                            src={toStorageUrl(skill.icon_url)}
                             alt={skill.name}
                             className="w-3.5 h-3.5 object-contain brightness-0 dark:invert transition-transform duration-200 group-hover:scale-110"
                           />
@@ -785,7 +786,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                 {images.length > 0 ? (
                   <>
                     <img
-                      src={images[currentIndex].image_url}
+                      src={toStorageUrl(images[currentIndex].image_url)}
                       alt={`Project Image ${currentIndex + 1}`}
                       className="w-full h-full object-cover transition-all duration-300 cursor-zoom-in hover:scale-[1.01]"
                       onClick={() => {
@@ -870,7 +871,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                           )}
                         >
                           <img
-                            src={item.image_url}
+                            src={toStorageUrl(item.image_url)}
                             alt={`Thumbnail ${idx + 1}`}
                             className="w-full h-full object-cover rounded-lg"
                           />
@@ -1166,7 +1167,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                 style={{ msOverflowStyle: "none", scrollbarWidth: "none" }}
               >
                 {images.map((item, idx) => {
-                  const url = item.image_url;
+                  const url = toStorageUrl(item.image_url);
                   const isActive = idx === viewerIndex;
                   return (
                     <button

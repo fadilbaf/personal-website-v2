@@ -21,6 +21,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/src/app/lib/utils";
 import { trackEvent } from "@/src/lib/track-event";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 interface BlogsClientProps {
   blogs: Blog[];
@@ -462,7 +463,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                       <div className="flex items-center gap-2.5 sm:gap-3 flex-wrap">
                         {blog.author?.photo_url ? (
                           <img
-                            src={blog.author.photo_url}
+                            src={toStorageUrl(blog.author.photo_url)}
                             alt={blog.author.full_name || "Author"}
                             className="h-6 w-6 rounded-full object-cover border border-neutral-100 dark:border-neutral-800 shrink-0"
                           />

@@ -22,6 +22,18 @@ const nextConfig: NextConfig = {
     UMAMI_SHARE_ID: process.env.UMAMI_SHARE_ID,
     SITE_URL: process.env.SITE_URL,
   },
+  async rewrites() {
+    return [
+      {
+        source: "/cv.pdf",
+        destination: "/cv",
+      },
+      {
+        source: "/storage/:path*",
+        destination: "https://uiotodwgeplnmxbfsloi.supabase.co/storage/v1/object/public/assets/:path*",
+      },
+    ];
+  },
 };
 
 export default nextConfig;

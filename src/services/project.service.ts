@@ -1,5 +1,6 @@
 import { createClient } from "@/src/services/supabase/client";
 import type { Project, ProjectType, ProjectCategory } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Project service — CRUD for projects, types, and categories.
@@ -13,7 +14,7 @@ export const ProjectService = {
       .select("*, type:project_types(*), category:project_categories(*), project_images(*), project_skills(skill_id, skill:skills(*))")
       .order("created_at", { ascending: false });
     if (error) throw error;
-    return data as Project[];
+    return sanitizeStorageUrls(data as Project[]);
   },
 
   async getById(id: string): Promise<Project> {
@@ -35,7 +36,7 @@ export const ProjectService = {
       .order("sort_order", { foreignTable: "project_features", ascending: true })
       .single();
     if (error) throw error;
-    return data as Project;
+    return sanitizeStorageUrls(data as Project);
   },
 
   async getBySlug(slug: string): Promise<Project> {
@@ -57,7 +58,7 @@ export const ProjectService = {
       .order("sort_order", { foreignTable: "project_features", ascending: true })
       .single();
     if (error) throw error;
-    return data as Project;
+    return sanitizeStorageUrls(data as Project);
   },
 
   async create(

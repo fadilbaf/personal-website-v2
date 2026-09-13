@@ -12,6 +12,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Profile, Role, Contact } from "@/src/types/database";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 /** Inline SVG brand icons — consistent B&W style */
 function LinkedInIcon({ className }: { className?: string }) {
@@ -162,7 +163,7 @@ export function LinksProfile({
               <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800 animate-pulse z-10" />
             )}
             <Image
-              src={profile.photo_url}
+              src={toStorageUrl(profile.photo_url)}
               alt={profile.full_name || "Profile"}
               fill
               className="object-cover select-none profile-image-grayscale"

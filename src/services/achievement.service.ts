@@ -4,6 +4,7 @@ import type {
   AchievementType,
   AchievementCategory,
 } from "@/src/types/database";
+import { sanitizeStorageUrls } from "@/src/lib/storage-url";
 
 /**
  * Achievement service — CRUD for achievements, types, and categories.
@@ -16,7 +17,7 @@ export const AchievementService = {
       .select("*, type:achievement_types(*), category:achievement_categories(*)")
       .order("issue_date", { ascending: false });
     if (error) throw error;
-    return data as Achievement[];
+    return sanitizeStorageUrls(data as Achievement[]);
   },
 
   async getById(id: string): Promise<Achievement> {
@@ -27,7 +28,7 @@ export const AchievementService = {
       .eq("id", id)
       .single();
     if (error) throw error;
-    return data as Achievement;
+    return sanitizeStorageUrls(data as Achievement);
   },
 
   async create(payload: Partial<Achievement>) {
