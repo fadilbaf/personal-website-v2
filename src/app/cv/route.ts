@@ -9,7 +9,9 @@ const DEFAULT_CV_URL =
 const BOT_USER_AGENTS = [
   "whatsapp",
   "facebookexternalhit",
+  "facebookcatalog",
   "facebot",
+  "meta-external",
   "twitterbot",
   "linkedinbot",
   "telegrambot",
@@ -55,14 +57,16 @@ export async function GET(request: NextRequest) {
   <meta name="description" content="${description}" />
 
   <!-- Open Graph / WhatsApp / Facebook / LinkedIn -->
-  <meta property="og:type" content="profile" />
+  <meta property="og:type" content="website" />
   <meta property="og:url" content="${canonicalUrl}" />
   <meta property="og:title" content="${title}" />
   <meta property="og:description" content="${description}" />
   <meta property="og:image" content="${imageUrl}" />
+  <meta property="og:image:secure_url" content="${imageUrl}" />
+  <meta property="og:image:type" content="image/png" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
-  <meta property="og:site_name" content="Fadil Bafagih Portfolio" />
+  <meta property="og:site_name" content="Fadil Bafagih" />
 
   <!-- Twitter Card -->
   <meta name="twitter:card" content="summary_large_image" />
@@ -70,9 +74,6 @@ export async function GET(request: NextRequest) {
   <meta name="twitter:title" content="${title}" />
   <meta name="twitter:description" content="${description}" />
   <meta name="twitter:image" content="${imageUrl}" />
-
-  <!-- Auto fallback redirect -->
-  <meta http-equiv="refresh" content="0; url=${canonicalUrl}" />
 </head>
 <body style="font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #fafafa;">
   <p>Loading resume...</p>
