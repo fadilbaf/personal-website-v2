@@ -1,13 +1,28 @@
-import { NextResponse } from "next/server";
-import { createClient } from "@/src/services/supabase/client";
+import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/src/services/supabase/server";
 
 export const dynamic = "force-dynamic";
 
 const SHARE_ID = process.env.UMAMI_SHARE_ID || process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    const supabase = createClient();
+    const supabase = await createClient();
+
+    // Verify authenticated admin session
+    const {
+      data: { user },
+      error: authError,
+    } = await supabase.auth.getUser();
+
+    if (authError || !user) {
+      const acceptHeader = request.headers.get("accept") || "";
+      // If accessed directly in browser address bar (HTML navigation), redirect to 404 page
+      if (acceptHeader.includes("text/html")) {
+        return NextResponse.redirect(new URL("/404", request.url));
+      }
+      return NextResponse.json({ success: false, error: "Not Found" }, { status: 404 });
+    }
     const now = new Date();
     const thirtyDaysAgo = new Date();
     thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
