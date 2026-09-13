@@ -80,7 +80,7 @@ export function ContentOverviewChart({
   const hasData = chartData.some((d) => d.Total > 0);
 
   return (
-    <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
+    <Card className="border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900">
       <CardHeader className="pb-2">
         <div className="flex items-center gap-2">
           <LayoutGrid className="h-4 w-4 text-neutral-500 dark:text-neutral-400" />

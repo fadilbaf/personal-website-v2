@@ -1,6 +1,7 @@
 "use client";
 
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Eye,
   Users,
@@ -12,9 +13,14 @@ import {
   FileText,
   LayoutDashboard,
   ExternalLink,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PageHeader } from "@/components/dashboard/page-header";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { OverviewStatCard } from "@/components/dashboard/charts/overview-stat-card";
 import { ViewsTrendChart } from "@/components/dashboard/charts/views-trend-chart";
 import { CountriesChart } from "@/components/dashboard/charts/countries-chart";
@@ -27,6 +33,7 @@ import { ContentOverviewChart } from "@/components/dashboard/charts/content-over
 import { AnalyticsService } from "@/src/services/analytics.service";
 import { StatisticsService } from "@/src/services/statistics.service";
 import { useLanguage } from "@/context/language-context";
+import { cn } from "@/src/app/lib/utils";
 
 /**
  * Enhanced Dashboard Overview — Complete analytics hub combining
@@ -34,9 +41,15 @@ import { useLanguage } from "@/context/language-context";
  */
 export default function DashboardPage() {
   const { t } = useLanguage();
+  const queryClient = useQueryClient();
+  const [isManualRefreshing, setIsManualRefreshing] = useState(false);
 
   // ─── 1. Unified Umami Analytics Query ─────────────────────────
-  const { data: analytics, isLoading: isAnalyticsLoading } = useQuery({
+  const {
+    data: analytics,
+    isLoading: isAnalyticsLoading,
+    isFetching: isAnalyticsFetching,
+  } = useQuery({
     queryKey: ["analytics", "overview"],
     queryFn: AnalyticsService.getOverviewData,
     refetchInterval: 30000, // Refresh realtime data every 30s
@@ -44,19 +57,31 @@ export default function DashboardPage() {
   });
 
   // ─── 2. Supabase Content Statistics Queries ───────────────────
-  const { data: stats, isLoading: isStatsLoading } = useQuery({
+  const {
+    data: stats,
+    isLoading: isStatsLoading,
+    isFetching: isStatsFetching,
+  } = useQuery({
     queryKey: ["statistics"],
     queryFn: StatisticsService.getAll,
     meta: { resource: "dashboard.title" },
   });
 
-  const { data: techStack = [], isLoading: isTechLoading } = useQuery({
+  const {
+    data: techStack = [],
+    isLoading: isTechLoading,
+    isFetching: isTechFetching,
+  } = useQuery({
     queryKey: ["analytics", "techStack"],
     queryFn: AnalyticsService.getTechStackDistribution,
     meta: { silent: true },
   });
 
-  const { data: contentOverview = [], isLoading: isOverviewLoading } = useQuery({
+  const {
+    data: contentOverview = [],
+    isLoading: isOverviewLoading,
+    isFetching: isOverviewFetching,
+  } = useQuery({
     queryKey: ["analytics", "contentOverview"],
     queryFn: AnalyticsService.getContentOverview,
     meta: { silent: true },
@@ -93,27 +118,96 @@ export default function DashboardPage() {
   };
 
   const isCardsLoading = isAnalyticsLoading || isStatsLoading;
+  const isRefreshingAll =
+    isAnalyticsFetching ||
+    isStatsFetching ||
+    isTechFetching ||
+    isOverviewFetching ||
+    isManualRefreshing;
+
+  const handleRefresh = async () => {
+    setIsManualRefreshing(true);
+    await Promise.all([
+      queryClient.invalidateQueries({ queryKey: ["analytics"] }),
+      queryClient.invalidateQueries({ queryKey: ["statistics"] }),
+    ]);
+    setTimeout(() => setIsManualRefreshing(false), 600);
+  };
 
   return (
     <>
-      <PageHeader
-        title={t("dashboard.title")}
-        description={t("dashboard.description")}
-        icon={LayoutDashboard}
-        actions={
-          analytics?.shareUrl ? (
+      <div className="mb-6 space-y-2">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <h1 className="flex items-center gap-3 text-2xl font-medium tracking-tight text-neutral-900 dark:text-white">
+              <LayoutDashboard className="h-6 w-6 text-neutral-500 dark:text-neutral-400" />
+              {t("dashboard.title")}
+            </h1>
+            <p className="mt-1 text-sm text-neutral-500 dark:text-neutral-400">
+              {t("dashboard.description")}
+            </p>
+          </div>
+
+          <div className="flex items-center gap-2 shrink-0">
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 cursor-pointer text-neutral-600 hover:text-neutral-900 active:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:active:bg-neutral-800"
+                  onClick={handleRefresh}
+                  disabled={isRefreshingAll}
+                  aria-label={t("dashboard.refresh_data")}
+                >
+                  <RefreshCw
+                    className={cn(
+                      "h-3.5 w-3.5 transition-all",
+                      isRefreshingAll && "animate-spin text-neutral-900 dark:text-white"
+                    )}
+                  />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom">
+                <p>{t("dashboard.refresh_data")}</p>
+              </TooltipContent>
+            </Tooltip>
+
+            {/* Desktop Open Umami Button */}
             <Button
               variant="outline"
               size="sm"
-              className="gap-1.5 text-xs font-medium cursor-pointer"
-              onClick={() => window.open(analytics.shareUrl, "_blank")}
+              className="hidden sm:inline-flex gap-1.5 text-xs font-medium cursor-pointer"
+              onClick={() => {
+                const targetUrl =
+                  analytics?.shareUrl ||
+                  `https://cloud.umami.is/share/${process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73"}`;
+                window.open(targetUrl, "_blank");
+              }}
             >
               <span>{t("dashboard.open_umami")}</span>
               <ExternalLink className="h-3.5 w-3.5" />
             </Button>
-          ) : undefined
-        }
-      />
+          </div>
+        </div>
+
+        {/* Mobile Open Umami Button (Below subtitle) */}
+        <div className="sm:hidden pt-1">
+          <Button
+            variant="outline"
+            size="sm"
+            className="w-fit gap-1.5 text-xs font-medium cursor-pointer"
+            onClick={() => {
+              const targetUrl =
+                analytics?.shareUrl ||
+                `https://cloud.umami.is/share/${process.env.NEXT_PUBLIC_UMAMI_SHARE_ID || "Xycy2JyKJMRnpj73"}`;
+              window.open(targetUrl, "_blank");
+            }}
+          >
+            <span>{t("dashboard.open_umami")}</span>
+            <ExternalLink className="h-3.5 w-3.5" />
+          </Button>
+        </div>
+      </div>
 
       {/* ─── Row 1: Primary Traffic & Live Stat Cards (3 Cards) ── */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 mb-4">

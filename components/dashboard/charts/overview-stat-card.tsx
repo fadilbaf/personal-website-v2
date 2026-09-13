@@ -33,13 +33,13 @@ export function OverviewStatCard({
   return (
     <Card
       className={cn(
-        "group relative overflow-hidden border-neutral-200/60 bg-white/80 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5",
-        "dark:border-white/10 dark:bg-neutral-900/80 dark:hover:shadow-white/5",
+        "group relative overflow-hidden border-neutral-200/60 bg-white transition-all duration-300 hover:shadow-lg hover:shadow-black/5 hover:-translate-y-0.5 transform-gpu",
+        "dark:border-white/10 dark:bg-neutral-900 dark:hover:shadow-white/5",
         className
       )}
     >
-      {/* Subtle gradient accent on hover */}
-      <div className="absolute inset-0 bg-linear-to-br from-neutral-100/0 to-neutral-100/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:from-white/0 dark:to-white/5" />
+      {/* Subtle accent on hover */}
+      <div className="absolute inset-0 bg-neutral-100/50 opacity-0 transition-opacity duration-300 group-hover:opacity-100 dark:bg-white/5 pointer-events-none" />
 
       <CardContent className="relative px-6 py-5">
         <div className="flex items-center justify-between">

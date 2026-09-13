@@ -98,7 +98,7 @@ export function ViewsTrendChart({
   ];
 
   return (
-    <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
+    <Card className="border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900">
       <CardHeader className="pb-3 border-b border-neutral-100 dark:border-white/5">
         <div className="flex items-center justify-between gap-3 relative z-30">
           <div className="flex items-center gap-2">
