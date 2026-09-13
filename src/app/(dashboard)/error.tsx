@@ -3,7 +3,7 @@
 import { useEffect } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { RefreshCw, LayoutDashboard, AlertTriangle } from "lucide-react";
+import { RefreshCw, LayoutDashboard } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useLanguage } from "@/context/language-context";
 
@@ -65,7 +65,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
   const homeText = isId ? "Beranda Dashboard" : "Dashboard Home";
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] p-6 text-center relative overflow-hidden font-sans select-none">
+    <div className="flex-1 flex flex-col items-center justify-center min-h-[calc(100dvh-8rem)] px-6 py-12 text-center relative overflow-hidden font-sans select-none">
       {/* Decorative Glow Backgrounds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-neutral-200/50 blur-3xl dark:bg-white/5" />
@@ -97,26 +97,10 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
         {/* Description */}
         <motion.p
           variants={textBlurVariants}
-          className="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-md leading-relaxed mb-6 mt-2"
+          className="text-sm sm:text-base text-neutral-500 dark:text-neutral-400 max-w-md leading-relaxed mb-8 mt-2"
         >
           {description}
         </motion.p>
-
-        {/* Error Details Box */}
-        {error?.message && (
-          <motion.div
-            variants={textBlurVariants}
-            className="mb-8 w-full max-w-md p-3.5 rounded-xl border border-neutral-200/80 bg-neutral-50/80 dark:border-white/10 dark:bg-neutral-900/80 text-left overflow-x-auto max-h-36 backdrop-blur-sm"
-          >
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-neutral-500 dark:text-neutral-400 mb-1">
-              <AlertTriangle className="h-3.5 w-3.5 text-amber-500" />
-              <span>Error Details:</span>
-            </div>
-            <code className="text-xs text-neutral-700 dark:text-neutral-300 font-mono block whitespace-pre-wrap leading-relaxed">
-              {error.message}
-            </code>
-          </motion.div>
-        )}
 
         {/* Action Buttons */}
         <motion.div
