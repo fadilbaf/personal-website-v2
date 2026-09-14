@@ -34,7 +34,11 @@ export async function proxy(request: NextRequest) {
   const hasLocale = pathname.startsWith("/en") || pathname.startsWith("/id");
   const isApiRoute = pathname.startsWith("/api");
   const isStorageRoute = pathname.startsWith("/storage") || pathname.startsWith("/storage/");
-  const isCvRoute = pathname === "/cv" || pathname === "/cv.pdf";
+  const isCvRoute =
+    pathname === "/cv" ||
+    pathname === "/cv.pdf" ||
+    pathname === "/Hasan-Fadlullah-CV.pdf" ||
+    pathname.startsWith("/cv/");
   const isStaticFile = pathname.includes(".");
 
   // 3. MAIN DOMAIN (Production non-admin): Block /login, /dashboard, and /admin routes with 404

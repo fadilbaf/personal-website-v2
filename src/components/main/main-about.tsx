@@ -970,7 +970,7 @@ export function MainAbout({
           isOpen={isCvPdfOpen}
           onClose={() => setIsCvPdfOpen(false)}
           pdfUrl="/cv"
-          fileName="Hasan-Fadlullah-CV.pdf"
+          fileName="Hasan-Fadlullah-CV"
         />
       )}
     </section>

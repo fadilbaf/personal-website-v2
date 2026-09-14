@@ -109,6 +109,15 @@ export async function GET(request: NextRequest) {
       // Fallback to default CV URL if query fails
     }
 
+    // Ensure cvUrl is a full absolute URL for server-side fetch
+    let targetFetchUrl = cvUrl;
+    if (targetFetchUrl.startsWith("/storage/")) {
+      const assetPath = targetFetchUrl.replace(/^\/storage\//, "");
+      targetFetchUrl = `https://uiotodwgeplnmxbfsloi.supabase.co/storage/v1/object/public/assets/${assetPath}`;
+    } else if (!targetFetchUrl.startsWith("http://") && !targetFetchUrl.startsWith("https://")) {
+      targetFetchUrl = `https://uiotodwgeplnmxbfsloi.supabase.co/storage/v1/object/public/assets/${targetFetchUrl.replace(/^\/+/, "")}`;
+    }
+
     // Track analytics event in background
     try {
       const ip =
@@ -134,10 +143,24 @@ export async function GET(request: NextRequest) {
       // Silent error for analytics tracking
     }
 
-    // Fetch PDF file from Supabase Storage
-    const pdfResponse = await fetch(cvUrl, { cache: "no-store" });
-    if (!pdfResponse.ok) {
-      return NextResponse.redirect(cvUrl);
+    // Fetch PDF file from Supabase Storage with graceful retry
+    let pdfResponse: Response | null = null;
+    for (let attempt = 1; attempt <= 2; attempt++) {
+      try {
+        pdfResponse = await fetch(targetFetchUrl, { cache: "no-store" });
+        if (pdfResponse.ok) break;
+      } catch (fetchErr) {
+        if (attempt === 2) {
+          console.warn("Direct PDF fetch connection reset, redirecting:", fetchErr);
+          return NextResponse.redirect(targetFetchUrl);
+        }
+        await new Promise((res) => setTimeout(res, 200));
+      }
+    }
+
+    if (!pdfResponse || !pdfResponse.ok) {
+      console.warn("Direct PDF fetch failed with status:", pdfResponse?.status);
+      return NextResponse.redirect(targetFetchUrl);
     }
 
     const pdfBuffer = await pdfResponse.arrayBuffer();

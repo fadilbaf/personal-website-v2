@@ -817,6 +817,11 @@ export default function AboutPage() {
           isOpen={!!viewPdfUrl}
           onClose={() => setViewPdfUrl(null)}
           pdfUrl={viewPdfUrl}
+          fileName={
+            cvFile
+              ? cvFile.name
+              : "Hasan-Fadlullah-CV.pdf"
+          }
         />
       )}
     </>

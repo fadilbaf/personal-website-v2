@@ -29,6 +29,14 @@ const nextConfig: NextConfig = {
         destination: "/cv",
       },
       {
+        source: "/Hasan-Fadlullah-CV.pdf",
+        destination: "/cv",
+      },
+      {
+        source: "/cv/:path*",
+        destination: "/cv",
+      },
+      {
         source: "/storage/:path*",
         destination: "https://uiotodwgeplnmxbfsloi.supabase.co/storage/v1/object/public/assets/:path*",
       },

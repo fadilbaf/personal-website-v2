@@ -43,7 +43,7 @@ export const translations = {
       page_info: "Page {current} of {total}",
       location: "Location",
       image_viewer: {
-        close: "Close viewer",
+        close: "Close",
         prev: "Previous image",
         next: "Next image",
         view_index: "View image {index}",
@@ -88,9 +88,16 @@ export const translations = {
         placeholder: "Select date...",
       },
       pdf_viewer: {
-        close: "Close viewer",
+        close: "Close",
         open_tab: "Open in new tab",
+        download: "Download",
         loading: "Loading document...",
+        page: "Page",
+        zoom_in: "Zoom In",
+        zoom_out: "Zoom Out",
+        reset_zoom: "Reset Zoom",
+        load_error: "Unable to load PDF document in browser.",
+        open_file: "Open / Download File",
       },
       tags_input: {
         placeholder: "Add tags...",
@@ -575,7 +582,7 @@ export const translations = {
       page_info: "Halaman {current} dari {total}",
       location: "Lokasi",
       image_viewer: {
-        close: "Tutup penampil",
+        close: "Tutup",
         prev: "Gambar sebelumnya",
         next: "Gambar berikutnya",
         view_index: "Lihat gambar {index}",
@@ -620,9 +627,16 @@ export const translations = {
         placeholder: "Pilih tanggal...",
       },
       pdf_viewer: {
-        close: "Tutup penampil",
+        close: "Tutup",
         open_tab: "Buka di tab baru",
+        download: "Unduh",
         loading: "Memuat dokumen...",
+        page: "Halaman",
+        zoom_in: "Perbesar",
+        zoom_out: "Perkecil",
+        reset_zoom: "Reset Zoom",
+        load_error: "Gagal memuat dokumen PDF di browser.",
+        open_file: "Buka / Unduh File",
       },
       tags_input: {
         placeholder: "Tambah tag...",
