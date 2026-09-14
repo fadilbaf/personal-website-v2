@@ -198,7 +198,7 @@ export function DataTable<T>({
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="pl-9 bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800"
+            className="pl-9 bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
           />
         </div>
 
@@ -213,7 +213,7 @@ export function DataTable<T>({
                 "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
                 activeFilterCount > 0
                   ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
-                  : "bg-white hover:bg-neutral-50 active:bg-neutral-50 text-neutral-700 border-neutral-200 dark:bg-neutral-950 dark:hover:bg-neutral-900 dark:active:bg-neutral-900 dark:text-neutral-300 dark:border-neutral-800"
+                  : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800"
               )}
             >
               <Filter className="h-3.5 w-3.5" />
@@ -232,7 +232,7 @@ export function DataTable<T>({
 
             {/* Dropdown panel */}
             {isFilterOpen && computedFilters.length > 0 && (
-              <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-lg border border-neutral-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-popover transition-all duration-200">
+              <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 transition-all duration-200">
                 <div className="space-y-4">
                   {/* Header */}
                   <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
@@ -289,6 +289,7 @@ export function DataTable<T>({
                                         ...prev,
                                         [filter.key]: nextValue,
                                       }));
+                                      setIsFilterOpen(false);
                                       setPage(1);
                                     }
                                   }}
@@ -296,7 +297,7 @@ export function DataTable<T>({
                                     "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
                                     isSelected
                                       ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                      : "bg-neutral-50 hover:bg-neutral-100 active:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-900/50 dark:hover:bg-neutral-900 dark:active:bg-neutral-900 dark:text-neutral-400 dark:border-white/10"
+                                      : "bg-neutral-100/80 hover:bg-neutral-200/80 text-neutral-600 border-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-700/80 dark:text-neutral-300 dark:border-neutral-700/50"
                                   )}
                                 >
                                   {opt.label}

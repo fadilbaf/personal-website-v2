@@ -247,7 +247,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
               setSearch(e.target.value);
               setPage(1);
             }}
-            className="pl-9 h-9 text-sm bg-white dark:bg-neutral-950 border-neutral-200 dark:border-neutral-800"
+            className="pl-9 h-9 text-sm bg-white dark:bg-neutral-900 border-neutral-200 dark:border-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
           />
         </div>
 
@@ -260,8 +260,8 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
             className={cn(
               "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
               activeFilterCount > 0
-                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 dark:hover:bg-neutral-200"
-                : "bg-white hover:bg-neutral-50 text-neutral-700 border-neutral-200 dark:bg-neutral-950 dark:hover:bg-neutral-900 dark:text-neutral-300 dark:border-neutral-800"
+                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
+                : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800"
             )}
           >
             <Filter className="h-3.5 w-3.5" />
@@ -280,7 +280,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
 
           {/* Filter Dropdown panel */}
           {isFilterOpen && computedFilters.length > 0 && (
-            <div className="absolute right-0 top-full mt-2 z-50 min-w-[240px] w-max max-w-[calc(100vw-2rem)] sm:max-w-[340px] rounded-lg border border-neutral-200 bg-white p-4 shadow-lg dark:border-white/10 dark:bg-neutral-950 transition-all duration-200">
+            <div className="absolute right-0 top-full mt-2 z-50 min-w-[240px] w-max max-w-[calc(100vw-2rem)] sm:max-w-[340px] rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 transition-all duration-200">
               <div className="space-y-4">
                 {/* Header */}
                 <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
@@ -295,7 +295,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                         setIsFilterOpen(false);
                         setPage(1);
                       }}
-                      className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors cursor-pointer"
+                      className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
                     >
                       <RotateCcw className="h-3 w-3" />
                       {tMain(locale, "clear_all")}
@@ -333,7 +333,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                                   "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
                                   isSelected
                                     ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                    : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-900/50 dark:hover:bg-neutral-900 dark:text-neutral-400 dark:border-white/10"
+                                    : "bg-neutral-100/80 hover:bg-neutral-200/80 text-neutral-600 border-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-700/80 dark:text-neutral-300 dark:border-neutral-700/50"
                                 )}
                               >
                                 {opt.label}
@@ -357,7 +357,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                       setIsFilterOpen(false);
                       setPage(1);
                     }}
-                    className="flex-1 h-8 text-xs bg-white hover:bg-neutral-50 border-neutral-200 text-neutral-700 dark:bg-transparent dark:hover:bg-white/5 dark:border-white/10 dark:text-neutral-300 cursor-pointer"
+                    className="flex-1 h-8 text-xs bg-white hover:bg-neutral-100 active:bg-neutral-100 border-neutral-200 text-neutral-700 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:border-neutral-700 dark:text-neutral-200 cursor-pointer"
                   >
                     {tMain(locale, "reset")}
                   </Button>
@@ -368,7 +368,7 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
                       setIsFilterOpen(false);
                       setPage(1);
                     }}
-                    className="flex-1 h-8 text-xs bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 cursor-pointer"
+                    className="flex-1 h-8 text-xs bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 cursor-pointer"
                   >
                     {tMain(locale, "apply")}
                   </Button>

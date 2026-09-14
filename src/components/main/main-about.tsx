@@ -762,7 +762,7 @@ export function MainAbout({
                   onClick={(e) => handleCategoryClick(e, "all")}
                   className={`text-sm font-semibold transition-colors whitespace-nowrap px-3.5 py-1.5 rounded-lg ${
                     selectedCategory === "all"
-                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                       : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 active:text-neutral-900 active:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-white/10 dark:active:text-white dark:active:bg-white/10"
                   }`}
                 >
@@ -774,7 +774,7 @@ export function MainAbout({
                     onClick={(e) => handleCategoryClick(e, cat.id)}
                     className={`text-sm font-semibold transition-colors whitespace-nowrap px-3.5 py-1.5 rounded-lg ${
                       selectedCategory === cat.id
-                        ? "bg-black text-white dark:bg-white dark:text-black"
+                        ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                         : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 active:text-neutral-900 active:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-white/10 dark:active:text-white dark:active:bg-white/10"
                     }`}
                   >
@@ -886,7 +886,7 @@ export function MainAbout({
                 onClick={(e) => handleModalCategoryClick(e, "all")}
                 className={`text-sm font-semibold transition-colors whitespace-nowrap px-3.5 py-1.5 rounded-lg ${
                   selectedModalCategory === "all"
-                    ? "bg-black text-white dark:bg-white dark:text-black"
+                    ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                     : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 active:text-neutral-900 active:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-white/10 dark:active:text-white dark:active:bg-white/10"
                 }`}
               >
@@ -898,7 +898,7 @@ export function MainAbout({
                   onClick={(e) => handleModalCategoryClick(e, cat.id)}
                   className={`text-sm font-semibold transition-colors whitespace-nowrap px-3.5 py-1.5 rounded-lg ${
                     selectedModalCategory === cat.id
-                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                       : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 active:text-neutral-900 active:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-white/10 dark:active:text-white dark:active:bg-white/10"
                   }`}
                 >

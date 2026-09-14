@@ -278,7 +278,7 @@ export function MainExperience({
                     });
                   }}
                   className={`flex items-center gap-2 text-sm font-semibold transition-colors whitespace-nowrap px-4 py-2 rounded-lg ${activeTab === tab.id
-                      ? "bg-black text-white dark:bg-white dark:text-black"
+                      ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                       : "text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 active:text-neutral-900 active:bg-neutral-100 dark:text-neutral-400 dark:hover:text-white dark:hover:bg-white/10 dark:active:text-white dark:active:bg-white/10"
                     }`}
                 >
