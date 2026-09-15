@@ -70,11 +70,7 @@ export async function POST(req: Request) {
     if (dbError) {
       console.error("Database upsert error on newsletter_subscribers:", dbError);
       return NextResponse.json(
-        {
-          success: false,
-          error: dbError.message || "Failed to process subscription.",
-          details: dbError,
-        },
+        { success: false, error: "Failed to process subscription." },
         { status: 500 }
       );
     }
@@ -155,14 +151,10 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("Unexpected error in /api/newsletter/subscribe:", err);
     return NextResponse.json(
-      {
-        success: false,
-        error: err?.message || "An unexpected error occurred.",
-        stack: process.env.NODE_ENV === "development" ? err?.stack : undefined,
-      },
+      { success: false, error: "An unexpected error occurred." },
       { status: 500 }
     );
   }

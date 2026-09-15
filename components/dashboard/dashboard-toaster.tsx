@@ -1,10 +1,13 @@
 "use client";
 
 import { useTheme } from "next-themes";
+import { usePathname } from "next/navigation";
 import { Toaster as SonnerToaster } from "sonner";
 
 export function DashboardToaster() {
   const { resolvedTheme } = useTheme();
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/login" || pathname?.startsWith("/login");
 
   return (
     <SonnerToaster
@@ -13,8 +16,16 @@ export function DashboardToaster() {
       closeButton
       expand={true}
       theme={resolvedTheme as "light" | "dark" | "system"}
-      offset={{ top: "68px", right: "16px" }}
-      mobileOffset={{ top: "68px", left: "16px", right: "16px" }}
+      offset={
+        isLoginPage
+          ? { top: "16px", right: "16px" }
+          : { top: "68px", right: "16px" }
+      }
+      mobileOffset={
+        isLoginPage
+          ? { top: "16px", left: "16px", right: "16px" }
+          : { top: "68px", left: "16px", right: "16px" }
+      }
       toastOptions={{
         className: "font-sans pr-10",
         classNames: {
