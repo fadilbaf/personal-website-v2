@@ -103,34 +103,32 @@ export function LinksContact({ locale }: LinksContactProps) {
 
   const onSubmit = async (data: ContactFormData) => {
     try {
-      const accessKey = process.env.WEB3FORMS_ACCESS_KEY || process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY;
-      if (!accessKey) {
-        toast.error(tLinks(locale, "message_failed"));
-        return;
-      }
-
-      const response = await fetch("https://api.web3forms.com/submit", {
+      const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          access_key: accessKey,
           name: data.name,
           email: data.email,
-          subject: `[Get In Touch] ${data.subject}`,
+          subject: data.subject,
           message: data.message,
-          from_name: "Fadil Bafagih | Personal Website",
+          locale,
         }),
       });
 
       const result = await response.json();
 
-      if (result.success) {
+      if (response.ok && result.success) {
         toast.success(tLinks(locale, "message_sent"), {
           description: tLinks(locale, "message_sent_desc"),
         });
-        reset();
+        reset({
+          name: "",
+          email: "",
+          subject: "",
+          message: "",
+        });
       } else {
-        throw new Error(result.message);
+        throw new Error(result.error || "Failed to send message");
       }
     } catch {
       toast.error(tLinks(locale, "message_failed"), {

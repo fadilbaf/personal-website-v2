@@ -13,11 +13,8 @@ export function LinksToaster() {
       closeButton
       expand={true}
       theme={resolvedTheme as "light" | "dark" | "system"}
-      offset={{ top: "76px", right: "16px" }}
+      offset={{ top: "16px", right: "16px" }}
       mobileOffset={{ top: "76px", left: "16px", right: "16px" }}
-      style={{
-        top: "76px",
-      }}
       toastOptions={{
         className: "font-sans pr-10",
         classNames: {
