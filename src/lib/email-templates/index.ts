@@ -31,6 +31,12 @@ export interface TemplateField {
   defaultValue: any;
 }
 
+export interface AvailableVariable {
+  key: string;
+  label: string;
+  description: string;
+}
+
 export interface EmailTemplateDefinition {
   id: TemplateId;
   name: string;
@@ -39,8 +45,10 @@ export interface EmailTemplateDefinition {
   sender: string;
   defaultSubject: string;
   fields: TemplateField[];
+  availableVariables: AvailableVariable[];
   supportsLocale: boolean;
   renderHtml: (params: Record<string, any>, locale?: "en" | "id") => string;
+  getDefaultRawTemplate: (locale?: "en" | "id") => string;
 }
 
 export function htmlToPlainText(html: string): string {
@@ -93,8 +101,15 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Contact",
     description: "Instant notification email delivered to the admin when a website visitor submits the contact form.",
     sender: EMAIL_SENDERS.NOREPLY,
-    defaultSubject: "📬 New Message: Partnership & AI Project",
+    defaultSubject: "📬 New Contact Message: {{subject}}",
     supportsLocale: false,
+    availableVariables: [
+      { key: "name", label: "{{name}}", description: "Visitor full name" },
+      { key: "email", label: "{{email}}", description: "Visitor email address" },
+      { key: "subject", label: "{{subject}}", description: "Visitor subject" },
+      { key: "message", label: "{{message}}", description: "Visitor message body" },
+      { key: "receivedAt", label: "{{receivedAt}}", description: "Submission timestamp" },
+    ],
     fields: [
       { key: "name", label: "Visitor Name", type: "text", defaultValue: "Sarah Jenkins" },
       { key: "email", label: "Visitor Email", type: "text", defaultValue: "sarah.jenkins@company.com" },
@@ -116,6 +131,14 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         message: params.message || "Hello Fadil!",
         receivedAt: params.receivedAt || new Date().toLocaleString(),
       }),
+    getDefaultRawTemplate: () =>
+      renderContactNotificationEmail({
+        name: "{{name}}",
+        email: "{{email}}",
+        subject: "{{subject}}",
+        message: "{{message}}",
+        receivedAt: "{{receivedAt}}",
+      }),
   },
   {
     id: "contact_autoreply",
@@ -125,6 +148,10 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     sender: EMAIL_SENDERS.NOREPLY,
     defaultSubject: "Thank you for reaching out! — Fadil Bafagih",
     supportsLocale: true,
+    availableVariables: [
+      { key: "name", label: "{{name}}", description: "Visitor full name" },
+      { key: "subject", label: "{{subject}}", description: "Inquiry subject" },
+    ],
     fields: [
       { key: "name", label: "Visitor Name", type: "text", defaultValue: "Sarah Jenkins" },
       { key: "subject", label: "Original Subject", type: "text", defaultValue: "Partnership & AI Project Inquiry" },
@@ -135,6 +162,12 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         subject: params.subject || "Partnership & AI Project Inquiry",
         locale,
       }),
+    getDefaultRawTemplate: (locale = "en") =>
+      renderContactAutoReplyEmail({
+        name: "{{name}}",
+        subject: "{{subject}}",
+        locale,
+      }),
   },
   {
     id: "contact_reply",
@@ -142,8 +175,15 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Contact",
     description: "Direct personal response sent from admin to visitor from within the dashboard messages interface.",
     sender: EMAIL_SENDERS.PERSONAL,
-    defaultSubject: "Re: Partnership & AI Project Inquiry",
+    defaultSubject: "Re: {{originalSubject}}",
     supportsLocale: false,
+    availableVariables: [
+      { key: "recipientName", label: "{{recipientName}}", description: "Visitor recipient name" },
+      { key: "subject", label: "{{subject}}", description: "Reply subject" },
+      { key: "replyMessage", label: "{{replyMessage}}", description: "Admin reply body" },
+      { key: "originalSubject", label: "{{originalSubject}}", description: "Original visitor subject" },
+      { key: "originalMessage", label: "{{originalMessage}}", description: "Original visitor message" },
+    ],
     fields: [
       { key: "recipientName", label: "Recipient Name", type: "text", defaultValue: "Sarah Jenkins" },
       { key: "subject", label: "Reply Subject", type: "text", defaultValue: "Re: Partnership & AI Project Inquiry" },
@@ -170,6 +210,14 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         originalMessage: params.originalMessage,
         originalSubject: params.originalSubject,
       }),
+    getDefaultRawTemplate: () =>
+      renderContactReplyEmail({
+        recipientName: "{{recipientName}}",
+        subject: "{{subject}}",
+        replyMessage: "{{replyMessage}}",
+        originalMessage: "{{originalMessage}}",
+        originalSubject: "{{originalSubject}}",
+      }),
   },
   {
     id: "newsletter_welcome",
@@ -179,12 +227,20 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     sender: EMAIL_SENDERS.NOREPLY,
     defaultSubject: "Welcome to Fadil Bafagih's Newsletter! 🚀",
     supportsLocale: true,
+    availableVariables: [
+      { key: "email", label: "{{email}}", description: "Subscriber email address" },
+    ],
     fields: [
       { key: "email", label: "Subscriber Email", type: "text", defaultValue: "subscriber@example.com" },
     ],
     renderHtml: (params, locale = "en") =>
       renderNewsletterWelcomeEmail({
         email: params.email || "subscriber@example.com",
+        locale,
+      }),
+    getDefaultRawTemplate: (locale = "en") =>
+      renderNewsletterWelcomeEmail({
+        email: "{{email}}",
         locale,
       }),
   },
@@ -194,8 +250,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Newsletter",
     description: "Notification sent to the admin when a new subscriber joins the newsletter list.",
     sender: EMAIL_SENDERS.NOREPLY,
-    defaultSubject: "🎉 New Subscriber Joined Your Newsletter!",
+    defaultSubject: "🎉 New Subscriber: {{email}}",
     supportsLocale: false,
+    availableVariables: [
+      { key: "email", label: "{{email}}", description: "New subscriber email" },
+      { key: "totalSubscribers", label: "{{totalSubscribers}}", description: "Total active subscribers count" },
+      { key: "subscribedAt", label: "{{subscribedAt}}", description: "Subscription timestamp" },
+    ],
     fields: [
       { key: "email", label: "Subscriber Email", type: "text", defaultValue: "new_reader@domain.com" },
       { key: "totalSubscribers", label: "Total Subscribers", type: "number", defaultValue: 42 },
@@ -207,6 +268,12 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         totalSubscribers: Number(params.totalSubscribers) || 42,
         subscribedAt: params.subscribedAt || new Date().toLocaleString(),
       }),
+    getDefaultRawTemplate: () =>
+      renderNewsletterAdminNotificationEmail({
+        email: "{{email}}",
+        totalSubscribers: Number("{{totalSubscribers}}") || 42,
+        subscribedAt: "{{subscribedAt}}",
+      }),
   },
   {
     id: "newsletter_broadcast",
@@ -214,8 +281,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Newsletter",
     description: "Standard broadcast layout for sending blog updates, project launches, or general newsletters to all subscribers.",
     sender: EMAIL_SENDERS.NEWSLETTER,
-    defaultSubject: "🚀 Next.js 15 Deep Dive & Full Stack Patterns",
+    defaultSubject: "🚀 {{subject}}",
     supportsLocale: false,
+    availableVariables: [
+      { key: "subject", label: "{{subject}}", description: "Broadcast campaign subject" },
+      { key: "contentHtml", label: "{{contentHtml}}", description: "Broadcast main body HTML" },
+      { key: "recipientEmail", label: "{{recipientEmail}}", description: "Subscriber recipient email" },
+    ],
     fields: [
       { key: "subject", label: "Broadcast Subject", type: "text", defaultValue: "🚀 Next.js 15 Deep Dive & Full Stack Patterns" },
       {
@@ -245,6 +317,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         type: (params.type as any) || "blog",
         recipientEmail: params.recipientEmail || "subscriber@example.com",
         contentHtml: params.contentHtml || "<p>Welcome to our update!</p>",
+      }),
+    getDefaultRawTemplate: () =>
+      renderNewsletterBroadcastEmail({
+        subject: "{{subject}}",
+        type: "general",
+        recipientEmail: "{{recipientEmail}}",
+        contentHtml: "{{contentHtml}}",
       }),
   },
 ];

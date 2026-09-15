@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/src/services/supabase/server";
 import { resend, EMAIL_SENDERS, getAdminNotificationEmail } from "@/src/lib/resend";
-import { renderNewsletterBroadcastEmail } from "@/src/lib/email-templates/newsletter-broadcast-email";
+import { resolveEmailTemplate } from "@/src/lib/email-templates/resolver";
 
 const broadcastSchema = z.object({
   subject: z.string().trim().min(1, "Subject is required").max(200),
@@ -55,16 +55,21 @@ export async function POST(req: Request) {
     // 2. If test mode: send single email to testEmail or dynamic admin email
     if (testOnly) {
       const recipient = testEmail || (await getAdminNotificationEmail());
-      const res = await resend.emails.send({
-        from: EMAIL_SENDERS.NEWSLETTER,
-        to: recipient,
-        subject: `[TEST] ${subject}`,
-        html: renderNewsletterBroadcastEmail({
+      const resolved = await resolveEmailTemplate({
+        slug: "newsletter_broadcast",
+        variables: {
           subject: `[TEST] ${subject}`,
           contentHtml,
           type,
           recipientEmail: recipient,
-        }),
+        },
+      });
+
+      const res = await resend.emails.send({
+        from: resolved.sender || EMAIL_SENDERS.NEWSLETTER,
+        to: recipient,
+        subject: `[TEST] ${subject}`,
+        html: resolved.html,
       });
 
       if (res.error) {
@@ -107,16 +112,21 @@ export async function POST(req: Request) {
       await Promise.allSettled(
         chunk.map(async (sub) => {
           try {
-            const sendResult = await resend.emails.send({
-              from: EMAIL_SENDERS.NEWSLETTER,
-              to: sub.email,
-              subject,
-              html: renderNewsletterBroadcastEmail({
+            const resolved = await resolveEmailTemplate({
+              slug: "newsletter_broadcast",
+              variables: {
                 subject,
                 contentHtml,
                 type,
                 recipientEmail: sub.email,
-              }),
+              },
+            });
+
+            const sendResult = await resend.emails.send({
+              from: resolved.sender || EMAIL_SENDERS.NEWSLETTER,
+              to: sub.email,
+              subject,
+              html: resolved.html,
             });
             if (sendResult.data) {
               successCount++;

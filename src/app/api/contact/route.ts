@@ -6,8 +6,7 @@ import {
   EMAIL_SENDERS,
   getAdminNotificationEmail,
 } from "@/src/lib/resend";
-import { renderContactNotificationEmail } from "@/src/lib/email-templates/contact-notification-email";
-import { renderContactAutoReplyEmail } from "@/src/lib/email-templates/contact-autoreply-email";
+import { resolveEmailTemplate } from "@/src/lib/email-templates/resolver";
 
 const contactSubmissionSchema = z.object({
   name: z.string().trim().min(1, "Name is required").max(100),
@@ -69,18 +68,23 @@ export async function POST(req: Request) {
     // 3. Send Admin Notification Email via Resend
     try {
       if (process.env.RESEND_API_KEY) {
-        const adminRes = await resend.emails.send({
-          from: EMAIL_SENDERS.NOREPLY,
-          to: adminEmail,
-          replyTo: email,
-          subject: `[Contact Form] ${subject} - from ${name}`,
-          html: renderContactNotificationEmail({
+        const resolvedAdmin = await resolveEmailTemplate({
+          slug: "contact_notification",
+          variables: {
             name,
             email,
             subject,
             message,
             receivedAt: `${receivedAtFormatted} (WIB)`,
-          }),
+          },
+        });
+
+        const adminRes = await resend.emails.send({
+          from: resolvedAdmin.sender || EMAIL_SENDERS.NOREPLY,
+          to: adminEmail,
+          replyTo: email,
+          subject: `[Contact Form] ${subject} - from ${name}`,
+          html: resolvedAdmin.html,
         });
 
         if (adminRes.error) {
@@ -90,18 +94,23 @@ export async function POST(req: Request) {
         }
 
         // 4. Send Auto-Reply Confirmation Email to Visitor
+        const resolvedVisitor = await resolveEmailTemplate({
+          slug: "contact_autoreply",
+          variables: {
+            name,
+            subject,
+          },
+          locale: locale === "id" ? "id" : "en",
+        });
+
         const visitorRes = await resend.emails.send({
-          from: EMAIL_SENDERS.NOREPLY,
+          from: resolvedVisitor.sender || EMAIL_SENDERS.NOREPLY,
           to: email,
           subject:
             locale === "id"
               ? `Pesan Anda telah diterima: "${subject}"`
               : `Message received: "${subject}"`,
-          html: renderContactAutoReplyEmail({
-            name,
-            subject,
-            locale,
-          }),
+          html: resolvedVisitor.html,
         });
 
         if (visitorRes.error) {

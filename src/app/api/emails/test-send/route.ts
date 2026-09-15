@@ -4,11 +4,15 @@ import { createClient } from "@/src/services/supabase/server";
 import { resend, EMAIL_SENDERS, getAdminNotificationEmail } from "@/src/lib/resend";
 import { EMAIL_TEMPLATES } from "@/src/lib/email-templates";
 
+import { compileTemplate } from "@/src/lib/email-templates/resolver";
+
 const testSendSchema = z.object({
   templateId: z.string(),
   recipientEmail: z.string().email("Valid email is required"),
   variables: z.record(z.string(), z.any()).default({}),
   locale: z.enum(["en", "id"]).default("en"),
+  customHtml: z.string().optional(),
+  customSubject: z.string().optional(),
 });
 
 export async function POST(req: Request) {
@@ -42,7 +46,8 @@ export async function POST(req: Request) {
       );
     }
 
-    const { templateId, recipientEmail, variables, locale } = validated.data;
+    const { templateId, recipientEmail, variables, locale, customHtml, customSubject } =
+      validated.data;
 
     const template = EMAIL_TEMPLATES.find((t) => t.id === templateId);
     if (!template) {
@@ -59,8 +64,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const html = template.renderHtml(variables, locale);
-    const subject = `[TEST] ${variables.subject || template.defaultSubject}`;
+    let html: string;
+    let rawSubject: string;
+
+    if (customHtml && customHtml.trim().length > 0) {
+      html = compileTemplate(customHtml, variables);
+      rawSubject = customSubject || template.defaultSubject;
+    } else {
+      html = template.renderHtml(variables, locale);
+      rawSubject = variables.subject || template.defaultSubject;
+    }
+
+    const subject = `[TEST] ${compileTemplate(rawSubject, variables)}`;
 
     const res = await resend.emails.send({
       from: template.sender,

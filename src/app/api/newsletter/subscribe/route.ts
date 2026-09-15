@@ -6,8 +6,7 @@ import {
   EMAIL_SENDERS,
   getAdminNotificationEmail,
 } from "@/src/lib/resend";
-import { renderNewsletterAdminNotificationEmail } from "@/src/lib/email-templates/newsletter-admin-notification-email";
-import { renderNewsletterWelcomeEmail } from "@/src/lib/email-templates/newsletter-welcome-email";
+import { resolveEmailTemplate } from "@/src/lib/email-templates/resolver";
 
 const subscribeSchema = z.object({
   email: z.string().trim().email("Invalid email address").toLowerCase(),
@@ -95,17 +94,20 @@ export async function POST(req: Request) {
     try {
       if (process.env.RESEND_API_KEY) {
         // Send Welcome Email to Subscriber
+        const resolvedWelcome = await resolveEmailTemplate({
+          slug: "newsletter_welcome",
+          variables: { email },
+          locale: locale === "id" ? "id" : "en",
+        });
+
         const welcomeRes = await resend.emails.send({
-          from: EMAIL_SENDERS.NOREPLY,
+          from: resolvedWelcome.sender || EMAIL_SENDERS.NOREPLY,
           to: email,
           subject:
             locale === "id"
               ? "Selamat Datang di Newsletter Fadil Bafagih 🎉"
               : "Welcome to Fadil Bafagih's Newsletter 🎉",
-          html: renderNewsletterWelcomeEmail({
-            email,
-            locale,
-          }),
+          html: resolvedWelcome.html,
         });
 
         if (welcomeRes.error) {
@@ -115,15 +117,20 @@ export async function POST(req: Request) {
         }
 
         // Send Notification Email to Admin
-        const adminRes = await resend.emails.send({
-          from: EMAIL_SENDERS.NOREPLY,
-          to: adminEmail,
-          subject: `[New Subscriber] ${email} just joined your newsletter!`,
-          html: renderNewsletterAdminNotificationEmail({
+        const resolvedAdmin = await resolveEmailTemplate({
+          slug: "newsletter_admin_notification",
+          variables: {
             email,
             totalSubscribers: totalActive || 1,
             subscribedAt: `${subscribedAtFormatted} (WIB)`,
-          }),
+          },
+        });
+
+        const adminRes = await resend.emails.send({
+          from: resolvedAdmin.sender || EMAIL_SENDERS.NOREPLY,
+          to: adminEmail,
+          subject: `[New Subscriber] ${email} just joined your newsletter!`,
+          html: resolvedAdmin.html,
         });
 
         if (adminRes.error) {

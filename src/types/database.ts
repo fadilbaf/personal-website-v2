@@ -329,3 +329,17 @@ export interface NewsletterCampaign {
   created_at: string;
   updated_at: string;
 }
+
+export interface EmailTemplate {
+  id: string;
+  slug: string;
+  name: string;
+  category: "Contact" | "Newsletter";
+  subject: string;
+  html_content: string;
+  description: string | null;
+  sender: string | null;
+  created_at: string;
+  updated_at: string;
+}
+

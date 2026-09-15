@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { createClient } from "@/src/services/supabase/server";
 import { resend, EMAIL_SENDERS } from "@/src/lib/resend";
-import { renderContactReplyEmail } from "@/src/lib/email-templates/contact-reply-email";
+import { resolveEmailTemplate } from "@/src/lib/email-templates/resolver";
 
 const replySchema = z.object({
   messageId: z.string().uuid("Invalid message ID"),
@@ -65,18 +65,23 @@ export async function POST(req: Request) {
       );
     }
 
-    const emailResponse = await resend.emails.send({
-      from: EMAIL_SENDERS.PERSONAL,
-      to: original.email,
-      replyTo: "fadil@bafagih.id",
-      subject: replySubject,
-      html: renderContactReplyEmail({
+    const resolved = await resolveEmailTemplate({
+      slug: "contact_reply",
+      variables: {
         recipientName: original.name,
         subject: replySubject,
         replyMessage,
         originalMessage: original.message,
         originalSubject: original.subject,
-      }),
+      },
+    });
+
+    const emailResponse = await resend.emails.send({
+      from: resolved.sender || EMAIL_SENDERS.PERSONAL,
+      to: original.email,
+      replyTo: "fadil@bafagih.id",
+      subject: replySubject,
+      html: resolved.html,
     });
 
     if (emailResponse.error) {
