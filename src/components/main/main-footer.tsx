@@ -113,10 +113,23 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
     
     setLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-      toast.success(tMain(locale, "newsletter_success"));
-      setEmail("");
+      const response = await fetch("/api/newsletter/subscribe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: trimmedEmail,
+          locale,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        toast.success(result.message || tMain(locale, "newsletter_success"));
+        setEmail("");
+      } else {
+        toast.error(result.error || tMain(locale, "newsletter_error"));
+      }
     } catch {
       toast.error(tMain(locale, "newsletter_error"));
     } finally {

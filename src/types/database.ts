@@ -285,3 +285,47 @@ export interface Statistics {
   total_educations: number;
   total_organizations: number;
 }
+
+// --- Messages & Newsletter ---
+export type MessageStatus = "unread" | "read" | "replied" | "archived";
+
+export interface ContactMessage {
+  id: string;
+  name: string;
+  email: string;
+  subject: string;
+  message: string;
+  is_read: boolean;
+  status: MessageStatus;
+  replied_at: string | null;
+  reply_content: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type SubscriberStatus = "active" | "unsubscribed";
+
+export interface NewsletterSubscriber {
+  id: string;
+  email: string;
+  status: SubscriberStatus;
+  subscribed_at: string;
+  unsubscribed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export type CampaignType = "general" | "blog" | "project" | "achievement";
+export type CampaignStatus = "draft" | "sending" | "sent" | "failed";
+
+export interface NewsletterCampaign {
+  id: string;
+  subject: string;
+  content: string;
+  type: CampaignType;
+  sent_count: number;
+  status: CampaignStatus;
+  sent_at: string | null;
+  created_at: string;
+  updated_at: string;
+}

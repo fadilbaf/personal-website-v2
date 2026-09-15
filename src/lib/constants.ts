@@ -9,6 +9,9 @@ import {
   Trophy,
   FileText,
   Mail,
+  Mails,
+  Inbox,
+  Newspaper,
   Link,
 } from "lucide-react";
 
@@ -83,6 +86,16 @@ export const DASHBOARD_NAV: NavItem[] = [
       { title: "List", href: "/dashboard/blogs/list" },
       { title: "Types", href: "/dashboard/blogs/types" },
       { title: "Categories", href: "/dashboard/blogs/categories" },
+    ],
+  },
+  {
+    title: "Emails",
+    href: "/dashboard/emails",
+    icon: Mails,
+    children: [
+      { title: "Messages", href: "/dashboard/emails/messages" },
+      { title: "Newsletter", href: "/dashboard/emails/newsletter" },
+      { title: "Templates", href: "/dashboard/emails/templates" },
     ],
   },
   {
