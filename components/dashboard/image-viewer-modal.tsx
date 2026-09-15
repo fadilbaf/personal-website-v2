@@ -192,7 +192,7 @@ export function ImageViewerModal({
         {/* Premium Glassmorphic Backdrop */}
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer touch-none"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer touch-none animate-in fade-in duration-200"
         />
 
         {/* Floating Filename Display (Top-Left) */}

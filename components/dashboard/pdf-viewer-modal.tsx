@@ -342,7 +342,7 @@ export function PdfViewerModal({
         {/* Backdrop Blur */}
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/60 backdrop-blur-xs cursor-pointer touch-none animate-in fade-in duration-200"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer touch-none animate-in fade-in duration-200"
         />
 
         {/* Modal PDF Sheet Container */}

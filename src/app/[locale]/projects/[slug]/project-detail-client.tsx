@@ -953,7 +953,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
           {/* Glassmorphic Backdrop */}
           <div
             onClick={() => setVideoOpen(false)}
-            className="fixed inset-0 bg-black/10 backdrop-blur-xs cursor-pointer"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer touch-none animate-in fade-in duration-200"
           />
 
           {/* Close Button (Top-Right) */}
@@ -1022,7 +1022,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
             {/* Premium Glassmorphic Backdrop */}
             <div
               onClick={() => setViewerOpen(false)}
-              className="fixed inset-0 bg-black/40 backdrop-blur-xs cursor-pointer touch-none"
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm cursor-pointer touch-none animate-in fade-in duration-200"
             />
 
             {/* Floating Control Buttons (Top-Right) */}
