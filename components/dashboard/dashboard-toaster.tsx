@@ -13,6 +13,8 @@ export function DashboardToaster() {
       closeButton
       expand={true}
       theme={resolvedTheme as "light" | "dark" | "system"}
+      offset={{ top: "68px", right: "16px" }}
+      mobileOffset={{ top: "68px", left: "16px", right: "16px" }}
       toastOptions={{
         className: "font-sans pr-10",
         classNames: {

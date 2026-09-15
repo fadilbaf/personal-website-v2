@@ -208,17 +208,6 @@
 }
 
 /* Sonner Toast Customization */
-[data-sonner-toaster] {
-  --offset: 76px !important;
-  --mobile-offset: 76px !important;
-}
-
-@media (max-width: 600px) {
-  [data-sonner-toaster][data-y-position="top"] {
-    top: 76px !important;
-  }
-}
-
 [data-sonner-toast] {
   --normal-bg: var(--background) !important;
   --normal-border: var(--border) !important;
