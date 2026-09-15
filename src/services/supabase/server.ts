@@ -6,11 +6,18 @@ import { cookies } from "next/headers";
  * Reads/writes auth tokens via Next.js cookies.
  */
 export async function createClient() {
+  const url = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!url || !key) {
+    throw new Error(`Supabase environment variables missing: SUPABASE_URL=${Boolean(url)}, SUPABASE_ANON_KEY=${Boolean(key)}`);
+  }
+
   const cookieStore = await cookies();
 
   return createServerClient(
-    (process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL)!,
-    (process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY)!,
+    url,
+    key,
     {
       cookies: {
         getAll() {

@@ -50,7 +50,11 @@ export async function POST(req: Request) {
     if (dbError) {
       console.error("Database insert error on contact_messages:", dbError);
       return NextResponse.json(
-        { success: false, error: "Failed to save message." },
+        {
+          success: false,
+          error: dbError.message || "Failed to save message.",
+          details: dbError,
+        },
         { status: 500 }
       );
     }
@@ -130,10 +134,14 @@ export async function POST(req: Request) {
       },
       { status: 201 }
     );
-  } catch (err: unknown) {
+  } catch (err: any) {
     console.error("Unexpected error in /api/contact:", err);
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred." },
+      {
+        success: false,
+        error: err?.message || "An unexpected error occurred.",
+        stack: process.env.NODE_ENV === "development" ? err?.stack : undefined,
+      },
       { status: 500 }
     );
   }
