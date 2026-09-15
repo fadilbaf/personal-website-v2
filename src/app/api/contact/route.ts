@@ -36,7 +36,7 @@ export async function POST(req: Request) {
     const supabase = await createClient();
 
     // 1. Save to Supabase
-    const { data: insertedMessage, error: dbError } = await supabase
+    const { error: dbError } = await supabase
       .from("contact_messages")
       .insert({
         name,
@@ -45,9 +45,7 @@ export async function POST(req: Request) {
         message,
         is_read: false,
         status: "unread",
-      })
-      .select()
-      .single();
+      });
 
     if (dbError) {
       console.error("Database insert error on contact_messages:", dbError);
@@ -129,7 +127,6 @@ export async function POST(req: Request) {
       {
         success: true,
         message: "Message sent successfully.",
-        data: insertedMessage,
       },
       { status: 201 }
     );

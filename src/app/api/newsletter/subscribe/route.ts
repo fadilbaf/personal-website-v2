@@ -54,7 +54,7 @@ export async function POST(req: Request) {
 
     // 2. Upsert subscriber (new subscription or reactivation)
     const now = new Date().toISOString();
-    const { data: subscriber, error: dbError } = await supabase
+    const { error: dbError } = await supabase
       .from("newsletter_subscribers")
       .upsert(
         {
@@ -65,9 +65,7 @@ export async function POST(req: Request) {
           updated_at: now,
         },
         { onConflict: "email" }
-      )
-      .select()
-      .single();
+      );
 
     if (dbError) {
       console.error("Database upsert error on newsletter_subscribers:", dbError);
@@ -150,7 +148,6 @@ export async function POST(req: Request) {
           locale === "id"
             ? "Terima kasih telah berlangganan newsletter!"
             : "Thank you for subscribing to the newsletter!",
-        data: subscriber,
       },
       { status: 201 }
     );
