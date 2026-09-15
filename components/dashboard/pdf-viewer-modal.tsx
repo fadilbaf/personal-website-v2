@@ -355,11 +355,11 @@ export function PdfViewerModal({
           )}
         >
           {/* Custom Control Toolbar Header */}
-          <div className="h-16 px-4 sm:px-6 bg-white dark:bg-neutral-900 border-b border-neutral-200/80 dark:border-neutral-800 flex items-center justify-between gap-3 shrink-0">
+          <div className="h-14 sm:h-16 px-4 sm:px-6 bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-white/10 flex items-center justify-between gap-3 shrink-0">
             {/* Left: PDF Info */}
             <div className="flex items-center gap-2.5 min-w-0">
-              <div className="p-2 bg-neutral-100 dark:bg-neutral-800 rounded-xl flex items-center justify-center shrink-0">
-                <FileText className="w-4 h-4 text-neutral-700 dark:text-neutral-300" />
+              <div className="h-8 w-8 rounded-lg border border-neutral-200 dark:border-white/10 bg-neutral-100/80 dark:bg-neutral-800/80 flex items-center justify-center shrink-0">
+                <FileText className="h-4 w-4 text-neutral-700 dark:text-neutral-300" />
               </div>
               <span className="font-sans font-medium text-xs sm:text-sm text-neutral-900 dark:text-neutral-100 truncate">
                 {displayFileName}
@@ -376,17 +376,18 @@ export function PdfViewerModal({
                     onClick={handleDownload}
                     disabled={isDownloading}
                     className={cn(
-                      "flex items-center justify-center p-2 sm:p-2.5 rounded-xl border transition-all duration-200 cursor-pointer outline-none",
-                      "border-neutral-200 hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700",
-                      "dark:border-neutral-800 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:hover:text-white",
+                      "h-8 w-8 flex items-center justify-center rounded-lg border transition-colors cursor-pointer outline-none focus:outline-none",
+                      "border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-neutral-950/50 backdrop-blur-md",
+                      "hover:bg-neutral-100/80 active:bg-neutral-100/80 dark:hover:bg-neutral-800/80 dark:active:bg-neutral-800/80",
+                      "text-neutral-900 dark:text-neutral-100",
                       "disabled:opacity-60 disabled:cursor-not-allowed"
                     )}
                     aria-label={t("common.pdf_viewer.download")}
                   >
                     {isDownloading ? (
-                      <Loader2 className="w-4 h-4 animate-spin text-neutral-500" />
+                      <Loader2 className="h-4 w-4 animate-spin text-neutral-500" />
                     ) : (
-                      <Download className="w-4 h-4" />
+                      <Download className="h-4 w-4" />
                     )}
                   </button>
                 </TooltipTrigger>
@@ -407,13 +408,14 @@ export function PdfViewerModal({
                       trackEvent("cv_download", "pdf_modal_open_tab");
                     }}
                     className={cn(
-                      "flex items-center justify-center p-2 sm:p-2.5 rounded-xl border transition-all duration-200 cursor-pointer outline-none",
-                      "border-neutral-200 hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700",
-                      "dark:border-neutral-800 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:hover:text-white"
+                      "h-8 w-8 flex items-center justify-center rounded-lg border transition-colors cursor-pointer outline-none focus:outline-none",
+                      "border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-neutral-950/50 backdrop-blur-md",
+                      "hover:bg-neutral-100/80 active:bg-neutral-100/80 dark:hover:bg-neutral-800/80 dark:active:bg-neutral-800/80",
+                      "text-neutral-900 dark:text-neutral-100"
                     )}
                     aria-label={t("common.pdf_viewer.open_tab")}
                   >
-                    <ExternalLink className="w-4 h-4" />
+                    <ExternalLink className="h-4 w-4" />
                   </a>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="z-70">
@@ -431,13 +433,14 @@ export function PdfViewerModal({
                     }}
                     type="button"
                     className={cn(
-                      "flex items-center justify-center p-2 sm:p-2.5 rounded-xl border transition-all duration-200 cursor-pointer outline-none",
-                      "border-neutral-200 hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700",
-                      "dark:border-neutral-800 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:hover:text-white"
+                      "h-8 w-8 flex items-center justify-center rounded-lg border transition-colors cursor-pointer outline-none focus:outline-none",
+                      "border-neutral-200 dark:border-white/10 bg-white/50 dark:bg-neutral-950/50 backdrop-blur-md",
+                      "hover:bg-neutral-100/80 active:bg-neutral-100/80 dark:hover:bg-neutral-800/80 dark:active:bg-neutral-800/80",
+                      "text-neutral-900 dark:text-neutral-100"
                     )}
                     aria-label={t("common.pdf_viewer.close")}
                   >
-                    <X className="w-4 h-4" />
+                    <X className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
                 <TooltipContent side="bottom" className="z-70">
