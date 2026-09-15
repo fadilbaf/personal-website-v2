@@ -9,17 +9,16 @@ import {
   Reply,
   Trash2,
   MoreHorizontal,
-  Clock,
   User,
   Send,
   Loader2,
-  CheckCircle2,
-  Search,
+  Mails,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { DataTable, type Column } from "@/components/dashboard/data-table";
 import { DeleteDialog } from "@/components/dashboard/delete-dialog";
+import { OverviewStatCard } from "@/components/dashboard/charts/overview-stat-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -48,8 +47,6 @@ export default function MessagesPage() {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
 
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-
   // Selected message for Detail Modal
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
@@ -66,25 +63,21 @@ export default function MessagesPage() {
   const [isDeleting, setIsDeleting] = useState(false);
 
   // Queries
-  const { data: messages = [], isLoading } = useQuery({
+  const {
+    data: messages = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["contact-messages"],
     queryFn: MessageService.getAll,
     meta: { resource: "sidebar.Messages" },
   });
 
-  // Calculate unread count
+  // Calculate statistics counts
+  const totalCount = messages.length;
   const unreadCount = messages.filter((m) => !m.is_read).length;
-
-  // Filtered messages
-  const filteredMessages = messages.filter((msg) => {
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "unread" && !msg.is_read) ||
-      (statusFilter === "read" && msg.is_read && msg.status !== "replied") ||
-      (statusFilter === "replied" && msg.status === "replied");
-
-    return matchesStatus;
-  });
+  const readCount = messages.filter((m) => m.is_read && m.status !== "replied").length;
+  const repliedCount = messages.filter((m) => m.status === "replied").length;
 
   const handleOpenDetail = async (msg: ContactMessage) => {
     setSelectedMessage(msg);
@@ -167,47 +160,31 @@ export default function MessagesPage() {
     }
   };
 
+  // Solid B&W status badges matching other pages, unread has pulse
   const renderStatusBadge = (status: MessageStatus, is_read: boolean) => {
     if (status === "replied") {
       return (
-        <Badge
-          variant="outline"
-          className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-medium"
-        >
-          <CheckCircle2 className="w-3 h-3 mr-1" />
+        <Badge variant="default" className="font-medium">
           {t("messages.status_replied")}
         </Badge>
       );
     }
     if (!is_read) {
       return (
-        <Badge
-          variant="outline"
-          className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-medium animate-pulse"
-        >
-          <Mail className="w-3 h-3 mr-1" />
+        <Badge variant="default" className="font-medium animate-pulse">
           {t("messages.status_unread")}
         </Badge>
       );
     }
     return (
-      <Badge
-        variant="outline"
-        className="bg-neutral-500/10 text-neutral-600 dark:text-neutral-400 border-neutral-500/20 font-medium"
-      >
-        <MailOpen className="w-3 h-3 mr-1" />
+      <Badge variant="secondary" className="font-medium">
         {t("messages.status_read")}
       </Badge>
     );
   };
 
+  // Columns: Sender -> Subject -> Received -> Status (next to Actions)
   const columns: Column<ContactMessage>[] = [
-    {
-      key: "status",
-      header: t("common.status"),
-      className: "w-32",
-      render: (msg) => renderStatusBadge(msg.status, msg.is_read),
-    },
     {
       key: "name",
       header: t("messages.sender"),
@@ -234,7 +211,7 @@ export default function MessagesPage() {
       header: t("messages.subject"),
       render: (msg) => (
         <div
-          className="flex flex-col max-w-[280px] cursor-pointer"
+          className="flex flex-col max-w-[320px] cursor-pointer"
           onClick={() => handleOpenDetail(msg)}
         >
           <span
@@ -255,7 +232,7 @@ export default function MessagesPage() {
     {
       key: "created_at",
       header: t("messages.received"),
-      className: "w-40",
+      className: "w-44",
       render: (msg) => {
         const date = new Date(msg.created_at);
         return (
@@ -272,83 +249,19 @@ export default function MessagesPage() {
       },
     },
     {
-      key: "id",
-      header: t("common.actions"),
-      className: "w-20 text-right",
-      render: (msg) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem
-              onClick={() => handleOpenDetail(msg)}
-              className="cursor-pointer"
-            >
-              <MailOpen className="h-4 w-4 mr-2" />
-              {t("messages.view_message")}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleOpenReply(msg)}
-              className="cursor-pointer"
-            >
-              <Reply className="h-4 w-4 mr-2" />
-              {t("messages.reply_message")}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              onClick={() => handleToggleReadStatus(msg)}
-              className="cursor-pointer"
-            >
-              {msg.is_read ? (
-                <>
-                  <Mail className="h-4 w-4 mr-2" />
-                  {t("messages.mark_as_unread")}
-                </>
-              ) : (
-                <>
-                  <CheckCircle2 className="h-4 w-4 mr-2" />
-                  {t("messages.mark_as_read")}
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => setDeleteItem(msg)}
-              className="cursor-pointer"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t("messages.delete_message")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      key: "status",
+      header: t("common.status"),
+      className: "w-32",
+      render: (msg) => renderStatusBadge(msg.status, msg.is_read),
     },
   ];
 
   return (
-    <>
+    <div className="space-y-6">
       <PageHeader
         title={t("messages.title")}
         icon={Inbox}
         description={t("messages.description")}
-        actions={
-          unreadCount > 0 ? (
-            <Badge
-              variant="outline"
-              className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20 font-medium px-3 py-1 text-xs"
-            >
-              <Mail className="w-3.5 h-3.5 mr-1.5" />
-              {t("messages.unread_count", { count: String(unreadCount) })}
-            </Badge>
-          ) : undefined
-        }
         breadcrumbs={[
           { label: t("dashboard.title"), href: "/dashboard" },
           { label: t("sidebar.Emails"), href: "/dashboard/emails/messages" },
@@ -356,56 +269,121 @@ export default function MessagesPage() {
         ]}
       />
 
-      <div className="space-y-4">
-        {/* Status Filter Tabs */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit">
-          {[
-            { id: "all", label: t("common.all") },
-            {
-              id: "unread",
-              label: `${t("messages.status_unread")}${
-                unreadCount > 0 ? ` (${unreadCount})` : ""
-              }`,
-            },
-            { id: "read", label: t("messages.status_read") },
-            { id: "replied", label: t("messages.status_replied") },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              onClick={() => setStatusFilter(tab.id)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
-                statusFilter === tab.id
-                  ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
-                  : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Data Table */}
-        <DataTable
-          columns={columns}
-          data={filteredMessages}
+      {/* Metric Statistics Cards with hover and animated numbers */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <OverviewStatCard
+          title={t("messages.total_messages")}
+          value={totalCount}
+          icon={Mails}
           loading={isLoading}
-          searchPlaceholder={t("messages.search_placeholder")}
-          pageSize={10}
+        />
+        <OverviewStatCard
+          title={t("messages.status_unread")}
+          value={unreadCount}
+          icon={Mail}
+          loading={isLoading}
+        />
+        <OverviewStatCard
+          title={t("messages.status_read")}
+          value={readCount}
+          icon={MailOpen}
+          loading={isLoading}
+        />
+        <OverviewStatCard
+          title={t("messages.status_replied")}
+          value={repliedCount}
+          icon={Reply}
+          loading={isLoading}
         />
       </div>
+
+      <DataTable
+        columns={columns}
+        data={messages}
+        loading={isLoading}
+        error={isError}
+        searchPlaceholder={t("messages.search_placeholder")}
+        pageSize={10}
+        filters={[
+          {
+            key: "status",
+            label: t("common.status"),
+            options: [
+              { label: t("messages.status_unread"), value: "unread" },
+              { label: t("messages.status_read"), value: "read" },
+              { label: t("messages.status_replied"), value: "replied" },
+            ],
+          },
+        ]}
+        actions={(msg) => (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10"
+              >
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuItem
+                onClick={() => handleOpenDetail(msg)}
+                className="cursor-pointer"
+              >
+                <MailOpen className="h-4 w-4 mr-2" />
+                {t("messages.view_message")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleOpenReply(msg)}
+                className="cursor-pointer"
+              >
+                <Reply className="h-4 w-4 mr-2" />
+                {t("messages.reply_message")}
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleToggleReadStatus(msg)}
+                className="cursor-pointer"
+              >
+                {msg.is_read ? (
+                  <>
+                    <Mail className="h-4 w-4 mr-2" />
+                    {t("messages.mark_as_unread")}
+                  </>
+                ) : (
+                  <>
+                    <MailOpen className="h-4 w-4 mr-2" />
+                    {t("messages.mark_as_read")}
+                  </>
+                )}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setDeleteItem(msg)}
+                className="cursor-pointer"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                {t("messages.delete_message")}
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      />
 
       {/* Message Detail Modal */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
         <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
           {selectedMessage && (
             <>
-              <DialogHeader className="space-y-2 border-b border-neutral-200 dark:border-white/10 pb-4">
-                <div className="flex items-center justify-between gap-2">
+              <DialogHeader className="space-y-2 border-b border-neutral-200 dark:border-white/10 pb-4 pr-10">
+                <div className="flex flex-wrap items-center justify-between gap-2">
                   {renderStatusBadge(
                     selectedMessage.status,
                     selectedMessage.is_read
                   )}
-                  <span className="text-xs text-neutral-400">
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400">
                     {new Date(selectedMessage.created_at).toLocaleString(
                       language === "id" ? "id-ID" : "en-US",
                       { dateStyle: "full", timeStyle: "short" }
@@ -432,7 +410,7 @@ export default function MessagesPage() {
 
               <div className="space-y-4 py-4">
                 <div>
-                  <Label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider block mb-2">
+                  <Label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block mb-2">
                     {t("messages.original_message")}
                   </Label>
                   <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
@@ -443,69 +421,40 @@ export default function MessagesPage() {
                 {selectedMessage.reply_content && (
                   <div className="pt-2">
                     <div className="flex items-center justify-between mb-2">
-                      <Label className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                        <CheckCircle2 className="h-3.5 w-3.5" />
+                      <Label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider flex items-center gap-1.5">
+                        <Reply className="h-3.5 w-3.5" />
                         {t("messages.reply_history")}
                       </Label>
                       {selectedMessage.replied_at && (
                         <span className="text-[11px] text-neutral-400">
-                          {t("messages.replied_at", {
-                            date: new Date(
-                              selectedMessage.replied_at
-                            ).toLocaleString(
-                              language === "id" ? "id-ID" : "en-US",
-                              { dateStyle: "medium", timeStyle: "short" }
-                            ),
-                          })}
+                          {new Date(selectedMessage.replied_at).toLocaleString(
+                            language === "id" ? "id-ID" : "en-US",
+                            { dateStyle: "medium", timeStyle: "short" }
+                          )}
                         </span>
                       )}
                     </div>
-                    <div className="bg-emerald-500/5 dark:bg-emerald-500/10 p-4 rounded-xl border border-emerald-500/20 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+                    <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
                       {selectedMessage.reply_content}
                     </div>
                   </div>
                 )}
               </div>
 
-              <DialogFooter className="flex flex-row items-center justify-between gap-2 border-t border-neutral-200 dark:border-white/10 pt-4">
+              <DialogFooter className="gap-3 sm:gap-2 border-t border-neutral-200 dark:border-white/10 pt-4">
                 <Button
                   variant="outline"
-                  size="sm"
-                  onClick={() => setDeleteItem(selectedMessage)}
-                  className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 cursor-pointer"
+                  onClick={() => setIsDetailOpen(false)}
                 >
-                  <Trash2 className="h-4 w-4 mr-1.5" />
-                  {t("common.delete")}
+                  {t("common.close")}
                 </Button>
-
-                <div className="flex items-center gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleToggleReadStatus(selectedMessage)}
-                    className="cursor-pointer"
-                  >
-                    {selectedMessage.is_read ? (
-                      <>
-                        <Mail className="h-4 w-4 mr-1.5" />
-                        {t("messages.mark_as_unread")}
-                      </>
-                    ) : (
-                      <>
-                        <MailOpen className="h-4 w-4 mr-1.5" />
-                        {t("messages.mark_as_read")}
-                      </>
-                    )}
-                  </Button>
-                  <Button
-                    size="sm"
-                    onClick={() => handleOpenReply(selectedMessage)}
-                    className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 gap-1.5 cursor-pointer"
-                  >
-                    <Reply className="h-4 w-4" />
-                    {t("messages.reply_message")}
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => handleOpenReply(selectedMessage)}
+                  className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                >
+                  <Reply className="h-4 w-4 mr-2" />
+                  {t("messages.reply_message")}
+                </Button>
               </DialogFooter>
             </>
           )}
@@ -517,63 +466,64 @@ export default function MessagesPage() {
         <DialogContent className="sm:max-w-xl">
           {replyMessage && (
             <>
-              <DialogHeader>
-                <DialogTitle className="text-base font-semibold">
-                  {t("messages.reply_dialog_title", { name: replyMessage.name })}
+              <DialogHeader className="pr-10">
+                <DialogTitle className="flex items-center gap-2">
+                  <Reply className="h-5 w-5 text-neutral-900 dark:text-white" />
+                  {t("messages.reply_dialog_title", {
+                    name: replyMessage.name,
+                  })}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500">
-                  From: <span className="font-medium text-neutral-700 dark:text-neutral-300">fadil@bafagih.id</span> &rarr; To:{" "}
-                  <span className="font-medium text-neutral-700 dark:text-neutral-300">{replyMessage.email}</span>
+                <DialogDescription>
+                  {t("messages.send_reply")} ({replyMessage.email})
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-2">
                 <div className="space-y-1.5">
-                  <Label className="text-xs">{t("messages.reply_subject")}</Label>
+                  <Label htmlFor="replySubject">{t("messages.reply_subject")}</Label>
                   <Input
+                    id="replySubject"
                     value={replySubject}
                     onChange={(e) => setReplySubject(e.target.value)}
                     placeholder="Re: Subject"
-                    className="h-9 text-sm"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-xs">{t("messages.reply_content")}</Label>
+                  <Label htmlFor="replyBody">{t("messages.reply_content")}</Label>
                   <Textarea
+                    id="replyBody"
                     value={replyBody}
                     onChange={(e) => setReplyBody(e.target.value)}
                     placeholder={t("messages.reply_content_placeholder")}
                     rows={6}
-                    className="resize-none text-sm"
                   />
                 </div>
               </div>
 
-              <DialogFooter className="gap-2">
+              <DialogFooter className="gap-3 sm:gap-2">
                 <Button
+                  type="button"
                   variant="outline"
-                  size="sm"
                   onClick={() => setIsReplyOpen(false)}
                   disabled={isSendingReply}
-                  className="cursor-pointer"
                 >
                   {t("common.cancel")}
                 </Button>
                 <Button
-                  size="sm"
+                  type="button"
                   onClick={handleSendReply}
-                  disabled={isSendingReply || !replyBody.trim()}
-                  className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 gap-1.5 cursor-pointer"
+                  disabled={isSendingReply}
+                  className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
                 >
                   {isSendingReply ? (
                     <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       {t("messages.sending_reply")}
                     </>
                   ) : (
                     <>
-                      <Send className="h-4 w-4" />
+                      <Send className="w-4 h-4 mr-2" />
                       {t("messages.send_reply")}
                     </>
                   )}
@@ -589,14 +539,12 @@ export default function MessagesPage() {
         open={!!deleteItem}
         onOpenChange={(open) => !open && setDeleteItem(null)}
         onConfirm={handleDelete}
-        title={t("common.delete_title")}
-        description={
-          deleteItem
-            ? t("messages.delete_warning", { name: deleteItem.name })
-            : undefined
-        }
         loading={isDeleting}
+        title={t("messages.delete_message")}
+        description={t("messages.delete_warning", {
+          name: deleteItem?.name || "",
+        })}
       />
-    </>
+    </div>
   );
 }
