@@ -1,22 +1,27 @@
+import type { CampaignType } from "@/src/types/database";
+
 export function renderNewsletterBroadcastEmail({
   subject,
   contentHtml,
-  type = "general",
+  type = "newsletter",
   recipientEmail,
 }: {
   subject: string;
   contentHtml: string;
-  type?: "general" | "blog" | "project" | "achievement";
+  type?: CampaignType | string;
   recipientEmail: string;
 }): string {
   const typeBadgeMap: Record<string, string> = {
-    general: "📰 Newsletter Update",
-    blog: "✍️ New Blog Post",
-    project: "🚀 New Project Launch",
-    achievement: "🏆 New Achievement",
+    newsletter: "📰 Newsletter",
+    general: "📰 General Update",
+    blog: "✍️ Blog Post",
+    project: "🚀 Project Launch",
+    achievement: "🏆 Achievement",
+    information: "💡 Information",
+    promotion: "✨ Promotion",
   };
 
-  const badgeText = typeBadgeMap[type] || "📰 Newsletter Update";
+  const badgeText = typeBadgeMap[type] || "📰 Newsletter";
 
   return `
 <!DOCTYPE html>

@@ -12,6 +12,7 @@ export interface BroadcastPayload {
   type: CampaignType;
   testOnly?: boolean;
   testEmail?: string;
+  recipients?: string[];
 }
 
 export const NewsletterService = {

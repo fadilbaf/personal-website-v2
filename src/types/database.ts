@@ -315,7 +315,14 @@ export interface NewsletterSubscriber {
   updated_at: string;
 }
 
-export type CampaignType = "general" | "blog" | "project" | "achievement";
+export type CampaignType =
+  | "newsletter"
+  | "general"
+  | "blog"
+  | "project"
+  | "achievement"
+  | "information"
+  | "promotion";
 export type CampaignStatus = "draft" | "sending" | "sent" | "failed";
 
 export interface NewsletterCampaign {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Newspaper,
@@ -8,22 +8,20 @@ import {
   UserCheck,
   UserX,
   Send,
-  Download,
   Trash2,
   MoreHorizontal,
-  CheckCircle2,
-  Clock,
-  Sparkles,
-  Loader2,
-  FileText,
-  Search,
-  Mail,
   Eye,
+  History,
+  Loader2,
+  SlidersHorizontal,
+  Plus,
+  Search,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard/page-header";
 import { DataTable, type Column } from "@/components/dashboard/data-table";
 import { DeleteDialog } from "@/components/dashboard/delete-dialog";
+import { OverviewStatCard } from "@/components/dashboard/charts/overview-stat-card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -41,6 +39,7 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -55,20 +54,65 @@ import { NewsletterService, type BroadcastPayload } from "@/src/services/newslet
 import type {
   NewsletterSubscriber,
   NewsletterCampaign,
-  SubscriberStatus,
   CampaignType,
 } from "@/src/types/database";
 import { useLanguage } from "@/context/language-context";
+import { renderNewsletterBroadcastEmail } from "@/src/lib/email-templates/newsletter-broadcast-email";
+
+/**
+ * Converts plain text paragraphs and optional action button into email-ready HTML.
+ */
+function formatBroadcastContentToHtml(
+  rawText: string,
+  buttonText?: string,
+  buttonUrl?: string
+): string {
+  if (!rawText.trim()) return "";
+
+  // 1. Escape raw HTML brackets
+  const escaped = rawText
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+
+  // 2. Split into paragraphs by double newlines
+  const paragraphs = escaped
+    .split(/\n\s*\n/)
+    .map((para) => {
+      const trimmed = para.trim();
+      if (!trimmed) return "";
+      const withBr = trimmed.replace(/\n/g, "<br/>");
+      return `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">${withBr}</p>`;
+    })
+    .filter(Boolean)
+    .join("");
+
+  // 3. Append CTA button if both buttonText and buttonUrl are provided
+  let buttonHtml = "";
+  if (buttonText?.trim() && buttonUrl?.trim()) {
+    const safeUrl = buttonUrl.trim();
+    const safeText = buttonText
+      .trim()
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;");
+    buttonHtml = `
+      <div style="margin: 28px 0 16px; text-align: left;">
+        <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #ffffff; color: #09090b; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 14px rgba(255,255,255,0.12);">
+          ${safeText} &rarr;
+        </a>
+      </div>
+    `;
+  }
+
+  return paragraphs + buttonHtml;
+}
 
 export default function NewsletterPage() {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
 
   // Active Tab
-  const [activeTab, setActiveTab] = useState<"subscribers" | "broadcast">("subscribers");
-
-  // Subscribers Filtering & Search
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [activeTab, setActiveTab] = useState<"subscribers" | "broadcast" | "history">("subscribers");
 
   // Delete State
   const [deleteItem, setDeleteItem] = useState<NewsletterSubscriber | null>(null);
@@ -76,12 +120,23 @@ export default function NewsletterPage() {
 
   // Broadcast Form State
   const [broadcastSubject, setBroadcastSubject] = useState("");
-  const [broadcastType, setBroadcastType] = useState<CampaignType>("general");
+  const [broadcastType, setBroadcastType] = useState<CampaignType>("newsletter");
   const [broadcastContent, setBroadcastContent] = useState("");
-  const [testEmail, setTestEmail] = useState("");
-  const [isSendingTest, setIsSendingTest] = useState(false);
+  const [buttonText, setButtonText] = useState("");
+  const [buttonUrl, setButtonUrl] = useState("");
   const [isSendingBlast, setIsSendingBlast] = useState(false);
   const [isConfirmBlastOpen, setIsConfirmBlastOpen] = useState(false);
+
+  // Committed Recipient Configuration State
+  const [isRecipientModalOpen, setIsRecipientModalOpen] = useState(false);
+  const [customRecipients, setCustomRecipients] = useState<string[]>([]);
+  const [selectedRecipientEmails, setSelectedRecipientEmails] = useState<string[] | null>(null);
+
+  // Draft / Staging state for the configuration modal
+  const [draftCustomRecipients, setDraftCustomRecipients] = useState<string[]>([]);
+  const [draftSelectedEmails, setDraftSelectedEmails] = useState<string[]>([]);
+  const [recipientSearch, setRecipientSearch] = useState("");
+  const [newRecipientInput, setNewRecipientInput] = useState("");
 
   // View Campaign Modal
   const [selectedCampaign, setSelectedCampaign] = useState<NewsletterCampaign | null>(null);
@@ -103,15 +158,144 @@ export default function NewsletterPage() {
   const activeCount = subscribers.filter((s) => s.status === "active").length;
   const unsubscribedCount = subscribers.filter((s) => s.status === "unsubscribed").length;
   const totalSubscribers = subscribers.length;
+  const totalCampaigns = campaigns.length;
 
-  // Filtered Subscribers
-  const filteredSubscribers = subscribers.filter((sub) => {
-    const matchesStatus =
-      statusFilter === "all" || sub.status === statusFilter;
-    return matchesStatus;
-  });
+  // Active subscriber emails list
+  const activeSubscriberEmails = useMemo(
+    () => subscribers.filter((s) => s.status === "active").map((s) => s.email.toLowerCase()),
+    [subscribers]
+  );
 
-  // Toggle subscriber status (active <-> unsubscribed)
+  // Committed selected recipient emails (default to active subscribers + custom recipients)
+  const effectiveSelectedEmails = useMemo(() => {
+    if (selectedRecipientEmails !== null) {
+      return selectedRecipientEmails;
+    }
+    return [
+      ...activeSubscriberEmails,
+      ...customRecipients.map((e) => e.toLowerCase()),
+    ];
+  }, [selectedRecipientEmails, activeSubscriberEmails, customRecipients]);
+
+  // Open recipient modal and clone committed state to draft
+  const handleOpenRecipientModal = () => {
+    setDraftCustomRecipients([...customRecipients]);
+    setDraftSelectedEmails([...effectiveSelectedEmails]);
+    setRecipientSearch("");
+    setNewRecipientInput("");
+    setIsRecipientModalOpen(true);
+  };
+
+  // Available options inside modal from draft state
+  const allDraftRecipientOptions = useMemo(() => {
+    const list: { email: string; type: "active" | "unsubscribed" | "custom"; id?: string }[] = [];
+    
+    // 1. Custom recipients (draft)
+    draftCustomRecipients.forEach((email) => {
+      list.push({ email: email.toLowerCase(), type: "custom" });
+    });
+
+    // 2. Subscribers
+    subscribers.forEach((sub) => {
+      if (!list.some((item) => item.email === sub.email.toLowerCase())) {
+        list.push({
+          email: sub.email.toLowerCase(),
+          type: sub.status === "active" ? "active" : "unsubscribed",
+          id: sub.id,
+        });
+      }
+    });
+
+    return list;
+  }, [subscribers, draftCustomRecipients]);
+
+  // Filtered recipient list for search in modal (draft)
+  const filteredDraftRecipientOptions = useMemo(() => {
+    if (!recipientSearch.trim()) return allDraftRecipientOptions;
+    const q = recipientSearch.toLowerCase().trim();
+    return allDraftRecipientOptions.filter((opt) => opt.email.includes(q));
+  }, [allDraftRecipientOptions, recipientSearch]);
+
+  // Toggle single recipient checkbox in draft
+  const toggleDraftRecipient = (email: string) => {
+    const lower = email.toLowerCase();
+    setDraftSelectedEmails((prev) =>
+      prev.includes(lower) ? prev.filter((e) => e !== lower) : [...prev, lower]
+    );
+  };
+
+  // Select all recipients in draft
+  const handleSelectAllDraftRecipients = () => {
+    setDraftSelectedEmails(allDraftRecipientOptions.map((opt) => opt.email));
+  };
+
+  // Deselect all recipients in draft
+  const handleDeselectAllDraftRecipients = () => {
+    setDraftSelectedEmails([]);
+  };
+
+  // Add custom non-subscriber email to draft
+  const handleAddDraftCustomRecipient = () => {
+    const trimmed = newRecipientInput.trim().toLowerCase();
+    if (!trimmed) return;
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(trimmed)) {
+      toast.error(t("newsletter.invalid_email"));
+      return;
+    }
+
+    if (
+      draftCustomRecipients.some((e) => e.toLowerCase() === trimmed) ||
+      subscribers.some((s) => s.email.toLowerCase() === trimmed)
+    ) {
+      toast.error(t("newsletter.duplicate_email"));
+      return;
+    }
+
+    setDraftCustomRecipients((prev) => [...prev, trimmed]);
+    setDraftSelectedEmails((prev) => [...prev, trimmed]);
+    setNewRecipientInput("");
+    toast.success(language === "id" ? "Email penerima ditambahkan" : "Recipient email added");
+  };
+
+  // Remove custom email from draft
+  const handleRemoveDraftCustomRecipient = (email: string) => {
+    const lower = email.toLowerCase();
+    setDraftCustomRecipients((prev) => prev.filter((e) => e.toLowerCase() !== lower));
+    setDraftSelectedEmails((prev) => prev.filter((e) => e !== lower));
+  };
+
+  // Save draft selections into committed state
+  const handleSaveRecipientConfig = () => {
+    setCustomRecipients([...draftCustomRecipients]);
+    setSelectedRecipientEmails([...draftSelectedEmails]);
+    setIsRecipientModalOpen(false);
+    toast.success(language === "id" ? "Penerima broadcast disimpan" : "Recipients saved");
+  };
+
+  // Generated email HTML for broadcast and live preview
+  const generatedEmailHtml = useMemo(() => {
+    const formattedContent = formatBroadcastContentToHtml(
+      broadcastContent,
+      buttonText,
+      buttonUrl
+    );
+    return renderNewsletterBroadcastEmail({
+      subject: broadcastSubject || (language === "id" ? "Subjek Broadcast Email" : "Broadcast Email Subject"),
+      contentHtml:
+        formattedContent ||
+        `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #a1a1aa; font-style: italic;">${
+          language === "id"
+            ? "Tulis pesan Anda pada form di sebelah kiri untuk melihat pratinjau langsung di sini..."
+            : "Write your message on the left form to see the live preview here..."
+        }</p>`,
+      type: broadcastType,
+      recipientEmail: "subscriber@example.com",
+    });
+  }, [broadcastSubject, broadcastContent, buttonText, buttonUrl, broadcastType, language]);
+
+  // Toggle subscriber status
   const handleToggleStatus = async (sub: NewsletterSubscriber) => {
     try {
       await NewsletterService.toggleStatus(sub.id, sub.status);
@@ -138,82 +322,36 @@ export default function NewsletterPage() {
     }
   };
 
-  // Export subscribers to CSV
-  const handleExportCSV = () => {
-    if (subscribers.length === 0) {
-      toast.info(t("newsletter.no_subscribers"));
-      return;
-    }
-
-    const headers = ["Email", "Status", "Subscribed At", "Unsubscribed At"];
-    const rows = subscribers.map((s) => [
-      s.email,
-      s.status,
-      s.subscribed_at,
-      s.unsubscribed_at || "",
-    ]);
-
-    const csvContent =
-      "data:text/csv;charset=utf-8," +
-      [headers.join(","), ...rows.map((e) => e.join(","))].join("\n");
-
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute(
-      "download",
-      `newsletter_subscribers_${new Date().toISOString().slice(0, 10)}.csv`
-    );
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    toast.success("CSV exported successfully");
-  };
-
-  // Send test broadcast email
-  const handleSendTest = async () => {
-    if (!broadcastSubject.trim() || !broadcastContent.trim()) {
-      toast.error(t("common.required_field"));
-      return;
-    }
-
-    setIsSendingTest(true);
-    try {
-      const payload: BroadcastPayload = {
-        subject: broadcastSubject.trim(),
-        contentHtml: broadcastContent.trim(),
-        type: broadcastType,
-        testOnly: true,
-        testEmail: testEmail.trim() || undefined,
-      };
-
-      const result = await NewsletterService.sendBroadcast(payload);
-      toast.success(t("newsletter.test_sent_success"), {
-        description: result.message,
-      });
-    } catch (err: unknown) {
-      toast.error("Failed to send test email", {
-        description: err instanceof Error ? err.message : "Unexpected error.",
-      });
-    } finally {
-      setIsSendingTest(false);
-    }
-  };
-
-  // Send full blast to all active subscribers
+  // Send full blast to selected recipients
   const handleSendBlast = async () => {
     if (!broadcastSubject.trim() || !broadcastContent.trim()) {
       toast.error(t("common.required_field"));
       return;
     }
 
+    if (effectiveSelectedEmails.length === 0) {
+      toast.error(
+        language === "id"
+          ? "Silakan pilih minimal 1 penerima broadcast."
+          : "Please select at least 1 recipient."
+      );
+      return;
+    }
+
+    const formattedContent = formatBroadcastContentToHtml(
+      broadcastContent,
+      buttonText,
+      buttonUrl
+    );
+
     setIsSendingBlast(true);
     try {
       const payload: BroadcastPayload = {
         subject: broadcastSubject.trim(),
-        contentHtml: broadcastContent.trim(),
+        contentHtml: formattedContent,
         type: broadcastType,
         testOnly: false,
+        recipients: effectiveSelectedEmails,
       };
 
       const result = await NewsletterService.sendBroadcast(payload);
@@ -224,7 +362,12 @@ export default function NewsletterPage() {
       // Reset form
       setBroadcastSubject("");
       setBroadcastContent("");
+      setButtonText("");
+      setButtonUrl("");
+      setSelectedRecipientEmails(null);
+      setCustomRecipients([]);
       setIsConfirmBlastOpen(false);
+      setActiveTab("history");
       queryClient.invalidateQueries({ queryKey: ["newsletter-campaigns"] });
     } catch (err: unknown) {
       toast.error("Broadcast failed", {
@@ -235,31 +378,8 @@ export default function NewsletterPage() {
     }
   };
 
+  // Subscriber columns
   const subscriberColumns: Column<NewsletterSubscriber>[] = [
-    {
-      key: "status",
-      header: t("common.status"),
-      className: "w-32",
-      render: (sub) => (
-        <Badge
-          variant="outline"
-          className={`font-medium ${
-            sub.status === "active"
-              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-              : "bg-neutral-500/10 text-neutral-500 border-neutral-500/20"
-          }`}
-        >
-          {sub.status === "active" ? (
-            <UserCheck className="w-3 h-3 mr-1" />
-          ) : (
-            <UserX className="w-3 h-3 mr-1" />
-          )}
-          {sub.status === "active"
-            ? t("newsletter.status_active")
-            : t("newsletter.status_unsubscribed")}
-        </Badge>
-      ),
-    },
     {
       key: "email",
       header: "Email",
@@ -287,49 +407,86 @@ export default function NewsletterPage() {
       },
     },
     {
-      key: "id",
-      header: t("common.actions"),
-      className: "w-20 text-right",
+      key: "status",
+      header: t("common.status"),
+      className: "w-32",
       render: (sub) => (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
-            >
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem
-              onClick={() => handleToggleStatus(sub)}
-              className="cursor-pointer"
-            >
-              {sub.status === "active" ? (
-                <>
-                  <UserX className="h-4 w-4 mr-2" />
-                  {t("newsletter.status_unsubscribed")}
-                </>
-              ) : (
-                <>
-                  <UserCheck className="h-4 w-4 mr-2" />
-                  {t("newsletter.status_active")}
-                </>
-              )}
-            </DropdownMenuItem>
-            <DropdownMenuItem
-              variant="destructive"
-              onClick={() => setDeleteItem(sub)}
-              className="cursor-pointer"
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              {t("newsletter.delete_subscriber")}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <Badge
+          variant={sub.status === "active" ? "default" : "secondary"}
+          className="font-medium"
+        >
+          {sub.status === "active"
+            ? t("newsletter.status_active")
+            : t("newsletter.status_unsubscribed")}
+        </Badge>
       ),
     },
+  ];
+
+  // Campaign History columns
+  const campaignColumns: Column<NewsletterCampaign>[] = [
+    {
+      key: "subject",
+      header: t("messages.subject"),
+      render: (camp) => (
+        <div className="space-y-0.5">
+          <p className="font-semibold text-sm text-neutral-900 dark:text-white">
+            {camp.subject}
+          </p>
+          <p className="text-xs text-neutral-500 line-clamp-1">
+            {camp.content.replace(/<[^>]*>?/gm, "").slice(0, 80)}...
+          </p>
+        </div>
+      ),
+    },
+    {
+      key: "type",
+      header: t("newsletter.broadcast_type"),
+      className: "w-36",
+      render: (camp) => (
+        <Badge variant="secondary" className="uppercase text-[11px] font-semibold">
+          {t(`newsletter.type_${camp.type}`) || camp.type}
+        </Badge>
+      ),
+    },
+    {
+      key: "sent_count",
+      header: t("newsletter.total_subscribers"),
+      className: "w-32",
+      render: (camp) => (
+        <span className="text-xs text-neutral-600 dark:text-neutral-300 font-medium">
+          {t("newsletter.sent_to_count", { count: String(camp.sent_count) })}
+        </span>
+      ),
+    },
+    {
+      key: "created_at",
+      header: t("messages.received"),
+      className: "w-44",
+      render: (camp) => (
+        <span className="text-xs text-neutral-500 dark:text-neutral-400">
+          {new Date(camp.created_at).toLocaleDateString(
+            language === "id" ? "id-ID" : "en-US",
+            {
+              day: "numeric",
+              month: "short",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }
+          )}
+        </span>
+      ),
+    },
+  ];
+
+  const campaignTypeOptions = [
+    { value: "newsletter", label: t("newsletter.type_newsletter") },
+    { value: "blog", label: t("newsletter.type_blog") },
+    { value: "project", label: t("newsletter.type_project") },
+    { value: "achievement", label: t("newsletter.type_achievement") },
+    { value: "information", label: t("newsletter.type_information") },
+    { value: "promotion", label: t("newsletter.type_promotion") },
   ];
 
   return (
@@ -348,87 +505,44 @@ export default function NewsletterPage() {
       <div className="space-y-6">
         {/* Metric Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  {t("newsletter.total_subscribers")}
-                </p>
-                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mt-1">
-                  {totalSubscribers}
-                </h3>
-              </div>
-              <div className="p-2.5 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-neutral-700 dark:text-neutral-300">
-                <Users className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-emerald-600 dark:text-emerald-400">
-                  {t("newsletter.active_subscribers")}
-                </p>
-                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mt-1">
-                  {activeCount}
-                </h3>
-              </div>
-              <div className="p-2.5 bg-emerald-500/10 rounded-xl text-emerald-600 dark:text-emerald-400">
-                <UserCheck className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400">
-                  {t("newsletter.unsubscribed")}
-                </p>
-                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mt-1">
-                  {unsubscribedCount}
-                </h3>
-              </div>
-              <div className="p-2.5 bg-neutral-100 dark:bg-neutral-800 rounded-xl text-neutral-500">
-                <UserX className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-            <CardContent className="p-4 flex items-center justify-between">
-              <div>
-                <p className="text-xs font-medium text-sky-600 dark:text-sky-400">
-                  {t("newsletter.campaign_history")}
-                </p>
-                <h3 className="text-2xl font-bold text-neutral-900 dark:text-white mt-1">
-                  {campaigns.length}
-                </h3>
-              </div>
-              <div className="p-2.5 bg-sky-500/10 rounded-xl text-sky-600 dark:text-sky-400">
-                <Send className="w-5 h-5" />
-              </div>
-            </CardContent>
-          </Card>
+          <OverviewStatCard
+            title={t("newsletter.total_subscribers")}
+            value={totalSubscribers}
+            icon={Users}
+          />
+          <OverviewStatCard
+            title={t("newsletter.active_subscribers")}
+            value={activeCount}
+            icon={UserCheck}
+          />
+          <OverviewStatCard
+            title={t("newsletter.unsubscribed")}
+            value={unsubscribedCount}
+            icon={UserX}
+          />
+          <OverviewStatCard
+            title={t("newsletter.campaign_history")}
+            value={totalCampaigns}
+            icon={Send}
+          />
         </div>
 
         {/* Tab Selector */}
-        <div className="flex items-center gap-2 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit">
+        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit">
           <button
             onClick={() => setActiveTab("subscribers")}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-md transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
               activeTab === "subscribers"
                 ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                 : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
             }`}
           >
             <Users className="w-4 h-4" />
-            {t("newsletter.tab_subscribers")} ({activeCount})
+            {t("newsletter.tab_subscribers")}
           </button>
           <button
             onClick={() => setActiveTab("broadcast")}
-            className={`flex items-center gap-2 px-4 py-2 text-xs font-medium rounded-md transition-all cursor-pointer ${
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
               activeTab === "broadcast"
                 ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                 : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
@@ -437,242 +551,455 @@ export default function NewsletterPage() {
             <Send className="w-4 h-4" />
             {t("newsletter.tab_broadcast")}
           </button>
+          <button
+            onClick={() => setActiveTab("history")}
+            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
+              activeTab === "history"
+                ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
+                : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+            }`}
+          >
+            <History className="w-4 h-4" />
+            {t("newsletter.campaign_history")}
+          </button>
         </div>
 
         {/* TAB 1: SUBSCRIBERS */}
         {activeTab === "subscribers" && (
           <div className="space-y-4 animate-in fade-in duration-200">
-            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-              {/* Status Filter */}
-              <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit">
-                {[
-                  { id: "all", label: t("common.all") },
-                  { id: "active", label: t("newsletter.status_active") },
-                  { id: "unsubscribed", label: t("newsletter.status_unsubscribed") },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setStatusFilter(tab.id)}
-                    className={`px-3 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
-                      statusFilter === tab.id
-                        ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
-                        : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-
-              {/* Actions & Search */}
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleExportCSV}
-                  className="gap-1.5 h-9 text-xs cursor-pointer shrink-0"
-                >
-                  <Download className="h-4 w-4" />
-                  {t("newsletter.export_csv")}
-                </Button>
-              </div>
-            </div>
-
             <DataTable
               columns={subscriberColumns}
-              data={filteredSubscribers}
+              data={subscribers}
               loading={isSubscribersLoading}
               searchPlaceholder={t("newsletter.search_subscribers")}
               pageSize={10}
+              filters={[
+                {
+                  key: "status",
+                  label: t("common.status"),
+                  options: [
+                    { label: t("newsletter.status_active"), value: "active" },
+                    { label: t("newsletter.status_unsubscribed"), value: "unsubscribed" },
+                  ],
+                },
+              ]}
+              actions={(sub) => (
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuItem
+                      onClick={() => handleToggleStatus(sub)}
+                      className="cursor-pointer"
+                    >
+                      {sub.status === "active" ? (
+                        <>
+                          <UserX className="h-4 w-4 mr-2" />
+                          {t("newsletter.status_unsubscribed")}
+                        </>
+                      ) : (
+                        <>
+                          <UserCheck className="h-4 w-4 mr-2" />
+                          {t("newsletter.status_active")}
+                        </>
+                      )}
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onClick={() => setDeleteItem(sub)}
+                      className="cursor-pointer"
+                    >
+                      <Trash2 className="h-4 w-4 mr-2" />
+                      {t("newsletter.delete_subscriber")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              )}
             />
           </div>
         )}
 
-        {/* TAB 2: BROADCAST CAMPAIGN */}
+        {/* TAB 2: BROADCAST CAMPAIGN (2-Column Side-by-Side) */}
         {activeTab === "broadcast" && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-              <CardHeader className="pb-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle className="text-lg">
-                      {t("newsletter.broadcast_title")}
-                    </CardTitle>
-                    <CardDescription className="text-xs mt-1">
-                      {t("newsletter.broadcast_desc")}
-                    </CardDescription>
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-200">
+            {/* Left Column: Form Composer (6 cols) */}
+            <div className="lg:col-span-6 space-y-4">
+              <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 shadow-sm">
+                <CardHeader className="pb-3 border-b border-neutral-200/60 dark:border-white/10">
+                  <CardTitle className="text-base font-semibold">
+                    {t("newsletter.broadcast_title")}
+                  </CardTitle>
+                  <CardDescription className="text-xs mt-0.5">
+                    {t("newsletter.broadcast_desc")}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4 pt-4">
+                  {/* Row 1: Subject & Type */}
+                  <div className="grid sm:grid-cols-3 gap-3">
+                    <div className="sm:col-span-2 space-y-1">
+                      <Label className="text-xs font-medium">{t("newsletter.broadcast_subject")}</Label>
+                      <Input
+                        value={broadcastSubject}
+                        onChange={(e) => setBroadcastSubject(e.target.value)}
+                        placeholder={
+                          language === "id"
+                            ? "Contoh: Update Proyek Terbaru & Tips Teknologi"
+                            : "e.g. Exciting New Projects & Tech Insights"
+                        }
+                        className="h-9 text-sm"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-medium">{t("newsletter.broadcast_type")}</Label>
+                      <Select
+                        value={broadcastType}
+                        onValueChange={(val) => setBroadcastType(val as CampaignType)}
+                      >
+                        <SelectTrigger className="h-9 text-xs">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {campaignTypeOptions.map((opt) => (
+                            <SelectItem key={opt.value} value={opt.value} className="text-xs">
+                              {opt.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 font-medium">
-                    <UserCheck className="w-3 h-3 mr-1" />
-                    {activeCount} Active Recipient(s)
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-5">
-                <div className="grid sm:grid-cols-3 gap-4">
-                  <div className="sm:col-span-2 space-y-1.5">
-                    <Label className="text-xs">{t("newsletter.broadcast_subject")}</Label>
-                    <Input
-                      value={broadcastSubject}
-                      onChange={(e) => setBroadcastSubject(e.target.value)}
-                      placeholder="e.g. Exciting New Projects & Tech Insights"
-                      className="h-10 text-sm"
-                    />
-                  </div>
+
+                  {/* Row 2: Message Content (Plain Text) */}
                   <div className="space-y-1.5">
-                    <Label className="text-xs">{t("newsletter.broadcast_type")}</Label>
-                    <Select
-                      value={broadcastType}
-                      onValueChange={(val) => setBroadcastType(val as CampaignType)}
-                    >
-                      <SelectTrigger className="h-10 text-sm">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="general">{t("newsletter.type_general")}</SelectItem>
-                        <SelectItem value="blog">{t("newsletter.type_blog")}</SelectItem>
-                        <SelectItem value="project">{t("newsletter.type_project")}</SelectItem>
-                        <SelectItem value="achievement">{t("newsletter.type_achievement")}</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                </div>
-
-                <div className="space-y-1.5">
-                  <Label className="text-xs">{t("newsletter.broadcast_content")}</Label>
-                  <Textarea
-                    value={broadcastContent}
-                    onChange={(e) => setBroadcastContent(e.target.value)}
-                    placeholder="<p>Hello everyone,</p><p>I'm thrilled to share my latest updates...</p>"
-                    rows={10}
-                    className="font-mono text-sm leading-relaxed"
-                  />
-                  <p className="text-[11px] text-neutral-400">
-                    Supports HTML markup (e.g. &lt;p&gt;, &lt;h2&gt;, &lt;ul&gt;, &lt;a href="..."&gt;, &lt;strong&gt;).
-                  </p>
-                </div>
-
-                {/* Actions Row */}
-                <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4 pt-4 border-t border-neutral-200 dark:border-white/10">
-                  {/* Test Email Section */}
-                  <div className="flex items-center gap-2 max-w-md">
-                    <Input
-                      type="email"
-                      value={testEmail}
-                      onChange={(e) => setTestEmail(e.target.value)}
-                      placeholder="Optional test email (default: admin)"
-                      className="h-9 text-xs"
+                    <Label className="text-xs font-medium">{t("newsletter.broadcast_content")}</Label>
+                    <Textarea
+                      value={broadcastContent}
+                      onChange={(e) => setBroadcastContent(e.target.value)}
+                      placeholder={
+                        language === "id"
+                          ? "Tulis pesan broadcast di sini..."
+                          : "Write your broadcast message here..."
+                      }
+                      rows={8}
+                      className="text-sm leading-relaxed"
                     />
+                  </div>
+
+                  {/* Row 3: Action Button (Clean 2-Column Fields) */}
+                  <div className="grid sm:grid-cols-2 gap-3 pt-1">
+                    <div className="space-y-1">
+                      <Label className="text-xs font-medium">
+                        {t("newsletter.button_text")}{" "}
+                        <span className="text-neutral-400 font-normal">
+                          ({t("common.optional")})
+                        </span>
+                      </Label>
+                      <Input
+                        value={buttonText}
+                        onChange={(e) => setButtonText(e.target.value)}
+                        placeholder={t("newsletter.button_text_placeholder")}
+                        className="h-9 text-xs"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs font-medium">
+                        {t("newsletter.button_url")}{" "}
+                        <span className="text-neutral-400 font-normal">
+                          ({t("common.optional")})
+                        </span>
+                      </Label>
+                      <Input
+                        type="url"
+                        value={buttonUrl}
+                        onChange={(e) => setButtonUrl(e.target.value)}
+                        placeholder={t("newsletter.button_url_placeholder")}
+                        className="h-9 text-xs font-mono"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Action Row: Recipients Setting & Send Blast Button */}
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-neutral-200 dark:border-white/10">
                     <Button
+                      type="button"
                       variant="outline"
                       size="sm"
-                      onClick={handleSendTest}
-                      disabled={isSendingTest || !broadcastSubject.trim() || !broadcastContent.trim()}
-                      className="h-9 text-xs whitespace-nowrap gap-1.5 cursor-pointer"
+                      onClick={handleOpenRecipientModal}
+                      className="h-9 px-3.5 text-xs gap-2 font-medium cursor-pointer justify-between sm:justify-start"
                     >
-                      {isSendingTest ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      ) : (
-                        <Mail className="w-3.5 h-3.5" />
-                      )}
-                      {t("newsletter.send_test_btn")}
+                      <Users className="w-3.5 h-3.5 text-neutral-500" />
+                      <span>
+                        {t("newsletter.recipients_label")} ({effectiveSelectedEmails.length})
+                      </span>
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      onClick={() => setIsConfirmBlastOpen(true)}
+                      disabled={
+                        effectiveSelectedEmails.length === 0 ||
+                        !broadcastSubject.trim() ||
+                        !broadcastContent.trim() ||
+                        isSendingBlast
+                      }
+                      className="gap-2 font-semibold h-9 px-5 cursor-pointer w-full sm:w-auto"
+                    >
+                      <Send className="w-4 h-4" />
+                      {t("newsletter.send_blast_btn")}
                     </Button>
                   </div>
-
-                  {/* Blast Button */}
-                  <Button
-                    size="sm"
-                    onClick={() => setIsConfirmBlastOpen(true)}
-                    disabled={
-                      activeCount === 0 ||
-                      !broadcastSubject.trim() ||
-                      !broadcastContent.trim() ||
-                      isSendingBlast
-                    }
-                    className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 gap-2 font-semibold h-10 px-5 cursor-pointer"
-                  >
-                    <Send className="w-4 h-4" />
-                    {t("newsletter.send_blast_btn")}
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Past Campaigns Table */}
-            <div className="space-y-3">
-              <h3 className="text-base font-semibold text-neutral-900 dark:text-white">
-                {t("newsletter.campaign_history")}
-              </h3>
-              <div className="rounded-xl border border-neutral-200/60 dark:border-white/10 overflow-hidden bg-white/80 dark:bg-neutral-900/80">
-                {campaigns.length === 0 ? (
-                  <div className="p-8 text-center text-xs text-neutral-500">
-                    {t("newsletter.no_campaigns")}
-                  </div>
-                ) : (
-                  <div className="divide-y divide-neutral-200/60 dark:divide-white/10">
-                    {campaigns.map((camp) => (
-                      <div
-                        key={camp.id}
-                        className="p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors"
-                      >
-                        <div className="space-y-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <span className="font-semibold text-sm text-neutral-900 dark:text-white truncate">
-                              {camp.subject}
-                            </span>
-                            <Badge variant="secondary" className="text-[11px] uppercase">
-                              {camp.type}
-                            </Badge>
-                          </div>
-                          <p className="text-xs text-neutral-500">
-                            {t("newsletter.sent_to_count", {
-                              count: String(camp.sent_count),
-                            })}{" "}
-                            &bull;{" "}
-                            {new Date(camp.created_at).toLocaleString(
-                              language === "id" ? "id-ID" : "en-US",
-                              { dateStyle: "medium", timeStyle: "short" }
-                            )}
-                          </p>
-                        </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => {
-                            setSelectedCampaign(camp);
-                            setIsCampaignModalOpen(true);
-                          }}
-                          className="text-xs gap-1.5 cursor-pointer shrink-0"
-                        >
-                          <Eye className="w-3.5 h-3.5" />
-                          View
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Right Column: Pure Live Preview (6 cols) */}
+            <div className="lg:col-span-6 lg:sticky lg:top-20 space-y-4">
+              <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-sm">
+                <CardHeader className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-950/50">
+                  <div className="flex items-center gap-2">
+                    <Eye className="w-3.5 h-3.5 text-neutral-500" />
+                    <CardTitle className="text-xs font-semibold">
+                      {t("newsletter.live_preview")}
+                    </CardTitle>
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <iframe
+                    srcDoc={generatedEmailHtml}
+                    title="Live Email Preview"
+                    className="w-full h-[520px] sm:h-[560px] border-0"
+                    sandbox="allow-same-origin"
+                  />
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        )}
+
+        {/* TAB 3: CAMPAIGN HISTORY */}
+        {activeTab === "history" && (
+          <div className="space-y-4 animate-in fade-in duration-200">
+            <DataTable
+              columns={campaignColumns}
+              data={campaigns}
+              loading={isCampaignsLoading}
+              searchPlaceholder={
+                language === "id"
+                  ? "Cari riwayat broadcast berdasarkan subjek..."
+                  : "Search broadcast history..."
+              }
+              pageSize={10}
+              filters={[
+                {
+                  key: "type",
+                  label: t("newsletter.broadcast_type"),
+                  options: campaignTypeOptions,
+                },
+              ]}
+              actions={(camp) => (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    setSelectedCampaign(camp);
+                    setIsCampaignModalOpen(true);
+                  }}
+                  className="h-8 text-xs gap-1.5 cursor-pointer"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  {t("messages.view_message") || "View"}
+                </Button>
+              )}
+            />
           </div>
         )}
       </div>
 
-      {/* Confirmation Blast Dialog */}
-      <Dialog open={isConfirmBlastOpen} onOpenChange={setIsConfirmBlastOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-base font-semibold">
-              Confirm Newsletter Blast
+      {/* Recipient Configuration Modal */}
+      <Dialog open={isRecipientModalOpen} onOpenChange={setIsRecipientModalOpen}>
+        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-6">
+          <DialogHeader className="pr-8 space-y-1">
+            <DialogTitle className="text-base font-semibold flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              {t("newsletter.recipients_modal_title")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500 pt-1">
-              {t("newsletter.send_blast_confirm", { count: String(activeCount) })}
+            <DialogDescription className="text-xs text-neutral-500">
+              {t("newsletter.recipients_modal_desc")}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-2 text-xs text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-white/10">
+          <div className="space-y-3.5 py-2 flex-1 flex flex-col min-h-0">
+            {/* Add Custom Email Bar */}
+            <div className="flex items-center gap-2">
+              <Input
+                type="email"
+                placeholder={t("newsletter.add_recipient_placeholder")}
+                value={newRecipientInput}
+                onChange={(e) => setNewRecipientInput(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") {
+                    e.preventDefault();
+                    handleAddDraftCustomRecipient();
+                  }
+                }}
+                className="h-9 text-xs sm:text-sm flex-1"
+              />
+              <Button
+                type="button"
+                size="sm"
+                variant="secondary"
+                onClick={handleAddDraftCustomRecipient}
+                className="h-9 text-xs px-3.5 gap-1.5 shrink-0 cursor-pointer font-medium"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {t("newsletter.add_recipient_btn")}
+              </Button>
+            </div>
+
+            {/* Search Input Bar */}
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
+              <Input
+                placeholder={t("newsletter.search_recipients")}
+                value={recipientSearch}
+                onChange={(e) => setRecipientSearch(e.target.value)}
+                className="h-9 pl-9 text-xs sm:text-sm w-full"
+              />
+            </div>
+
+            {/* Counter and Single Master Checkbox */}
+            <div className="flex items-center justify-between px-1 text-xs text-neutral-500">
+              <span className="font-medium">
+                {t("newsletter.selected_recipients_count", {
+                  count: String(draftSelectedEmails.length),
+                  total: String(allDraftRecipientOptions.length),
+                })}
+              </span>
+              <label className="flex items-center gap-2 cursor-pointer select-none font-medium text-neutral-700 dark:text-neutral-300">
+                <span>{language === "id" ? "Pilih Semua" : "Select All"}</span>
+                <input
+                  type="checkbox"
+                  checked={
+                    allDraftRecipientOptions.length > 0 &&
+                    draftSelectedEmails.length === allDraftRecipientOptions.length
+                  }
+                  onChange={(e) => {
+                    if (e.target.checked) {
+                      handleSelectAllDraftRecipients();
+                    } else {
+                      handleDeselectAllDraftRecipients();
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-neutral-300 dark:border-white/20 text-neutral-900 accent-neutral-900 dark:accent-white cursor-pointer"
+                />
+              </label>
+            </div>
+
+            {/* Scrollable Recipient List */}
+            <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/70 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-950/30">
+              {filteredDraftRecipientOptions.length === 0 ? (
+                <div className="py-8 text-center text-xs text-neutral-400">
+                  {t("newsletter.no_recipients_found")}
+                </div>
+              ) : (
+                filteredDraftRecipientOptions.map((opt) => {
+                  const isChecked = draftSelectedEmails.includes(opt.email);
+                  return (
+                    <div
+                      key={opt.email}
+                      onClick={() => toggleDraftRecipient(opt.email)}
+                      className={`flex items-center justify-between p-2.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer border ${
+                        isChecked
+                          ? "bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/15 shadow-2xs"
+                          : "bg-transparent border-transparent opacity-60 hover:opacity-100 hover:bg-neutral-100/60 dark:hover:bg-neutral-800/40"
+                      }`}
+                    >
+                      {/* Left: Email + Non-Subscriber Badge / Delete */}
+                      <div className="flex items-center gap-2 min-w-0 pr-3">
+                        <span className="font-medium truncate text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm">
+                          {opt.email}
+                        </span>
+                        {opt.type === "custom" && (
+                          <div
+                            className="flex items-center gap-1 shrink-0"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <Badge
+                              variant="secondary"
+                              className="text-[10px] font-normal px-1.5 py-0 h-4"
+                            >
+                              {t("newsletter.recipient_custom")}
+                            </Badge>
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemoveDraftCustomRecipient(opt.email)}
+                              className="h-5 w-5 text-neutral-400 hover:text-red-500 cursor-pointer"
+                            >
+                              <Trash2 className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Right: Checkbox */}
+                      <div className="shrink-0 flex items-center">
+                        <input
+                          type="checkbox"
+                          checked={isChecked}
+                          onChange={() => {}} // Handled by parent div onClick
+                          className="h-4 w-4 rounded border-neutral-300 dark:border-white/20 text-neutral-900 accent-neutral-900 dark:accent-white cursor-pointer pointer-events-none"
+                        />
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </div>
+
+          <DialogFooter className="pt-3 border-t border-neutral-200 dark:border-white/10">
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveRecipientConfig}
+              className="cursor-pointer font-medium text-xs px-6 h-9"
+            >
+              {t("common.save") || (language === "id" ? "Simpan" : "Save")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Confirmation Blast Dialog */}
+      <Dialog open={isConfirmBlastOpen} onOpenChange={setIsConfirmBlastOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader className="pr-10">
+            <DialogTitle className="text-base font-semibold">
+              {language === "id" ? "Konfirmasi Kirim Broadcast" : "Confirm Newsletter Blast"}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-neutral-500 pt-1">
+              {t("newsletter.send_blast_confirm", { count: String(effectiveSelectedEmails.length) })}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="py-2 text-xs text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-white/10 space-y-1">
             <p><strong>Subject:</strong> {broadcastSubject}</p>
-            <p className="mt-1"><strong>Sender:</strong> newsletter@fadil.bafagih.id</p>
-            <p className="mt-1"><strong>Recipients:</strong> {activeCount} active subscriber(s)</p>
+            <p><strong>Type:</strong> <span className="uppercase">{t(`newsletter.type_${broadcastType}`) || broadcastType}</span></p>
+            <p><strong>Recipients:</strong> {effectiveSelectedEmails.length} selected recipient(s)</p>
+            {buttonText && buttonUrl && (
+              <p><strong>Action Button:</strong> {buttonText} ({buttonUrl})</p>
+            )}
           </div>
 
           <DialogFooter className="gap-2 pt-2">
@@ -681,6 +1008,7 @@ export default function NewsletterPage() {
               size="sm"
               onClick={() => setIsConfirmBlastOpen(false)}
               disabled={isSendingBlast}
+              className="cursor-pointer"
             >
               {t("common.cancel")}
             </Button>
@@ -688,7 +1016,7 @@ export default function NewsletterPage() {
               size="sm"
               onClick={handleSendBlast}
               disabled={isSendingBlast}
-              className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 gap-1.5 cursor-pointer"
+              className="gap-1.5 cursor-pointer"
             >
               {isSendingBlast ? (
                 <>
@@ -698,7 +1026,7 @@ export default function NewsletterPage() {
               ) : (
                 <>
                   <Send className="w-3.5 h-3.5" />
-                  Confirm & Send Blast
+                  {language === "id" ? "Kirim Sekarang" : "Confirm & Send Blast"}
                 </>
               )}
             </Button>
@@ -708,42 +1036,47 @@ export default function NewsletterPage() {
 
       {/* Campaign Detail Modal */}
       <Dialog open={isCampaignModalOpen} onOpenChange={setIsCampaignModalOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[80vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
           {selectedCampaign && (
             <>
-              <DialogHeader>
-                <div className="flex items-center gap-2">
-                  <Badge variant="secondary" className="uppercase text-[10px]">
-                    {selectedCampaign.type}
+              <DialogHeader className="pr-10">
+                <div className="flex items-center gap-2 flex-wrap mb-1">
+                  <Badge variant="secondary" className="uppercase text-[10px] font-semibold">
+                    {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
                   </Badge>
                   <span className="text-xs text-neutral-400">
-                    {new Date(selectedCampaign.created_at).toLocaleString()}
+                    {new Date(selectedCampaign.created_at).toLocaleString(
+                      language === "id" ? "id-ID" : "en-US",
+                      { dateStyle: "full", timeStyle: "short" }
+                    )}
                   </span>
                 </div>
-                <DialogTitle className="text-base font-semibold pt-1">
+                <DialogTitle className="text-lg font-semibold">
                   {selectedCampaign.subject}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-neutral-500">
-                  Sent to {selectedCampaign.sent_count} subscriber(s)
+                  {t("newsletter.sent_to_count", { count: String(selectedCampaign.sent_count) })}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="py-3">
-                <Label className="text-xs uppercase text-neutral-400 tracking-wider block mb-2">
-                  Email Content
+              <div className="py-2 space-y-2">
+                <Label className="text-xs font-semibold uppercase text-neutral-400 tracking-wider block">
+                  {language === "id" ? "Konten Email" : "Email Content"}
                 </Label>
                 <div
-                  className="bg-neutral-50 dark:bg-neutral-900 p-4 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm prose dark:prose-invert max-w-none"
+                  className="bg-neutral-50 dark:bg-neutral-900/90 p-5 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm prose dark:prose-invert max-w-none"
                   dangerouslySetInnerHTML={{ __html: selectedCampaign.content }}
                 />
               </div>
 
-              <DialogFooter>
+              <DialogFooter className="pt-2">
                 <Button
                   size="sm"
+                  variant="outline"
                   onClick={() => setIsCampaignModalOpen(false)}
+                  className="cursor-pointer"
                 >
-                  {t("common.back")}
+                  {t("common.close")}
                 </Button>
               </DialogFooter>
             </>
