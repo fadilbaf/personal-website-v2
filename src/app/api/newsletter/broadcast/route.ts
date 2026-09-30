@@ -179,6 +179,7 @@ export async function POST(req: Request) {
         content: contentHtml,
         type,
         sent_count: successCount,
+        recipients: targetEmails,
         status: successCount > 0 ? "sent" : "failed",
         sent_at: new Date().toISOString(),
       })

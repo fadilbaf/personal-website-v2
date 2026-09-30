@@ -138,9 +138,10 @@ export default function NewsletterPage() {
   const [recipientSearch, setRecipientSearch] = useState("");
   const [newRecipientInput, setNewRecipientInput] = useState("");
 
-  // View Campaign Modal
+  // View Campaign & Recipients Modals
   const [selectedCampaign, setSelectedCampaign] = useState<NewsletterCampaign | null>(null);
   const [isCampaignModalOpen, setIsCampaignModalOpen] = useState(false);
+  const [isRecipientsViewModalOpen, setIsRecipientsViewModalOpen] = useState(false);
 
   // Queries
   const { data: subscribers = [], isLoading: isSubscribersLoading } = useQuery({
@@ -294,6 +295,17 @@ export default function NewsletterPage() {
       recipientEmail: "subscriber@example.com",
     });
   }, [broadcastSubject, broadcastContent, buttonText, buttonUrl, broadcastType, language]);
+
+  // Generated email HTML for selected campaign preview in View Message modal
+  const viewingCampaignHtml = useMemo(() => {
+    if (!selectedCampaign) return "";
+    return renderNewsletterBroadcastEmail({
+      subject: selectedCampaign.subject,
+      contentHtml: selectedCampaign.content,
+      type: selectedCampaign.type,
+      recipientEmail: "subscriber@example.com",
+    });
+  }, [selectedCampaign]);
 
   // Toggle subscriber status
   const handleToggleStatus = async (sub: NewsletterSubscriber) => {
@@ -806,18 +818,40 @@ export default function NewsletterPage() {
                 },
               ]}
               actions={(camp) => (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    setSelectedCampaign(camp);
-                    setIsCampaignModalOpen(true);
-                  }}
-                  className="h-8 text-xs gap-1.5 cursor-pointer"
-                >
-                  <Eye className="w-3.5 h-3.5" />
-                  {t("messages.view_message") || "View"}
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10"
+                    >
+                      <MoreHorizontal className="h-4 w-4" />
+                      <span className="sr-only">Open menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-44">
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedCampaign(camp);
+                        setIsCampaignModalOpen(true);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <Eye className="h-4 w-4 mr-2" />
+                      {t("messages.view_message") || (language === "id" ? "Lihat Pesan" : "View Message")}
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      onClick={() => {
+                        setSelectedCampaign(camp);
+                        setIsRecipientsViewModalOpen(true);
+                      }}
+                      className="cursor-pointer"
+                    >
+                      <Users className="h-4 w-4 mr-2" />
+                      {t("newsletter.view_recipients") || (language === "id" ? "Lihat Penerima" : "View Recipients")}
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               )}
             />
           </div>
@@ -1034,24 +1068,24 @@ export default function NewsletterPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Campaign Detail Modal */}
+      {/* Campaign Message Detail Modal */}
       <Dialog open={isCampaignModalOpen} onOpenChange={setIsCampaignModalOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-3xl max-h-[90vh] flex flex-col p-6">
           {selectedCampaign && (
             <>
-              <DialogHeader className="pr-10">
-                <div className="flex items-center gap-2 flex-wrap mb-1">
+              <DialogHeader className="pr-8 space-y-1">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <Badge variant="secondary" className="uppercase text-[10px] font-semibold">
                     {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
                   </Badge>
                   <span className="text-xs text-neutral-400">
-                    {new Date(selectedCampaign.created_at).toLocaleString(
+                    {new Date(selectedCampaign.sent_at || selectedCampaign.created_at).toLocaleString(
                       language === "id" ? "id-ID" : "en-US",
-                      { dateStyle: "full", timeStyle: "short" }
+                      { dateStyle: "medium", timeStyle: "short" }
                     )}
                   </span>
                 </div>
-                <DialogTitle className="text-lg font-semibold">
+                <DialogTitle className="text-base sm:text-lg font-semibold truncate">
                   {selectedCampaign.subject}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-neutral-500">
@@ -1059,22 +1093,122 @@ export default function NewsletterPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="py-2 space-y-2">
-                <Label className="text-xs font-semibold uppercase text-neutral-400 tracking-wider block">
-                  {language === "id" ? "Konten Email" : "Email Content"}
-                </Label>
-                <div
-                  className="bg-neutral-50 dark:bg-neutral-900/90 p-5 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm prose dark:prose-invert max-w-none"
-                  dangerouslySetInnerHTML={{ __html: selectedCampaign.content }}
+              <div className="py-2 flex-1 min-h-0 overflow-hidden">
+                <iframe
+                  srcDoc={viewingCampaignHtml}
+                  title="Sent Broadcast Email Preview"
+                  className="w-full h-[460px] sm:h-[500px] rounded-lg border border-neutral-200/70 dark:border-white/10"
+                  sandbox="allow-same-origin"
                 />
               </div>
 
-              <DialogFooter className="pt-2">
+              <DialogFooter className="pt-3 border-t border-neutral-200 dark:border-white/10">
                 <Button
                   size="sm"
                   variant="outline"
                   onClick={() => setIsCampaignModalOpen(false)}
-                  className="cursor-pointer"
+                  className="cursor-pointer text-xs px-5 h-9"
+                >
+                  {t("common.close")}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Campaign Recipients Detail Modal */}
+      <Dialog
+        open={isRecipientsViewModalOpen}
+        onOpenChange={(open) => {
+          setIsRecipientsViewModalOpen(open);
+          if (!open) setRecipientSearch("");
+        }}
+      >
+        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-6">
+          {selectedCampaign && (
+            <>
+              <DialogHeader className="pr-8 space-y-1">
+                <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                  <Badge variant="secondary" className="uppercase text-[10px] font-semibold">
+                    {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
+                  </Badge>
+                  <span className="text-xs text-neutral-400">
+                    {new Date(selectedCampaign.sent_at || selectedCampaign.created_at).toLocaleString(
+                      language === "id" ? "id-ID" : "en-US",
+                      { dateStyle: "medium", timeStyle: "short" }
+                    )}
+                  </span>
+                </div>
+                <DialogTitle className="text-base sm:text-lg font-semibold truncate">
+                  {selectedCampaign.subject}
+                </DialogTitle>
+                <DialogDescription className="text-xs text-neutral-500">
+                  {t("newsletter.sent_to_count", { count: String(selectedCampaign.sent_count) })}
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="space-y-3 py-2 flex-1 flex flex-col min-h-0">
+                {/* Search Bar */}
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
+                  <Input
+                    placeholder={
+                      language === "id"
+                        ? "Cari email penerima..."
+                        : "Search recipient email..."
+                    }
+                    value={recipientSearch}
+                    onChange={(e) => setRecipientSearch(e.target.value)}
+                    className="h-9 pl-9 text-xs sm:text-sm w-full"
+                  />
+                </div>
+
+                {/* Recipient Email List */}
+                {selectedCampaign.recipients && selectedCampaign.recipients.length > 0 ? (
+                  <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/70 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-950/30">
+                    {selectedCampaign.recipients
+                      .filter((email) =>
+                        !recipientSearch.trim() ||
+                        email
+                          .toLowerCase()
+                          .includes(recipientSearch.toLowerCase().trim())
+                      )
+                      .map((email) => (
+                        <div
+                          key={email}
+                          className="flex items-center justify-between p-2.5 rounded-md bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-white/10 text-xs sm:text-sm"
+                        >
+                          <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate pr-2">
+                            {email}
+                          </span>
+                          <Badge
+                            variant="outline"
+                            className="text-[10px] font-normal px-1.5 py-0 h-4 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 shrink-0"
+                          >
+                            Delivered
+                          </Badge>
+                        </div>
+                      ))}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-xs text-neutral-400 bg-neutral-50/50 dark:bg-neutral-950/20 rounded-lg border border-dashed border-neutral-200 dark:border-white/10 px-4">
+                    {language === "id"
+                      ? "Rincian list email tersimpan untuk broadcast yang dikirim setelah pembaruan database."
+                      : "Detailed email list is recorded for broadcasts dispatched after database update."}
+                  </div>
+                )}
+              </div>
+
+              <DialogFooter className="pt-3 border-t border-neutral-200 dark:border-white/10">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    setIsRecipientsViewModalOpen(false);
+                    setRecipientSearch("");
+                  }}
+                  className="cursor-pointer text-xs px-5 h-9"
                 >
                   {t("common.close")}
                 </Button>

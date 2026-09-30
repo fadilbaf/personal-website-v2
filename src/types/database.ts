@@ -331,6 +331,7 @@ export interface NewsletterCampaign {
   content: string;
   type: CampaignType;
   sent_count: number;
+  recipients?: string[];
   status: CampaignStatus;
   sent_at: string | null;
   created_at: string;
