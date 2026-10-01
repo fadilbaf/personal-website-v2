@@ -469,19 +469,9 @@ export default function EmailTemplatesPage() {
         }));
       }
 
-      toast.success(
-        t("templates.saved_success", { name: activeTemplate.name }),
-        {
-          description: t("templates.saved_desc"),
-        }
-      );
-    } catch (err: unknown) {
-      toast.error(
-        t("templates.saved_failed"),
-        {
-          description: err instanceof Error ? err.message : "Unknown error",
-        }
-      );
+      toast.success(t("templates.saved_success"));
+    } catch {
+      toast.error(t("templates.saved_failed"));
     } finally {
       setIsSaving(false);
     }
@@ -496,11 +486,7 @@ export default function EmailTemplatesPage() {
       [activeTemplate.id]: activeTemplate.defaultSubject,
     }));
 
-    toast.info(
-      language === "id"
-        ? "Template dikembalikan ke default di editor. Klik Simpan untuk menerapkan."
-        : "Template reset to default in editor. Click Save to apply changes."
-    );
+    toast.info(t("templates.reset_info"));
   };
 
   // Reset variables of current template to default values
@@ -513,7 +499,7 @@ export default function EmailTemplatesPage() {
       ...prev,
       [activeTemplate.id]: defaults,
     }));
-    toast.success(language === "id" ? "Variabel sampel direset" : "Sample variables reset");
+    toast.success(t("templates.variables_reset"));
   };
 
   // Copy HTML content
@@ -524,18 +510,14 @@ export default function EmailTemplatesPage() {
       setTimeout(() => setHasCopied(false), 2000);
       toast.success(t("templates.copy_html_success"));
     } catch {
-      toast.error("Failed to copy content to clipboard.");
+      toast.error(t("common.failed"));
     }
   };
 
   // Send real test email via API using current editor's HTML
   const handleSendTestEmail = async () => {
     if (!testRecipient || !testRecipient.includes("@")) {
-      toast.error(
-        language === "id"
-          ? "Masukkan alamat email penerima yang valid."
-          : "Please enter a valid recipient email address."
-      );
+      toast.error(t("newsletter.invalid_email"));
       return;
     }
 
@@ -559,20 +541,10 @@ export default function EmailTemplatesPage() {
         throw new Error(data.error || "Failed to send test email");
       }
 
-      toast.success(
-        t("templates.test_success", { recipient: testRecipient }),
-        {
-          description: `Sender: ${activeTemplate.sender}`,
-        }
-      );
+      toast.success(t("templates.test_success", { recipient: testRecipient }));
       setIsTestModalOpen(false);
-    } catch (err: unknown) {
-      toast.error(
-        t("templates.test_failed"),
-        {
-          description: err instanceof Error ? err.message : "Unknown error",
-        }
-      );
+    } catch {
+      toast.error(t("templates.test_failed"));
     } finally {
       setIsSendingTest(false);
     }
@@ -747,7 +719,7 @@ export default function EmailTemplatesPage() {
                     </span>
                     <span
                       className={cn(
-                        "text-[10px] px-2 py-0.5 rounded-full font-mono font-medium shrink-0 border transition-colors",
+                        "text-xs px-2.5 py-0.5 rounded-full font-mono font-medium shrink-0 border transition-colors",
                         isSelected
                           ? isDbCustom
                             ? "bg-white/20 text-white border-white/25 dark:bg-neutral-900/20 dark:text-neutral-900 dark:border-neutral-900/25"
@@ -763,7 +735,7 @@ export default function EmailTemplatesPage() {
 
                   <p
                     className={cn(
-                      "text-[11px] line-clamp-1 leading-snug",
+                      "text-xs line-clamp-1 leading-snug",
                       isSelected
                         ? "text-neutral-300 dark:text-neutral-600"
                         : "text-neutral-500 dark:text-neutral-400"
@@ -783,7 +755,7 @@ export default function EmailTemplatesPage() {
         {/* Left Column: Canvas Viewer & Code Editor */}
         <div
           className={cn(
-            "space-y-4 transition-all duration-200",
+            "space-y-4",
             showParamsPanel ? "lg:col-span-8" : "lg:col-span-12"
           )}
         >
@@ -895,13 +867,13 @@ export default function EmailTemplatesPage() {
                       </div>
 
                       {/* Variables Toggle Button */}
-                      <Button
-                        size="sm"
+                      <button
+                        type="button"
                         onClick={() => setShowParamsPanel(!showParamsPanel)}
                         className={cn(
-                          "h-8 text-xs gap-1.5 cursor-pointer font-medium transition-colors border",
+                          "h-8 px-2.5 rounded-md text-xs font-medium flex items-center gap-1.5 cursor-pointer border select-none transition-none",
                           showParamsPanel
-                            ? "bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-900 dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 dark:hover:text-neutral-900 dark:border-white shadow-2xs"
+                            ? "bg-neutral-900 hover:bg-neutral-800 text-white border-neutral-900 dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 dark:border-white shadow-2xs"
                             : "bg-white hover:bg-neutral-100 text-neutral-700 hover:text-neutral-900 border-neutral-200/80 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:text-neutral-300 dark:hover:text-white dark:border-white/10"
                         )}
                       >
@@ -911,17 +883,17 @@ export default function EmailTemplatesPage() {
                             ? t("templates.hide_variables")
                             : t("templates.show_variables")}
                         </span>
-                      </Button>
+                      </button>
 
                       {/* SEND TEST EMAIL BUTTON (In Preview) */}
-                      <Button
-                        size="sm"
+                      <button
+                        type="button"
                         onClick={() => setIsTestModalOpen(true)}
-                        className="h-8 gap-1.5 text-xs font-medium cursor-pointer bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900"
+                        className="h-8 px-2.5 rounded-md gap-1.5 text-xs font-medium flex items-center cursor-pointer border border-transparent select-none transition-colors bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 shadow-2xs"
                       >
                         <Send className="w-3.5 h-3.5" />
                         <span>{t("templates.send_test")}</span>
-                      </Button>
+                      </button>
                     </>
                   )}
 
@@ -1050,7 +1022,7 @@ export default function EmailTemplatesPage() {
                 <div className="p-4 space-y-3 bg-neutral-50/40 dark:bg-neutral-950/40">
                   {/* Subject Input Bar */}
                   <div className="flex items-center gap-2.5">
-                    <span className="text-xs font-medium text-neutral-400 uppercase tracking-wider shrink-0">
+                    <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300 shrink-0">
                       {t("templates.subject_label")}:
                     </span>
                     <Input
@@ -1081,7 +1053,7 @@ export default function EmailTemplatesPage() {
                   />
 
                   {/* Editor Status Bar */}
-                  <div className="flex items-center justify-between text-[11px] text-neutral-400 dark:text-neutral-500 font-mono px-1">
+                  <div className="flex items-center justify-between text-xs text-neutral-400 dark:text-neutral-500 font-mono px-1">
                     <span>{currentHtmlCode.split("\n").length} lines</span>
                     <span>{(new Blob([currentHtmlCode]).size / 1024).toFixed(1)} KB</span>
                   </div>
@@ -1093,7 +1065,7 @@ export default function EmailTemplatesPage() {
 
         {/* Right Column: Dynamic Sample Variables Customizer */}
         {showParamsPanel && (
-          <div className="lg:col-span-4 space-y-4 animate-in fade-in duration-200">
+          <div className="lg:col-span-4 space-y-4">
             <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 shadow-sm overflow-hidden">
               <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-950/50">
                 <div className="flex items-center justify-between">
@@ -1106,7 +1078,7 @@ export default function EmailTemplatesPage() {
                   <button
                     onClick={handleResetVariables}
                     title="Reset to defaults"
-                    className="text-[11px] text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 flex items-center gap-1 cursor-pointer transition-colors"
+                    className="text-xs text-neutral-400 hover:text-neutral-700 dark:hover:text-neutral-200 flex items-center gap-1 cursor-pointer transition-colors"
                   >
                     <RotateCcw className="w-3 h-3" />
                     Reset
@@ -1115,7 +1087,7 @@ export default function EmailTemplatesPage() {
               </div>
 
               <div className="p-4 space-y-3.5">
-                <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
+                <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
                   {t("templates.variables_desc")}
                 </p>
 
@@ -1129,7 +1101,7 @@ export default function EmailTemplatesPage() {
                           <Label className="text-xs font-medium text-neutral-800 dark:text-neutral-200">
                             {field.label}
                           </Label>
-                          <span className="text-[10px] font-mono text-neutral-400 dark:text-neutral-500">
+                          <span className="text-xs font-mono text-neutral-400 dark:text-neutral-500">
                             {`{{${field.key}}}`}
                           </span>
                         </div>
@@ -1149,16 +1121,20 @@ export default function EmailTemplatesPage() {
                             onValueChange={(newVal) =>
                               handleVariableChange(field.key, newVal)
                             }
+                            searchable={false}
                           >
-                            <SelectTrigger className="h-8 text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 w-full cursor-pointer">
-                              <SelectValue />
+                            <SelectTrigger
+                              size="sm"
+                              className="h-8 text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 w-full cursor-pointer px-2.5"
+                            >
+                              <SelectValue className="text-xs" />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10">
                               {field.options.map((opt) => (
                                 <SelectItem
                                   key={opt.value}
                                   value={opt.value}
-                                  className="text-xs cursor-pointer"
+                                  className="text-xs cursor-pointer py-1.5"
                                 >
                                   {opt.label}
                                 </SelectItem>

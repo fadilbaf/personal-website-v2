@@ -99,7 +99,7 @@ export default function MessagesPage() {
       const nextRead = !msg.is_read;
       await MessageService.toggleRead(msg.id, nextRead);
       toast.success(
-        nextRead ? t("messages.mark_as_read") : t("messages.mark_as_unread")
+        nextRead ? t("messages.mark_as_read_success") : t("messages.mark_as_unread_success")
       );
       queryClient.invalidateQueries({ queryKey: ["contact-messages"] });
     } catch {
@@ -133,10 +133,8 @@ export default function MessagesPage() {
       toast.success(t("messages.reply_sent_success"));
       setIsReplyOpen(false);
       queryClient.invalidateQueries({ queryKey: ["contact-messages"] });
-    } catch (err: unknown) {
-      toast.error(t("messages.reply_sent_failed"), {
-        description: err instanceof Error ? err.message : "Failed to send email.",
-      });
+    } catch {
+      toast.error(t("messages.reply_sent_failed"));
     } finally {
       setIsSendingReply(false);
     }
@@ -160,24 +158,24 @@ export default function MessagesPage() {
     }
   };
 
-  // Solid B&W status badges matching other pages, unread has pulse
+  // Status badges matching standard dashboard style
   const renderStatusBadge = (status: MessageStatus, is_read: boolean) => {
     if (status === "replied") {
       return (
-        <Badge variant="default" className="font-medium">
+        <Badge variant="default" className="rounded-full text-xs font-medium">
           {t("messages.status_replied")}
         </Badge>
       );
     }
     if (!is_read) {
       return (
-        <Badge variant="default" className="font-medium animate-pulse">
+        <Badge variant="default" className="rounded-full text-xs font-medium animate-pulse">
           {t("messages.status_unread")}
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary" className="font-medium">
+      <Badge variant="secondary" className="rounded-full text-xs font-medium">
         {t("messages.status_read")}
       </Badge>
     );
@@ -377,7 +375,7 @@ export default function MessagesPage() {
         <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
           {selectedMessage && (
             <>
-              <DialogHeader className="space-y-2 border-b border-neutral-200 dark:border-white/10 pb-4 pr-10">
+              <DialogHeader className="space-y-1.5 pb-2">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   {renderStatusBadge(
                     selectedMessage.status,
@@ -386,47 +384,47 @@ export default function MessagesPage() {
                   <span className="text-xs text-neutral-500 dark:text-neutral-400">
                     {new Date(selectedMessage.created_at).toLocaleString(
                       language === "id" ? "id-ID" : "en-US",
-                      { dateStyle: "full", timeStyle: "short" }
+                      { dateStyle: "medium", timeStyle: "short" }
                     )}
                   </span>
                 </div>
-                <DialogTitle className="text-lg font-semibold text-neutral-900 dark:text-white pt-1">
+                <DialogTitle className="text-base font-semibold text-neutral-900 dark:text-white pt-1">
                   {selectedMessage.subject}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500 flex items-center gap-2 pt-1">
+                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5 pt-0.5">
                   <User className="h-3.5 w-3.5 shrink-0" />
-                  <span className="font-semibold text-neutral-900 dark:text-white">
+                  <span className="font-medium text-neutral-900 dark:text-white">
                     {selectedMessage.name}
                   </span>
                   &bull;
                   <a
                     href={`mailto:${selectedMessage.email}`}
-                    className="text-sky-500 hover:underline"
+                    className="text-neutral-600 dark:text-neutral-300 hover:underline font-mono text-xs"
                   >
                     {selectedMessage.email}
                   </a>
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4 py-4">
+              <div className="space-y-4 py-2">
                 <div>
-                  <Label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider block mb-2">
+                  <Label className="text-xs font-medium text-neutral-700 dark:text-neutral-300 block mb-1.5">
                     {t("messages.original_message")}
                   </Label>
-                  <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+                  <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
                     {selectedMessage.message}
                   </div>
                 </div>
 
                 {selectedMessage.reply_content && (
-                  <div className="pt-2">
-                    <div className="flex items-center justify-between mb-2">
-                      <Label className="text-xs font-semibold text-neutral-500 dark:text-neutral-400 uppercase tracking-wider flex items-center gap-1.5">
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <Label className="text-xs font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5">
                         <Reply className="h-3.5 w-3.5" />
                         {t("messages.reply_history")}
                       </Label>
                       {selectedMessage.replied_at && (
-                        <span className="text-[11px] text-neutral-400">
+                        <span className="text-xs text-neutral-500 dark:text-neutral-400">
                           {new Date(selectedMessage.replied_at).toLocaleString(
                             language === "id" ? "id-ID" : "en-US",
                             { dateStyle: "medium", timeStyle: "short" }
@@ -434,25 +432,28 @@ export default function MessagesPage() {
                         </span>
                       )}
                     </div>
-                    <div className="bg-neutral-50 dark:bg-neutral-900/60 p-4 rounded-xl border border-neutral-200/60 dark:border-white/10 text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+                    <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
                       {selectedMessage.reply_content}
                     </div>
                   </div>
                 )}
               </div>
 
-              <DialogFooter className="gap-3 sm:gap-2 border-t border-neutral-200 dark:border-white/10 pt-4">
+              <DialogFooter className="flex items-center justify-end gap-2.5 pt-2">
                 <Button
                   variant="outline"
+                  size="sm"
                   onClick={() => setIsDetailOpen(false)}
+                  className="h-9 px-4 text-xs font-medium cursor-pointer"
                 >
                   {t("common.close")}
                 </Button>
                 <Button
+                  size="sm"
                   onClick={() => handleOpenReply(selectedMessage)}
-                  className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                  className="h-9 px-4 text-xs gap-1.5 font-medium bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 cursor-pointer"
                 >
-                  <Reply className="h-4 w-4 mr-2" />
+                  <Reply className="h-3.5 w-3.5 mr-1" />
                   {t("messages.reply_message")}
                 </Button>
               </DialogFooter>
@@ -466,64 +467,73 @@ export default function MessagesPage() {
         <DialogContent className="sm:max-w-xl">
           {replyMessage && (
             <>
-              <DialogHeader className="pr-10">
-                <DialogTitle className="flex items-center gap-2">
-                  <Reply className="h-5 w-5 text-neutral-900 dark:text-white" />
+              <DialogHeader>
+                <DialogTitle className="flex items-center gap-2 text-base font-semibold">
+                  <Reply className="h-4 w-4 text-neutral-500" />
                   {t("messages.reply_dialog_title", {
                     name: replyMessage.name,
                   })}
                 </DialogTitle>
-                <DialogDescription>
+                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
                   {t("messages.send_reply")} ({replyMessage.email})
                 </DialogDescription>
               </DialogHeader>
 
               <div className="space-y-4 py-2">
                 <div className="space-y-1.5">
-                  <Label htmlFor="replySubject">{t("messages.reply_subject")}</Label>
+                  <Label htmlFor="replySubject" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                    {t("messages.reply_subject")}
+                  </Label>
                   <Input
                     id="replySubject"
                     value={replySubject}
                     onChange={(e) => setReplySubject(e.target.value)}
                     placeholder="Re: Subject"
+                    className="h-9 text-xs"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label htmlFor="replyBody">{t("messages.reply_content")}</Label>
+                  <Label htmlFor="replyBody" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                    {t("messages.reply_content")}
+                  </Label>
                   <Textarea
                     id="replyBody"
                     value={replyBody}
                     onChange={(e) => setReplyBody(e.target.value)}
                     placeholder={t("messages.reply_content_placeholder")}
                     rows={6}
+                    className="text-xs"
                   />
                 </div>
               </div>
 
-              <DialogFooter className="gap-3 sm:gap-2">
+              <DialogFooter className="flex items-center justify-end gap-2.5 pt-2">
                 <Button
                   type="button"
                   variant="outline"
+                  size="sm"
                   onClick={() => setIsReplyOpen(false)}
                   disabled={isSendingReply}
+                  className="h-9 px-4 text-xs font-medium cursor-pointer"
                 >
                   {t("common.cancel")}
                 </Button>
                 <Button
                   type="button"
+                  size="sm"
                   onClick={handleSendReply}
                   disabled={isSendingReply}
-                  className="bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200"
+                  className="h-9 px-4 text-xs gap-1.5 font-medium bg-neutral-900 text-white hover:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 cursor-pointer"
                 >
                   {isSendingReply ? (
                     <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       {t("messages.sending_reply")}
                     </>
                   ) : (
                     <>
-                      <Send className="w-4 h-4 mr-2" />
+                      <Send className="w-3.5 h-3.5" />
                       {t("messages.send_reply")}
                     </>
                   )}

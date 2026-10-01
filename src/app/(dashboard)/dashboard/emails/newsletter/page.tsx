@@ -257,7 +257,7 @@ export default function NewsletterPage() {
     setDraftCustomRecipients((prev) => [...prev, trimmed]);
     setDraftSelectedEmails((prev) => [...prev, trimmed]);
     setNewRecipientInput("");
-    toast.success(language === "id" ? "Email penerima ditambahkan" : "Recipient email added");
+    toast.success(t("newsletter.recipient_added"));
   };
 
   // Remove custom email from draft
@@ -272,7 +272,7 @@ export default function NewsletterPage() {
     setCustomRecipients([...draftCustomRecipients]);
     setSelectedRecipientEmails([...draftSelectedEmails]);
     setIsRecipientModalOpen(false);
-    toast.success(language === "id" ? "Penerima broadcast disimpan" : "Recipients saved");
+    toast.success(t("newsletter.recipients_saved"));
   };
 
   // Generated email HTML for broadcast and live preview
@@ -366,10 +366,8 @@ export default function NewsletterPage() {
         recipients: effectiveSelectedEmails,
       };
 
-      const result = await NewsletterService.sendBroadcast(payload);
-      toast.success(t("newsletter.broadcast_success"), {
-        description: result.message,
-      });
+      await NewsletterService.sendBroadcast(payload);
+      toast.success(t("newsletter.broadcast_success"));
 
       // Reset form
       setBroadcastSubject("");
@@ -381,10 +379,8 @@ export default function NewsletterPage() {
       setIsConfirmBlastOpen(false);
       setActiveTab("history");
       queryClient.invalidateQueries({ queryKey: ["newsletter-campaigns"] });
-    } catch (err: unknown) {
-      toast.error("Broadcast failed", {
-        description: err instanceof Error ? err.message : "Failed to broadcast email.",
-      });
+    } catch {
+      toast.error(t("common.failed"));
     } finally {
       setIsSendingBlast(false);
     }
@@ -396,7 +392,7 @@ export default function NewsletterPage() {
       key: "email",
       header: "Email",
       render: (sub) => (
-        <span className="font-medium text-neutral-900 dark:text-white text-sm">
+        <span className="font-medium text-neutral-900 dark:text-white text-xs sm:text-sm">
           {sub.email}
         </span>
       ),
@@ -425,7 +421,7 @@ export default function NewsletterPage() {
       render: (sub) => (
         <Badge
           variant={sub.status === "active" ? "default" : "secondary"}
-          className="font-medium"
+          className="rounded-full text-xs font-medium"
         >
           {sub.status === "active"
             ? t("newsletter.status_active")
@@ -442,7 +438,7 @@ export default function NewsletterPage() {
       header: t("messages.subject"),
       render: (camp) => (
         <div className="space-y-0.5">
-          <p className="font-semibold text-sm text-neutral-900 dark:text-white">
+          <p className="font-medium text-xs sm:text-sm text-neutral-900 dark:text-white">
             {camp.subject}
           </p>
           <p className="text-xs text-neutral-500 line-clamp-1">
@@ -456,7 +452,7 @@ export default function NewsletterPage() {
       header: t("newsletter.broadcast_type"),
       className: "w-36",
       render: (camp) => (
-        <Badge variant="secondary" className="uppercase text-[11px] font-semibold">
+        <Badge variant="secondary" className="rounded-full text-xs font-medium">
           {t(`newsletter.type_${camp.type}`) || camp.type}
         </Badge>
       ),
@@ -969,7 +965,7 @@ export default function NewsletterPage() {
                           >
                             <Badge
                               variant="secondary"
-                              className="text-[10px] font-normal px-1.5 py-0 h-4"
+                              className="rounded-full text-xs font-normal px-2 py-0 h-5"
                             >
                               {t("newsletter.recipient_custom")}
                             </Badge>
@@ -1007,9 +1003,9 @@ export default function NewsletterPage() {
               type="button"
               size="sm"
               onClick={handleSaveRecipientConfig}
-              className="cursor-pointer font-medium text-xs px-6 h-9"
+              className="cursor-pointer font-medium text-xs px-6 h-9 bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900"
             >
-              {t("common.save") || (language === "id" ? "Simpan" : "Save")}
+              {t("common.save")}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -1022,14 +1018,14 @@ export default function NewsletterPage() {
             <DialogTitle className="text-base font-semibold">
               {language === "id" ? "Konfirmasi Kirim Broadcast" : "Confirm Newsletter Blast"}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500 pt-1">
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 pt-1">
               {t("newsletter.send_blast_confirm", { count: String(effectiveSelectedEmails.length) })}
             </DialogDescription>
           </DialogHeader>
 
           <div className="py-2 text-xs text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-white/10 space-y-1">
             <p><strong>Subject:</strong> {broadcastSubject}</p>
-            <p><strong>Type:</strong> <span className="uppercase">{t(`newsletter.type_${broadcastType}`) || broadcastType}</span></p>
+            <p><strong>Type:</strong> <span>{t(`newsletter.type_${broadcastType}`) || broadcastType}</span></p>
             <p><strong>Recipients:</strong> {effectiveSelectedEmails.length} selected recipient(s)</p>
             {buttonText && buttonUrl && (
               <p><strong>Action Button:</strong> {buttonText} ({buttonUrl})</p>
@@ -1042,7 +1038,7 @@ export default function NewsletterPage() {
               size="sm"
               onClick={() => setIsConfirmBlastOpen(false)}
               disabled={isSendingBlast}
-              className="cursor-pointer"
+              className="h-9 text-xs font-medium cursor-pointer"
             >
               {t("common.cancel")}
             </Button>
@@ -1050,7 +1046,7 @@ export default function NewsletterPage() {
               size="sm"
               onClick={handleSendBlast}
               disabled={isSendingBlast}
-              className="gap-1.5 cursor-pointer"
+              className="h-9 text-xs gap-1.5 font-medium bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 cursor-pointer"
             >
               {isSendingBlast ? (
                 <>
@@ -1075,7 +1071,7 @@ export default function NewsletterPage() {
             <>
               <DialogHeader className="pr-8 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <Badge variant="secondary" className="uppercase text-[10px] font-semibold">
+                  <Badge variant="secondary" className="rounded-full text-xs font-medium">
                     {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
                   </Badge>
                   <span className="text-xs text-neutral-400">
@@ -1130,7 +1126,7 @@ export default function NewsletterPage() {
             <>
               <DialogHeader className="pr-8 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <Badge variant="secondary" className="uppercase text-[10px] font-semibold">
+                  <Badge variant="secondary" className="rounded-full text-xs font-medium">
                     {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
                   </Badge>
                   <span className="text-xs text-neutral-400">
