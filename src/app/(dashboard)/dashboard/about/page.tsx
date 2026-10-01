@@ -13,6 +13,8 @@ import {
   Trash2,
   X,
   MoreHorizontal,
+  Sparkles,
+  Briefcase,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -362,39 +364,42 @@ export default function AboutPage() {
         }
       />
 
-      {/* Tabs Control */}
-      <div className="flex gap-2 border-b border-neutral-200 dark:border-white/10 pb-px mb-6">
+      {/* Tab Selector */}
+      <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit mb-6">
         <button
           onClick={() => setActiveTab("general")}
           className={cn(
-            "pb-3 px-4 text-sm font-medium border-b-2 transition-all cursor-pointer outline-none focus:outline-none",
+            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
             activeTab === "general"
-              ? "border-neutral-900 text-neutral-900 dark:border-white dark:text-white"
-              : "border-transparent text-neutral-500 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white"
+              ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
+              : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           )}
         >
+          <User className="w-4 h-4" />
           {t("about.title")}
         </button>
         <button
           onClick={() => setActiveTab("badges")}
           className={cn(
-            "pb-3 px-4 text-sm font-medium border-b-2 transition-all cursor-pointer outline-none focus:outline-none",
+            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
             activeTab === "badges"
-              ? "border-neutral-900 text-neutral-900 dark:border-white dark:text-white"
-              : "border-transparent text-neutral-500 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white"
+              ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
+              : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           )}
         >
+          <Sparkles className="w-4 h-4" />
           {t("badges.title")}
         </button>
         <button
           onClick={() => setActiveTab("roles")}
           className={cn(
-            "pb-3 px-4 text-sm font-medium border-b-2 transition-all cursor-pointer outline-none focus:outline-none",
+            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
             activeTab === "roles"
-              ? "border-neutral-900 text-neutral-900 dark:border-white dark:text-white"
-              : "border-transparent text-neutral-500 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white"
+              ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
+              : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           )}
         >
+          <Briefcase className="w-4 h-4" />
           {t("roles.title")}
         </button>
       </div>
