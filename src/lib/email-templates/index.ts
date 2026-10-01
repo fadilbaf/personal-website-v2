@@ -111,24 +111,24 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       { key: "receivedAt", label: "{{receivedAt}}", description: "Submission timestamp" },
     ],
     fields: [
-      { key: "name", label: "Visitor Name", type: "text", defaultValue: "Sarah Jenkins" },
-      { key: "email", label: "Visitor Email", type: "text", defaultValue: "sarah.jenkins@company.com" },
-      { key: "subject", label: "Subject", type: "text", defaultValue: "Partnership & AI Project Inquiry" },
+      { key: "name", label: "Visitor Name", type: "text", defaultValue: "Aliya Kherid" },
+      { key: "email", label: "Visitor Email", type: "text", defaultValue: "aliyakherid@gmail.com" },
+      { key: "subject", label: "Subject", type: "text", defaultValue: "Collaboration — Wedding Planner & Digital Invitation Project" },
       {
         key: "message",
         label: "Message Content",
         type: "textarea",
         defaultValue:
-          "Hi Fadil,\n\nI came across your portfolio and was really impressed with your Next.js and AI projects. We have an upcoming design engineering project and would love to collaborate.\n\nBest,\nSarah",
+          "Hi Fadil,\n\nI'm interested in collaborating on the development of an interactive wedding planner & digital invitation platform for our clients.\n\nWould you have some time available this week to discuss the project concept, scope, and timeline?\n\nBest regards,\nAliya Kherid",
       },
       { key: "receivedAt", label: "Received Timestamp", type: "text", defaultValue: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) },
     ],
     renderHtml: (params) =>
       renderContactNotificationEmail({
-        name: params.name || "Sarah Jenkins",
-        email: params.email || "sarah.jenkins@company.com",
-        subject: params.subject || "Partnership & AI Project Inquiry",
-        message: params.message || "Hello Fadil!",
+        name: params.name || "Aliya Kherid",
+        email: params.email || "aliyakherid@gmail.com",
+        subject: params.subject || "Collaboration — Wedding Planner & Digital Invitation Project",
+        message: params.message || "Hi Fadil,\n\nI'm interested in collaborating with you!",
         receivedAt: params.receivedAt || new Date().toLocaleString(),
       }),
     getDefaultRawTemplate: () =>
@@ -153,13 +153,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       { key: "subject", label: "{{subject}}", description: "Inquiry subject" },
     ],
     fields: [
-      { key: "name", label: "Visitor Name", type: "text", defaultValue: "Sarah Jenkins" },
-      { key: "subject", label: "Original Subject", type: "text", defaultValue: "Partnership & AI Project Inquiry" },
+      { key: "name", label: "Visitor Name", type: "text", defaultValue: "Aliya Kherid" },
+      { key: "subject", label: "Original Subject", type: "text", defaultValue: "Collaboration — Wedding Planner & Digital Invitation Project" },
     ],
     renderHtml: (params, locale = "en") =>
       renderContactAutoReplyEmail({
-        name: params.name || "Sarah Jenkins",
-        subject: params.subject || "Partnership & AI Project Inquiry",
+        name: params.name || "Aliya Kherid",
+        subject: params.subject || "Collaboration — Wedding Planner & Digital Invitation Project",
         locale,
       }),
     getDefaultRawTemplate: (locale = "en") =>
@@ -185,27 +185,28 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       { key: "originalMessage", label: "{{originalMessage}}", description: "Original visitor message" },
     ],
     fields: [
-      { key: "recipientName", label: "Recipient Name", type: "text", defaultValue: "Sarah Jenkins" },
-      { key: "subject", label: "Reply Subject", type: "text", defaultValue: "Re: Partnership & AI Project Inquiry" },
+      { key: "recipientName", label: "Recipient Name", type: "text", defaultValue: "Aliya Kherid" },
+      { key: "subject", label: "Reply Subject", type: "text", defaultValue: "Re: Collaboration — Wedding Planner & Digital Invitation Project" },
       {
         key: "replyMessage",
         label: "Reply Message",
         type: "textarea",
         defaultValue:
-          "Hi Sarah,\n\nThank you for reaching out! I would love to learn more about the project and how we can work together.\n\nAre you available for a brief Google Meet call this Thursday around 2 PM GMT+7?\n\nLooking forward to speaking with you!",
+          "Hi Aliya,\n\nThank you so much for reaching out! The wedding planner & digital invitation platform sounds exciting, and I'd love to help bring this project to life.\n\nCould we schedule a quick Google Meet call tomorrow or the day after to go over the feature requirements, design direction, and timeline?\n\nWarm regards,\nFadil Bafagih",
       },
-      { key: "originalSubject", label: "Original Subject", type: "text", defaultValue: "Partnership & AI Project Inquiry" },
+      { key: "originalSubject", label: "Original Subject", type: "text", defaultValue: "Collaboration — Wedding Planner & Digital Invitation Project" },
       {
         key: "originalMessage",
         label: "Original Visitor Message",
         type: "textarea",
-        defaultValue: "Hi Fadil, I came across your portfolio and was really impressed with your Next.js and AI projects.",
+        defaultValue:
+          "Hi Fadil,\n\nI'm interested in collaborating on the development of an interactive wedding planner & digital invitation platform for our clients.\n\nWould you have some time available this week to discuss the project concept, scope, and timeline?\n\nBest regards,\nAliya Kherid",
       },
     ],
     renderHtml: (params) =>
       renderContactReplyEmail({
-        recipientName: params.recipientName || "Sarah Jenkins",
-        subject: params.subject || "Re: Partnership & AI Project Inquiry",
+        recipientName: params.recipientName || "Aliya Kherid",
+        subject: params.subject || "Re: Collaboration — Wedding Planner & Digital Invitation Project",
         replyMessage: params.replyMessage || "Thank you for reaching out!",
         originalMessage: params.originalMessage,
         originalSubject: params.originalSubject,
@@ -231,11 +232,11 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       { key: "email", label: "{{email}}", description: "Subscriber email address" },
     ],
     fields: [
-      { key: "email", label: "Subscriber Email", type: "text", defaultValue: "subscriber@example.com" },
+      { key: "email", label: "Subscriber Email", type: "text", defaultValue: "aliyakherid@gmail.com" },
     ],
     renderHtml: (params, locale = "en") =>
       renderNewsletterWelcomeEmail({
-        email: params.email || "subscriber@example.com",
+        email: params.email || "aliyakherid@gmail.com",
         locale,
       }),
     getDefaultRawTemplate: (locale = "en") =>
@@ -258,20 +259,20 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       { key: "subscribedAt", label: "{{subscribedAt}}", description: "Subscription timestamp" },
     ],
     fields: [
-      { key: "email", label: "Subscriber Email", type: "text", defaultValue: "new_reader@domain.com" },
-      { key: "totalSubscribers", label: "Total Subscribers", type: "number", defaultValue: 42 },
+      { key: "email", label: "Subscriber Email", type: "text", defaultValue: "aliyakherid@gmail.com" },
+      { key: "totalSubscribers", label: "Total Subscribers", type: "number", defaultValue: 18 },
       { key: "subscribedAt", label: "Subscribed Timestamp", type: "text", defaultValue: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) },
     ],
     renderHtml: (params) =>
       renderNewsletterAdminNotificationEmail({
-        email: params.email || "new_reader@domain.com",
-        totalSubscribers: Number(params.totalSubscribers) || 42,
+        email: params.email || "aliyakherid@gmail.com",
+        totalSubscribers: Number(params.totalSubscribers) || 18,
         subscribedAt: params.subscribedAt || new Date().toLocaleString(),
       }),
     getDefaultRawTemplate: () =>
       renderNewsletterAdminNotificationEmail({
         email: "{{email}}",
-        totalSubscribers: Number("{{totalSubscribers}}") || 42,
+        totalSubscribers: Number("{{totalSubscribers}}") || 18,
         subscribedAt: "{{subscribedAt}}",
       }),
   },
@@ -289,39 +290,43 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       { key: "recipientEmail", label: "{{recipientEmail}}", description: "Subscriber recipient email" },
     ],
     fields: [
-      { key: "subject", label: "Broadcast Subject", type: "text", defaultValue: "🚀 Next.js 15 Deep Dive & Full Stack Patterns" },
+      { key: "subject", label: "Broadcast Subject", type: "text", defaultValue: "Introducing Pixture — A Modern Photography & Visual Showcase Platform" },
       {
         key: "type",
-        label: "Update Type",
+        label: "Campaign Type",
         type: "select",
         options: [
+          { label: "Newsletter", value: "newsletter" },
           { label: "Blog Article", value: "blog" },
           { label: "Project Launch", value: "project" },
           { label: "Achievement", value: "achievement" },
-          { label: "General Update", value: "general" },
+          { label: "Information", value: "information" },
+          { label: "Promotion", value: "promotion" },
         ],
-        defaultValue: "blog",
+        defaultValue: "project",
       },
-      { key: "recipientEmail", label: "Recipient Placeholder", type: "text", defaultValue: "subscriber@example.com" },
+      { key: "recipientEmail", label: "Recipient Placeholder", type: "text", defaultValue: "aliyakherid@gmail.com" },
       {
         key: "contentHtml",
         label: "Body Content (HTML allowed)",
         type: "textarea",
         defaultValue:
-          "<p>Hello everyone! 👋</p><p>I'm thrilled to share my latest technical article exploring <strong>Next.js 15 architecture, React Server Components, and zero-latency caching</strong>.</p><p>We break down production benchmarks, edge deployment considerations, and practical lessons from building real-world enterprise apps.</p><p><a href=\"https://bafagih.id/blogs/nextjs-15-deep-dive\" style=\"display: inline-block; background-color: #38bdf8; color: #09090b; font-weight: 600; font-size: 13px; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin-top: 12px;\">Read Full Story &rarr;</a></p>",
+          `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">\n  Hey everyone! 👋\n</p>\n<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">\n  I'm thrilled to announce the launch of my latest project: <strong>Pixture</strong> — a modern visual curation and photography showcase platform built for high performance and seamless interactive experiences.\n</p>\n<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">\n  The platform is built using a modern technology stack with adaptive image optimization, dynamic masonry layouts, and lightning-fast cloud delivery.\n</p>\n<div style="margin: 28px 0 16px; text-align: left;">\n  <a href="https://bafagih.id/projects/pixture" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #ffffff; color: #09090b; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 14px rgba(255,255,255,0.12);">\n    Explore Pixture &rarr;\n  </a>\n</div>`,
       },
     ],
     renderHtml: (params) =>
       renderNewsletterBroadcastEmail({
-        subject: params.subject || "Newsletter Broadcast",
-        type: (params.type as any) || "blog",
-        recipientEmail: params.recipientEmail || "subscriber@example.com",
-        contentHtml: params.contentHtml || "<p>Welcome to our update!</p>",
+        subject: params.subject || "Introducing Pixture — A Modern Photography & Visual Showcase Platform",
+        type: (params.type as any) || "project",
+        recipientEmail: params.recipientEmail || "aliyakherid@gmail.com",
+        contentHtml:
+          params.contentHtml ||
+          `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">Hey everyone! 👋</p><p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">I'm thrilled to announce the launch of my latest project: <strong>Pixture</strong>.</p>`,
       }),
     getDefaultRawTemplate: () =>
       renderNewsletterBroadcastEmail({
         subject: "{{subject}}",
-        type: "general",
+        type: "project",
         recipientEmail: "{{recipientEmail}}",
         contentHtml: "{{contentHtml}}",
       }),
