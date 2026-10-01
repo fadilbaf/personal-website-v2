@@ -889,10 +889,10 @@ export default function EmailTemplatesPage() {
                       {/* Locale Switcher (EN / ID) - Always rendered, disabled for single-language templates */}
                       <div
                         className={cn(
-                          "flex items-center p-0.5 rounded-md border text-xs transition-opacity",
+                          "flex items-center p-0.5 rounded-md border text-xs transition-colors",
                           activeTemplate.supportsLocale
                             ? "bg-neutral-200/60 dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
-                            : "bg-neutral-100/70 dark:bg-neutral-950/50 border-neutral-200/40 dark:border-white/5 opacity-50 cursor-not-allowed"
+                            : "bg-neutral-100/80 dark:bg-neutral-900/60 border-neutral-200/60 dark:border-white/10 cursor-not-allowed"
                         )}
                         title={!activeTemplate.supportsLocale ? "Template ini hanya mendukung satu bahasa (Single Language)" : undefined}
                       >
@@ -901,9 +901,9 @@ export default function EmailTemplatesPage() {
                           disabled={!activeTemplate.supportsLocale}
                           onClick={() => handleLocaleChange("en")}
                           className={cn(
-                            "px-2 py-1 rounded font-medium transition-colors",
+                            "px-2 py-1 rounded font-medium transition-colors text-xs select-none",
                             !activeTemplate.supportsLocale
-                              ? "cursor-not-allowed opacity-40 text-neutral-400 dark:text-neutral-600 hover:text-neutral-400 dark:hover:text-neutral-600 hover:bg-transparent"
+                              ? "cursor-not-allowed text-neutral-400 dark:text-neutral-500 hover:text-neutral-400 dark:hover:text-neutral-500 hover:bg-transparent"
                               : templateLocale === "en"
                               ? "bg-white text-neutral-900 shadow-2xs dark:bg-neutral-800 dark:text-white cursor-pointer"
                               : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
@@ -916,9 +916,9 @@ export default function EmailTemplatesPage() {
                           disabled={!activeTemplate.supportsLocale}
                           onClick={() => handleLocaleChange("id")}
                           className={cn(
-                            "px-2 py-1 rounded font-medium transition-colors",
+                            "px-2 py-1 rounded font-medium transition-colors text-xs select-none",
                             !activeTemplate.supportsLocale
-                              ? "cursor-not-allowed opacity-40 text-neutral-400 dark:text-neutral-600 hover:text-neutral-400 dark:hover:text-neutral-600 hover:bg-transparent"
+                              ? "cursor-not-allowed text-neutral-400 dark:text-neutral-500 hover:text-neutral-400 dark:hover:text-neutral-500 hover:bg-transparent"
                               : templateLocale === "id"
                               ? "bg-white text-neutral-900 shadow-2xs dark:bg-neutral-800 dark:text-white cursor-pointer"
                               : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
@@ -973,7 +973,7 @@ export default function EmailTemplatesPage() {
                           "h-8 w-8 transition-colors",
                           canUndo
                             ? "cursor-pointer bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-white"
-                            : "cursor-not-allowed opacity-35 bg-white dark:bg-neutral-900 text-neutral-400 dark:text-neutral-600 hover:bg-white dark:hover:bg-neutral-900 hover:text-neutral-400 dark:hover:text-neutral-600 hover:border-neutral-200/80 dark:hover:border-white/10"
+                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 bg-neutral-100/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-white/10 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none"
                         )}
                       >
                         <Undo2 className="w-3.5 h-3.5" />
@@ -990,7 +990,7 @@ export default function EmailTemplatesPage() {
                           "h-8 w-8 transition-colors",
                           canRedo
                             ? "cursor-pointer bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-white"
-                            : "cursor-not-allowed opacity-35 bg-white dark:bg-neutral-900 text-neutral-400 dark:text-neutral-600 hover:bg-white dark:hover:bg-neutral-900 hover:text-neutral-400 dark:hover:text-neutral-600 hover:border-neutral-200/80 dark:hover:border-white/10"
+                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 bg-neutral-100/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-white/10 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none"
                         )}
                       >
                         <Redo2 className="w-3.5 h-3.5" />
@@ -1022,7 +1022,7 @@ export default function EmailTemplatesPage() {
                           "h-8 w-8 transition-colors",
                           !isAlreadyDefault
                             ? "cursor-pointer text-red-600 border-red-200/80 bg-red-50/50 hover:bg-red-100/80 hover:text-red-700 hover:border-red-300 dark:text-red-400 dark:border-red-900/40 dark:bg-red-950/30 dark:hover:bg-red-950/60 dark:hover:border-red-800"
-                            : "cursor-not-allowed opacity-35 text-neutral-400 border-neutral-200/60 bg-neutral-100/40 dark:text-neutral-600 dark:border-white/5 dark:bg-neutral-900 hover:bg-neutral-100/40 dark:hover:bg-neutral-900 hover:text-neutral-400 dark:hover:text-neutral-600 hover:border-neutral-200/60 dark:hover:border-white/5"
+                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 border-neutral-200/50 dark:border-white/10 bg-neutral-100/50 dark:bg-neutral-900/50 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none"
                         )}
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
@@ -1037,7 +1037,7 @@ export default function EmailTemplatesPage() {
                           "h-8 text-xs gap-1.5 font-medium ml-0.5 transition-colors",
                           isDirty && !isSaving
                             ? "bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 cursor-pointer shadow-xs"
-                            : "bg-neutral-200 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500 hover:bg-neutral-200 dark:hover:bg-neutral-800 hover:text-neutral-400 dark:hover:text-neutral-500 cursor-not-allowed opacity-40 shadow-none border-0"
+                            : "bg-neutral-100 text-neutral-400 border border-neutral-200/60 dark:bg-neutral-800/60 dark:text-neutral-400 dark:border-white/5 cursor-not-allowed shadow-none"
                         )}
                       >
                         {isSaving ? (
