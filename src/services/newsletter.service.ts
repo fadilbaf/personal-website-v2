@@ -97,6 +97,22 @@ export const NewsletterService = {
   },
 
   /**
+   * Deletes a broadcast campaign history record permanently.
+   */
+  async deleteCampaign(id: string): Promise<void> {
+    const supabase = createClient();
+    const { error } = await supabase
+      .from("newsletter_campaigns")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      console.error("NewsletterService.deleteCampaign error:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Dispatches broadcast or test email via API.
    */
   async sendBroadcast(payload: BroadcastPayload): Promise<{

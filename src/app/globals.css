@@ -447,31 +447,56 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
   font-family: var(--font-sans), sans-serif !important;
 }
 
-/* Custom Scrollbar for GitHub Calendar Scroll Container & Category Nav */
+/* Custom Scrollbar for GitHub Calendar Scroll Container & Category Nav & Modals & Tables */
 .scrollbar-custom,
-.react-activity-calendar__scroll-container {
+.react-activity-calendar__scroll-container,
+[data-slot="dialog-content"],
+[data-slot="table-container"],
+[data-slot="textarea"],
+[data-slot="select-content"],
+[data-slot="dropdown-menu-content"] {
   scrollbar-width: thin;
   scrollbar-color: rgba(0, 0, 0, 0.8) transparent;
 }
 
 .dark .scrollbar-custom,
-.dark .react-activity-calendar__scroll-container {
+.dark .react-activity-calendar__scroll-container,
+.dark [data-slot="dialog-content"],
+.dark [data-slot="table-container"],
+.dark [data-slot="textarea"],
+.dark [data-slot="select-content"],
+.dark [data-slot="dropdown-menu-content"] {
   scrollbar-color: rgba(255, 255, 255, 0.85) transparent;
 }
 
 .scrollbar-custom::-webkit-scrollbar,
-.react-activity-calendar__scroll-container::-webkit-scrollbar {
+.react-activity-calendar__scroll-container::-webkit-scrollbar,
+[data-slot="dialog-content"]::-webkit-scrollbar,
+[data-slot="table-container"]::-webkit-scrollbar,
+[data-slot="textarea"]::-webkit-scrollbar,
+[data-slot="select-content"]::-webkit-scrollbar,
+[data-slot="dropdown-menu-content"]::-webkit-scrollbar {
   height: 8px !important;
   width: 8px !important;
 }
 
 .scrollbar-custom::-webkit-scrollbar-track,
-.react-activity-calendar__scroll-container::-webkit-scrollbar-track {
+.react-activity-calendar__scroll-container::-webkit-scrollbar-track,
+[data-slot="dialog-content"]::-webkit-scrollbar-track,
+[data-slot="table-container"]::-webkit-scrollbar-track,
+[data-slot="textarea"]::-webkit-scrollbar-track,
+[data-slot="select-content"]::-webkit-scrollbar-track,
+[data-slot="dropdown-menu-content"]::-webkit-scrollbar-track {
   background: transparent !important;
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb,
-.react-activity-calendar__scroll-container::-webkit-scrollbar-thumb {
+.react-activity-calendar__scroll-container::-webkit-scrollbar-thumb,
+[data-slot="dialog-content"]::-webkit-scrollbar-thumb,
+[data-slot="table-container"]::-webkit-scrollbar-thumb,
+[data-slot="textarea"]::-webkit-scrollbar-thumb,
+[data-slot="select-content"]::-webkit-scrollbar-thumb,
+[data-slot="dropdown-menu-content"]::-webkit-scrollbar-thumb {
   background: rgba(0, 0, 0, 0.85) !important;
   border: 2px solid transparent !important;
   background-clip: padding-box !important;
@@ -479,21 +504,36 @@ input[type="date"]::-webkit-calendar-picker-indicator:hover {
 }
 
 .dark .scrollbar-custom::-webkit-scrollbar-thumb,
-.dark .react-activity-calendar__scroll-container::-webkit-scrollbar-thumb {
+.dark .react-activity-calendar__scroll-container::-webkit-scrollbar-thumb,
+.dark [data-slot="dialog-content"]::-webkit-scrollbar-thumb,
+.dark [data-slot="table-container"]::-webkit-scrollbar-thumb,
+.dark [data-slot="textarea"]::-webkit-scrollbar-thumb,
+.dark [data-slot="select-content"]::-webkit-scrollbar-thumb,
+.dark [data-slot="dropdown-menu-content"]::-webkit-scrollbar-thumb {
   background: rgba(255, 255, 255, 0.8) !important;
   border: 2px solid transparent !important;
   background-clip: padding-box !important;
 }
 
 .scrollbar-custom::-webkit-scrollbar-thumb:hover,
-.react-activity-calendar__scroll-container::-webkit-scrollbar-thumb:hover {
+.react-activity-calendar__scroll-container::-webkit-scrollbar-thumb:hover,
+[data-slot="dialog-content"]::-webkit-scrollbar-thumb:hover,
+[data-slot="table-container"]::-webkit-scrollbar-thumb:hover,
+[data-slot="textarea"]::-webkit-scrollbar-thumb:hover,
+[data-slot="select-content"]::-webkit-scrollbar-thumb:hover,
+[data-slot="dropdown-menu-content"]::-webkit-scrollbar-thumb:hover {
   background: #000000 !important;
   border: 2px solid transparent !important;
   background-clip: padding-box !important;
 }
 
 .dark .scrollbar-custom::-webkit-scrollbar-thumb:hover,
-.dark .react-activity-calendar__scroll-container::-webkit-scrollbar-thumb:hover {
+.dark .react-activity-calendar__scroll-container::-webkit-scrollbar-thumb:hover,
+.dark [data-slot="dialog-content"]::-webkit-scrollbar-thumb:hover,
+.dark [data-slot="table-container"]::-webkit-scrollbar-thumb:hover,
+.dark [data-slot="textarea"]::-webkit-scrollbar-thumb:hover,
+.dark [data-slot="select-content"]::-webkit-scrollbar-thumb:hover,
+.dark [data-slot="dropdown-menu-content"]::-webkit-scrollbar-thumb:hover {
   background: #ffffff !important;
   border: 2px solid transparent !important;
   background-clip: padding-box !important;

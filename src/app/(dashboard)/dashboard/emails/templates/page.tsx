@@ -50,6 +50,7 @@ import { compileTemplate } from "@/src/lib/email-templates/compiler";
 import { EmailTemplateService } from "@/src/services/email-template.service";
 import type { EmailTemplate as DbEmailTemplate } from "@/src/types/database";
 import { useLanguage } from "@/context/language-context";
+import { useTheme } from "next-themes";
 import { cn } from "@/src/app/lib/utils";
 
 type ViewMode = "preview" | "html";
@@ -57,6 +58,8 @@ type Viewport = "desktop" | "mobile";
 
 export default function EmailTemplatesPage() {
   const { t, language } = useLanguage();
+  const { resolvedTheme } = useTheme();
+  const isDark = resolvedTheme === "dark";
 
   // Active template selection
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>(
@@ -103,6 +106,23 @@ export default function EmailTemplatesPage() {
     }
     return initial;
   });
+
+  // Dynamic Full-Height Preview measurement
+  const previewIframeRef = useRef<HTMLIFrameElement>(null);
+  const [previewHeight, setPreviewHeight] = useState(800);
+
+  const handlePreviewIframeLoad = () => {
+    if (previewIframeRef.current?.contentWindow) {
+      const doc = previewIframeRef.current.contentWindow.document;
+      const scrollHeight = Math.max(
+        doc.body?.scrollHeight || 0,
+        doc.documentElement?.scrollHeight || 0
+      );
+      if (scrollHeight > 0) {
+        setPreviewHeight(scrollHeight + 24);
+      }
+    }
+  };
 
   // Test Email Modal
   const [isTestModalOpen, setIsTestModalOpen] = useState(false);
@@ -216,10 +236,52 @@ export default function EmailTemplatesPage() {
     return compileTemplate(currentSubjectCode, currentVariables);
   }, [currentSubjectCode, currentVariables]);
 
-  // Compiled HTML for live preview
+  // Compiled HTML for live preview with custom scrollbar injected into iframe matching active theme
   const renderedHtml = useMemo(() => {
-    return compileTemplate(currentHtmlCode, currentVariables);
-  }, [currentHtmlCode, currentVariables]);
+    const raw = compileTemplate(currentHtmlCode, currentVariables);
+    const scrollbarColor = isDark
+      ? "rgba(255, 255, 255, 0.85) transparent"
+      : "rgba(0, 0, 0, 0.8) transparent";
+    const thumbColor = isDark
+      ? "rgba(255, 255, 255, 0.8)"
+      : "rgba(0, 0, 0, 0.85)";
+    const thumbHoverColor = isDark
+      ? "#ffffff"
+      : "#000000";
+
+    const scrollbarStyle = `<style>
+      html, body {
+        scrollbar-width: thin !important;
+        scrollbar-color: ${scrollbarColor} !important;
+      }
+      ::-webkit-scrollbar {
+        height: 8px !important;
+        width: 8px !important;
+      }
+      ::-webkit-scrollbar-track {
+        background: transparent !important;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: ${thumbColor} !important;
+        border: 2px solid transparent !important;
+        background-clip: padding-box !important;
+        border-radius: 9999px !important;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: ${thumbHoverColor} !important;
+        border: 2px solid transparent !important;
+        background-clip: padding-box !important;
+      }
+    </style>`;
+    if (raw.includes("</head>")) {
+      return raw.replace("</head>", `${scrollbarStyle}</head>`);
+    }
+    return scrollbarStyle + raw;
+  }, [currentHtmlCode, currentVariables, isDark]);
+
+  useEffect(() => {
+    handlePreviewIframeLoad();
+  }, [renderedHtml, viewport]);
 
   // Is customized in DB
   const isCustomizedInDb = !!dbTemplates[activeTemplate.id];
@@ -999,8 +1061,8 @@ export default function EmailTemplatesPage() {
             {/* Canvas Viewport / Editor Body */}
             <div>
               {viewMode === "preview" && (
-                /* LIVE EMAIL PREVIEW CANVAS (Starts right below toolbar divider) */
-                <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-950/60 flex justify-center min-h-[640px] overflow-auto">
+                /* LIVE EMAIL PREVIEW CANVAS (Full dynamic height without restrictions) */
+                <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-950/60 flex justify-center">
                   <div
                     className={cn(
                       "w-full transition-all duration-300 rounded-lg overflow-hidden border border-neutral-200/80 dark:border-white/10 shadow-sm bg-white dark:bg-neutral-900",
@@ -1008,9 +1070,12 @@ export default function EmailTemplatesPage() {
                     )}
                   >
                     <iframe
+                      ref={previewIframeRef}
                       srcDoc={renderedHtml}
+                      onLoad={handlePreviewIframeLoad}
                       title="Email Preview"
-                      className="w-full h-[640px] border-0 bg-transparent block"
+                      style={{ height: `${previewHeight}px` }}
+                      className="w-full border-0 bg-transparent block transition-[height] duration-150"
                       sandbox="allow-same-origin allow-popups"
                     />
                   </div>
@@ -1038,7 +1103,7 @@ export default function EmailTemplatesPage() {
                     />
                   </div>
 
-                  {/* Monospaced Code Textarea */}
+                  {/* Monospaced Code Textarea (100 lines limit before scrollbar appears) */}
                   <Textarea
                     ref={htmlTextareaRef}
                     value={currentHtmlCode}
@@ -1048,7 +1113,7 @@ export default function EmailTemplatesPage() {
                     spellCheck={false}
                     autoCorrect="off"
                     autoCapitalize="off"
-                    className="font-mono text-xs leading-relaxed min-h-[560px] bg-white dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 resize-y p-3.5 focus-visible:ring-1"
+                    className="font-mono text-xs leading-relaxed min-h-[560px] max-h-[1950px] overflow-y-auto bg-white dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 resize-y p-3.5 focus-visible:ring-1 scrollbar-custom"
                     placeholder="Enter email HTML markup..."
                   />
 
@@ -1113,7 +1178,7 @@ export default function EmailTemplatesPage() {
                               handleVariableChange(field.key, e.target.value)
                             }
                             rows={3}
-                            className="text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10"
+                            className="text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 scrollbar-custom"
                           />
                         ) : field.type === "select" && field.options ? (
                           <Select
@@ -1129,7 +1194,7 @@ export default function EmailTemplatesPage() {
                             >
                               <SelectValue className="text-xs" />
                             </SelectTrigger>
-                            <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10">
+                            <SelectContent className="bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 scrollbar-custom">
                               {field.options.map((opt) => (
                                 <SelectItem
                                   key={opt.value}
@@ -1163,8 +1228,8 @@ export default function EmailTemplatesPage() {
 
       {/* Send Test Email Modal */}
       <Dialog open={isTestModalOpen} onOpenChange={setIsTestModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
+        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto scrollbar-custom">
+          <DialogHeader className="pr-10 sm:pr-12">
             <DialogTitle className="flex items-center gap-2 text-base font-semibold">
               <Send className="w-4 h-4 text-neutral-500" />
               {t("templates.test_modal_title")}

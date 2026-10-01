@@ -28,7 +28,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import {
@@ -158,6 +157,21 @@ export default function MessagesPage() {
     }
   };
 
+  // Format date time helper consistent across table and modals
+  const formatDateTime = (dateStr?: string | null) => {
+    if (!dateStr) return "-";
+    const date = new Date(dateStr);
+    if (isNaN(date.getTime())) return "-";
+    return `${date.toLocaleDateString(language === "id" ? "id-ID" : "en-US", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+    })} • ${date.toLocaleTimeString([], {
+      hour: "2-digit",
+      minute: "2-digit",
+    })}`;
+  };
+
   // Status badges matching standard dashboard style
   const renderStatusBadge = (status: MessageStatus, is_read: boolean) => {
     if (status === "replied") {
@@ -231,20 +245,11 @@ export default function MessagesPage() {
       key: "created_at",
       header: t("messages.received"),
       className: "w-44",
-      render: (msg) => {
-        const date = new Date(msg.created_at);
-        return (
-          <span className="text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
-            {date.toLocaleDateString(language === "id" ? "id-ID" : "en-US", {
-              day: "numeric",
-              month: "short",
-              year: "numeric",
-            })}{" "}
-            &bull;{" "}
-            {date.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-          </span>
-        );
-      },
+      render: (msg) => (
+        <span className="text-xs text-neutral-500 dark:text-neutral-400 whitespace-nowrap">
+          {formatDateTime(msg.created_at)}
+        </span>
+      ),
     },
     {
       key: "status",
@@ -319,7 +324,7 @@ export default function MessagesPage() {
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10"
+                className="h-8 w-8 data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10"
               >
                 <MoreHorizontal className="h-4 w-4" />
                 <span className="sr-only">Open menu</span>
@@ -356,7 +361,6 @@ export default function MessagesPage() {
                   </>
                 )}
               </DropdownMenuItem>
-              <DropdownMenuSeparator />
               <DropdownMenuItem
                 variant="destructive"
                 onClick={() => setDeleteItem(msg)}
@@ -372,20 +376,17 @@ export default function MessagesPage() {
 
       {/* Message Detail Modal */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto scrollbar-custom">
           {selectedMessage && (
             <>
-              <DialogHeader className="space-y-1.5 pb-2">
+              <DialogHeader className="space-y-1.5 pb-2 pr-10 sm:pr-12">
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   {renderStatusBadge(
                     selectedMessage.status,
                     selectedMessage.is_read
                   )}
                   <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {new Date(selectedMessage.created_at).toLocaleString(
-                      language === "id" ? "id-ID" : "en-US",
-                      { dateStyle: "medium", timeStyle: "short" }
-                    )}
+                    {formatDateTime(selectedMessage.created_at)}
                   </span>
                 </div>
                 <DialogTitle className="text-base font-semibold text-neutral-900 dark:text-white pt-1">
@@ -411,7 +412,7 @@ export default function MessagesPage() {
                   <Label className="text-xs font-medium text-neutral-700 dark:text-neutral-300 block mb-1.5">
                     {t("messages.original_message")}
                   </Label>
-                  <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+                  <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto scrollbar-custom">
                     {selectedMessage.message}
                   </div>
                 </div>
@@ -425,14 +426,11 @@ export default function MessagesPage() {
                       </Label>
                       {selectedMessage.replied_at && (
                         <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                          {new Date(selectedMessage.replied_at).toLocaleString(
-                            language === "id" ? "id-ID" : "en-US",
-                            { dateStyle: "medium", timeStyle: "short" }
-                          )}
+                          {formatDateTime(selectedMessage.replied_at)}
                         </span>
                       )}
                     </div>
-                    <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed">
+                    <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto scrollbar-custom">
                       {selectedMessage.reply_content}
                     </div>
                   </div>
@@ -464,10 +462,10 @@ export default function MessagesPage() {
 
       {/* Reply Modal */}
       <Dialog open={isReplyOpen} onOpenChange={setIsReplyOpen}>
-        <DialogContent className="sm:max-w-xl">
+        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto scrollbar-custom">
           {replyMessage && (
             <>
-              <DialogHeader>
+              <DialogHeader className="pr-10 sm:pr-12">
                 <DialogTitle className="flex items-center gap-2 text-base font-semibold">
                   <Reply className="h-4 w-4 text-neutral-500" />
                   {t("messages.reply_dialog_title", {
