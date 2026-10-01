@@ -109,18 +109,72 @@ export default function EmailTemplatesPage() {
 
   // Dynamic Full-Height Preview measurement
   const previewIframeRef = useRef<HTMLIFrameElement>(null);
-  const [previewHeight, setPreviewHeight] = useState(800);
+  const [previewHeight, setPreviewHeight] = useState(600);
+  const iframeResizeObserverRef = useRef<any>(null);
+
+  const measureIframeHeight = () => {
+    if (previewIframeRef.current?.contentWindow) {
+      const doc = previewIframeRef.current.contentWindow.document;
+      const targetEl =
+        (doc.body?.firstElementChild as HTMLElement) ||
+        doc.body?.querySelector("table") ||
+        doc.body;
+
+      if (targetEl) {
+        const exactHeight = Math.ceil(
+          targetEl.getBoundingClientRect().height ||
+          targetEl.offsetHeight ||
+          0
+        );
+        if (exactHeight > 0) {
+          setPreviewHeight(exactHeight);
+        }
+      }
+    }
+  };
 
   const handlePreviewIframeLoad = () => {
     if (previewIframeRef.current?.contentWindow) {
-      const doc = previewIframeRef.current.contentWindow.document;
-      const scrollHeight = Math.max(
-        doc.body?.scrollHeight || 0,
-        doc.documentElement?.scrollHeight || 0
-      );
-      if (scrollHeight > 0) {
-        setPreviewHeight(scrollHeight + 24);
+      const win = previewIframeRef.current.contentWindow;
+      const doc = win.document;
+
+      if (doc?.documentElement) {
+        doc.documentElement.style.backgroundColor = "transparent";
+        doc.documentElement.style.colorScheme = isDark ? "dark" : "light";
       }
+      if (doc?.body) {
+        doc.body.style.backgroundColor = "transparent";
+        doc.body.style.colorScheme = isDark ? "dark" : "light";
+      }
+
+      const targetEl =
+        (doc.body?.firstElementChild as HTMLElement) ||
+        doc.body?.querySelector("table") ||
+        doc.body;
+
+      measureIframeHeight();
+
+      if (iframeResizeObserverRef.current) {
+        try {
+          iframeResizeObserverRef.current.disconnect();
+        } catch {}
+      }
+
+      const winAny = win as any;
+      if (typeof winAny.ResizeObserver !== "undefined" && targetEl) {
+        try {
+          const ro = new winAny.ResizeObserver(() => {
+            measureIframeHeight();
+          });
+          ro.observe(targetEl);
+          if (doc.body && doc.body !== targetEl) {
+            ro.observe(doc.body);
+          }
+          iframeResizeObserverRef.current = ro;
+        } catch {}
+      }
+
+      win.addEventListener("resize", measureIframeHeight);
     }
   };
 
@@ -249,38 +303,37 @@ export default function EmailTemplatesPage() {
       ? "#ffffff"
       : "#000000";
 
-    const scrollbarStyle = `<style>
-      html, body {
-        scrollbar-width: thin !important;
-        scrollbar-color: ${scrollbarColor} !important;
+    const previewStyle = `<style>
+      :root, html, body {
+        background-color: transparent !important;
+        background: transparent !important;
+        color-scheme: ${isDark ? "dark" : "light"} !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        overflow: hidden !important;
       }
       ::-webkit-scrollbar {
-        height: 8px !important;
-        width: 8px !important;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent !important;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: ${thumbColor} !important;
-        border: 2px solid transparent !important;
-        background-clip: padding-box !important;
-        border-radius: 9999px !important;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: ${thumbHoverColor} !important;
-        border: 2px solid transparent !important;
-        background-clip: padding-box !important;
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
       }
     </style>`;
     if (raw.includes("</head>")) {
-      return raw.replace("</head>", `${scrollbarStyle}</head>`);
+      return raw.replace("</head>", `${previewStyle}</head>`);
     }
-    return scrollbarStyle + raw;
+    return previewStyle + raw;
   }, [currentHtmlCode, currentVariables, isDark]);
 
   useEffect(() => {
-    handlePreviewIframeLoad();
+    measureIframeHeight();
+    const t1 = setTimeout(measureIframeHeight, 40);
+    const t2 = setTimeout(measureIframeHeight, 150);
+    const t3 = setTimeout(measureIframeHeight, 320);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, [renderedHtml, viewport]);
 
   // Is customized in DB
@@ -973,7 +1026,7 @@ export default function EmailTemplatesPage() {
                           "h-8 w-8 transition-colors",
                           canUndo
                             ? "cursor-pointer bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-white"
-                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 bg-neutral-100/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-white/10 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none"
+                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 bg-neutral-100/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-white/10 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none disabled:opacity-100"
                         )}
                       >
                         <Undo2 className="w-3.5 h-3.5" />
@@ -990,7 +1043,7 @@ export default function EmailTemplatesPage() {
                           "h-8 w-8 transition-colors",
                           canRedo
                             ? "cursor-pointer bg-white hover:bg-neutral-100 hover:text-neutral-900 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:hover:text-white"
-                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 bg-neutral-100/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-white/10 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none"
+                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 bg-neutral-100/50 dark:bg-neutral-900/50 border-neutral-200/50 dark:border-white/10 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none disabled:opacity-100"
                         )}
                       >
                         <Redo2 className="w-3.5 h-3.5" />
@@ -1022,7 +1075,7 @@ export default function EmailTemplatesPage() {
                           "h-8 w-8 transition-colors",
                           !isAlreadyDefault
                             ? "cursor-pointer text-red-600 border-red-200/80 bg-red-50/50 hover:bg-red-100/80 hover:text-red-700 hover:border-red-300 dark:text-red-400 dark:border-red-900/40 dark:bg-red-950/30 dark:hover:bg-red-950/60 dark:hover:border-red-800"
-                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 border-neutral-200/50 dark:border-white/10 bg-neutral-100/50 dark:bg-neutral-900/50 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none"
+                            : "cursor-not-allowed text-neutral-400 dark:text-neutral-500 border-neutral-200/50 dark:border-white/10 bg-neutral-100/50 dark:bg-neutral-900/50 hover:bg-neutral-100/50 dark:hover:bg-neutral-900/50 hover:text-neutral-400 dark:hover:text-neutral-500 shadow-none disabled:opacity-100"
                         )}
                       >
                         <RotateCcw className="w-3.5 h-3.5" />
@@ -1037,7 +1090,7 @@ export default function EmailTemplatesPage() {
                           "h-8 text-xs gap-1.5 font-medium ml-0.5 transition-colors",
                           isDirty && !isSaving
                             ? "bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 cursor-pointer shadow-xs"
-                            : "bg-neutral-100 text-neutral-400 border border-neutral-200/60 dark:bg-neutral-800/60 dark:text-neutral-400 dark:border-white/5 cursor-not-allowed shadow-none"
+                            : "bg-neutral-100 text-neutral-400 border border-neutral-200/60 dark:bg-neutral-800/60 dark:text-neutral-500 dark:border-white/5 cursor-not-allowed shadow-none hover:bg-neutral-100 dark:hover:bg-neutral-800/60 hover:text-neutral-400 dark:hover:text-neutral-500 disabled:opacity-100"
                         )}
                       >
                         {isSaving ? (
@@ -1061,12 +1114,12 @@ export default function EmailTemplatesPage() {
             {/* Canvas Viewport / Editor Body */}
             <div>
               {viewMode === "preview" && (
-                /* LIVE EMAIL PREVIEW CANVAS (Full dynamic height without restrictions) */
+                /* LIVE EMAIL PREVIEW CANVAS (Pure template card rendering) */
                 <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-950/60 flex justify-center">
                   <div
                     className={cn(
-                      "w-full transition-all duration-300 rounded-lg overflow-hidden border border-neutral-200/80 dark:border-white/10 shadow-sm bg-white dark:bg-neutral-900",
-                      viewport === "desktop" ? "max-w-[620px]" : "max-w-[375px]"
+                      "w-full transition-[max-width] duration-200 ease-in-out flex justify-center",
+                      viewport === "desktop" ? "max-w-[600px]" : "max-w-[375px]"
                     )}
                   >
                     <iframe
@@ -1074,9 +1127,15 @@ export default function EmailTemplatesPage() {
                       srcDoc={renderedHtml}
                       onLoad={handlePreviewIframeLoad}
                       title="Email Preview"
-                      style={{ height: `${previewHeight}px` }}
-                      className="w-full border-0 bg-transparent block transition-[height] duration-150"
-                      sandbox="allow-same-origin allow-popups"
+                      scrolling="no"
+                      {...{ allowtransparency: "true" }}
+                      style={{
+                        height: `${previewHeight}px`,
+                        backgroundColor: "transparent",
+                        colorScheme: isDark ? "dark" : "light",
+                      }}
+                      className="w-full border-0 bg-transparent block overflow-hidden"
+                      sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
                     />
                   </div>
                 </div>
@@ -1113,7 +1172,7 @@ export default function EmailTemplatesPage() {
                     spellCheck={false}
                     autoCorrect="off"
                     autoCapitalize="off"
-                    className="font-mono text-xs leading-relaxed min-h-[560px] max-h-[1950px] overflow-y-auto bg-white dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 resize-y p-3.5 focus-visible:ring-1 scrollbar-custom"
+                    className="font-mono text-xs leading-relaxed min-h-[560px] max-h-[1950px] overflow-y-auto bg-white dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 resize-y p-3.5 scrollbar-custom"
                     placeholder="Enter email HTML markup..."
                   />
 

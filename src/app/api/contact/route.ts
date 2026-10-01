@@ -55,8 +55,29 @@ export async function POST(req: Request) {
       );
     }
 
-    // 2. Resolve admin recipient dynamically
+    // 2. Resolve admin recipient and dynamic contact/social details from database
     const adminEmail = await getAdminNotificationEmail();
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .limit(1)
+      .maybeSingle();
+
+    const { data: contact } = await supabase
+      .from("contacts")
+      .select("email, instagram_url, github_url, linkedin_url, tiktok_url")
+      .limit(1)
+      .maybeSingle();
+
+    const adminName = profile?.full_name || "Fadil Bafagih";
+    const adminContactEmail = contact?.email || profile?.email || adminEmail || "fadil@bafagih.id";
+    const adminWebsite = "fadil.bafagih.id";
+    const instagramUrl = contact?.instagram_url || "https://instagram.com/fadilbafagih";
+    const githubUrl = contact?.github_url || "https://github.com/fadilbafagih";
+    const linkedinUrl = contact?.linkedin_url || "https://linkedin.com/in/fadilbafagih";
+    const tiktokUrl = contact?.tiktok_url || "https://tiktok.com/@fadilbafagih";
+
     const receivedAtFormatted = new Date().toLocaleString("en-US", {
       timeZone: "Asia/Jakarta",
       dateStyle: "full",
@@ -74,6 +95,13 @@ export async function POST(req: Request) {
             subject,
             message,
             receivedAt: `${receivedAtFormatted} (WIB)`,
+            adminName,
+            adminEmail: adminContactEmail,
+            adminWebsite,
+            instagramUrl,
+            githubUrl,
+            linkedinUrl,
+            tiktokUrl,
           },
         });
 

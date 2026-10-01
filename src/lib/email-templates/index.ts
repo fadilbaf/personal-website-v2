@@ -101,7 +101,7 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Contact",
     description: "Instant notification email delivered to the admin when a website visitor submits the contact form.",
     sender: EMAIL_SENDERS.NOREPLY,
-    defaultSubject: "📬 New Contact Message: {{subject}}",
+    defaultSubject: "New Contact Message: {{subject}}",
     supportsLocale: false,
     availableVariables: [
       { key: "name", label: "{{name}}", description: "Visitor full name" },
@@ -121,7 +121,7 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         defaultValue:
           "Hi Fadil,\n\nI'm interested in collaborating on the development of an interactive wedding planner & digital invitation platform for our clients.\n\nWould you have some time available this week to discuss the project concept, scope, and timeline?\n\nBest regards,\nAliya Kherid",
       },
-      { key: "receivedAt", label: "Received Timestamp", type: "text", defaultValue: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) },
+      { key: "receivedAt", label: "Received Timestamp", type: "text", defaultValue: "Oct 2, 2026, 12:40 AM" },
     ],
     renderHtml: (params) =>
       renderContactNotificationEmail({
@@ -129,7 +129,14 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         email: params.email || "aliyakherid@gmail.com",
         subject: params.subject || "Collaboration — Wedding Planner & Digital Invitation Project",
         message: params.message || "Hi Fadil,\n\nI'm interested in collaborating with you!",
-        receivedAt: params.receivedAt || new Date().toLocaleString(),
+        receivedAt: params.receivedAt || "Oct 2, 2026, 12:40 AM",
+        adminName: params.adminName,
+        adminEmail: params.adminEmail,
+        adminWebsite: params.adminWebsite,
+        instagramUrl: params.instagramUrl,
+        githubUrl: params.githubUrl,
+        linkedinUrl: params.linkedinUrl,
+        tiktokUrl: params.tiktokUrl,
       }),
     getDefaultRawTemplate: () =>
       renderContactNotificationEmail({
@@ -138,6 +145,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         subject: "{{subject}}",
         message: "{{message}}",
         receivedAt: "{{receivedAt}}",
+        adminName: "{{adminName}}",
+        adminEmail: "{{adminEmail}}",
+        adminWebsite: "{{adminWebsite}}",
+        instagramUrl: "{{instagramUrl}}",
+        githubUrl: "{{githubUrl}}",
+        linkedinUrl: "{{linkedinUrl}}",
+        tiktokUrl: "{{tiktokUrl}}",
       }),
   },
   {
@@ -226,7 +240,7 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Newsletter",
     description: "Onboarding welcome email sent immediately to new newsletter subscribers.",
     sender: EMAIL_SENDERS.NOREPLY,
-    defaultSubject: "Welcome to Fadil Bafagih's Newsletter! 🚀",
+    defaultSubject: "Welcome to Fadil Bafagih's Newsletter!",
     supportsLocale: true,
     availableVariables: [
       { key: "email", label: "{{email}}", description: "Subscriber email address" },
@@ -251,7 +265,7 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Newsletter",
     description: "Notification sent to the admin when a new subscriber joins the newsletter list.",
     sender: EMAIL_SENDERS.NOREPLY,
-    defaultSubject: "🎉 New Subscriber: {{email}}",
+    defaultSubject: "New Subscriber: {{email}}",
     supportsLocale: false,
     availableVariables: [
       { key: "email", label: "{{email}}", description: "New subscriber email" },
@@ -261,13 +275,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     fields: [
       { key: "email", label: "Subscriber Email", type: "text", defaultValue: "aliyakherid@gmail.com" },
       { key: "totalSubscribers", label: "Total Subscribers", type: "number", defaultValue: 18 },
-      { key: "subscribedAt", label: "Subscribed Timestamp", type: "text", defaultValue: new Date().toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) },
+      { key: "subscribedAt", label: "Subscribed Timestamp", type: "text", defaultValue: "Oct 2, 2026, 12:40 AM" },
     ],
     renderHtml: (params) =>
       renderNewsletterAdminNotificationEmail({
         email: params.email || "aliyakherid@gmail.com",
         totalSubscribers: Number(params.totalSubscribers) || 18,
-        subscribedAt: params.subscribedAt || new Date().toLocaleString(),
+        subscribedAt: params.subscribedAt || "Oct 2, 2026, 12:40 AM",
       }),
     getDefaultRawTemplate: () =>
       renderNewsletterAdminNotificationEmail({
@@ -282,7 +296,7 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     category: "Newsletter",
     description: "Standard broadcast layout for sending blog updates, project launches, or general newsletters to all subscribers.",
     sender: EMAIL_SENDERS.NEWSLETTER,
-    defaultSubject: "🚀 {{subject}}",
+    defaultSubject: "{{subject}}",
     supportsLocale: false,
     availableVariables: [
       { key: "subject", label: "{{subject}}", description: "Broadcast campaign subject" },
