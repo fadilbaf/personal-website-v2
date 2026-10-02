@@ -150,6 +150,13 @@ export async function POST(req: Request) {
             email,
             totalSubscribers: totalActive || 1,
             subscribedAt: `${subscribedAtFormatted} (WIB)`,
+            adminName,
+            adminEmail: adminContactEmail,
+            adminWebsite,
+            instagramUrl,
+            githubUrl,
+            linkedinUrl,
+            tiktokUrl,
           },
         });
 
