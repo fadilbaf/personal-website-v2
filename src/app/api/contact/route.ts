@@ -125,6 +125,13 @@ export async function POST(req: Request) {
           variables: {
             name,
             subject,
+            adminName,
+            adminEmail: adminContactEmail,
+            adminWebsite,
+            instagramUrl,
+            githubUrl,
+            linkedinUrl,
+            tiktokUrl,
           },
           locale: locale === "id" ? "id" : "en",
         });
