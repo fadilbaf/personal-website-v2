@@ -18,6 +18,8 @@ const broadcastSchema = z.object({
       "promotion",
     ])
     .default("newsletter"),
+  buttonText: z.string().trim().optional(),
+  buttonUrl: z.string().trim().optional(),
   testOnly: z.boolean().default(false),
   testEmail: z.string().email().optional(),
   recipients: z.array(z.string().email()).optional(),
@@ -54,7 +56,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const { subject, contentHtml, type, testOnly, testEmail, recipients } = validated.data;
+    const { subject, contentHtml, type, buttonText, buttonUrl, testOnly, testEmail, recipients } = validated.data;
 
     if (!process.env.RESEND_API_KEY) {
       return NextResponse.json(
@@ -62,6 +64,26 @@ export async function POST(req: Request) {
         { status: 500 }
       );
     }
+
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .limit(1)
+      .maybeSingle();
+
+    const { data: contact } = await supabase
+      .from("contacts")
+      .select("email, instagram_url, github_url, linkedin_url, tiktok_url")
+      .limit(1)
+      .maybeSingle();
+
+    const adminName = profile?.full_name || "Fadil Bafagih";
+    const adminContactEmail = contact?.email || profile?.email || "fadil@bafagih.id";
+    const adminWebsite = "fadil.bafagih.id";
+    const instagramUrl = contact?.instagram_url || "https://instagram.com/fadilbafagih";
+    const githubUrl = contact?.github_url || "https://github.com/fadilbafagih";
+    const linkedinUrl = contact?.linkedin_url || "https://linkedin.com/in/fadilbafagih";
+    const tiktokUrl = contact?.tiktok_url || "https://tiktok.com/@fadilbafagih";
 
     // 2. If test mode: send single email to testEmail or dynamic admin email
     if (testOnly) {
@@ -72,7 +94,16 @@ export async function POST(req: Request) {
           subject: `[TEST] ${subject}`,
           contentHtml,
           type,
+          buttonText,
+          buttonUrl,
           recipientEmail: recipient,
+          adminName,
+          adminEmail: adminContactEmail,
+          adminWebsite,
+          instagramUrl,
+          githubUrl,
+          linkedinUrl,
+          tiktokUrl,
         },
       });
 
@@ -147,7 +178,16 @@ export async function POST(req: Request) {
                 subject,
                 contentHtml,
                 type,
+                buttonText,
+                buttonUrl,
                 recipientEmail: email,
+                adminName,
+                adminEmail: adminContactEmail,
+                adminWebsite,
+                instagramUrl,
+                githubUrl,
+                linkedinUrl,
+                tiktokUrl,
               },
             });
 

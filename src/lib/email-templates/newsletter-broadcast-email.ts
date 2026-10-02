@@ -4,88 +4,189 @@ export function renderNewsletterBroadcastEmail({
   subject,
   contentHtml,
   type = "newsletter",
+  buttonText,
+  buttonUrl,
   recipientEmail,
+  adminName = "Fadil Bafagih",
+  adminEmail = "fadil@bafagih.id",
+  adminWebsite = "fadil.bafagih.id",
+  instagramUrl = "https://instagram.com/fadilbafagih",
+  githubUrl = "https://github.com/fadilbafagih",
+  linkedinUrl = "https://linkedin.com/in/fadilbafagih",
+  tiktokUrl = "https://tiktok.com/@fadilbafagih",
 }: {
   subject: string;
   contentHtml: string;
   type?: CampaignType | string;
+  buttonText?: string;
+  buttonUrl?: string;
   recipientEmail: string;
+  adminName?: string;
+  adminEmail?: string;
+  adminWebsite?: string;
+  instagramUrl?: string;
+  githubUrl?: string;
+  linkedinUrl?: string;
+  tiktokUrl?: string;
 }): string {
+  const resolvedName = adminName || "Fadil Bafagih";
+  const resolvedEmail = adminEmail || "fadil@bafagih.id";
+  const resolvedWebsite = adminWebsite || "fadil.bafagih.id";
+  const resolvedInstagram = instagramUrl || "https://instagram.com/fadilbafagih";
+  const resolvedGithub = githubUrl || "https://github.com/fadilbafagih";
+  const resolvedLinkedin = linkedinUrl || "https://linkedin.com/in/fadilbafagih";
+  const resolvedTiktok = tiktokUrl || "https://tiktok.com/@fadilbafagih";
+
   const typeBadgeMap: Record<string, string> = {
-    newsletter: "📰 Newsletter",
-    general: "📰 General Update",
-    blog: "✍️ Blog Post",
-    project: "🚀 Project Launch",
-    achievement: "🏆 Achievement",
-    information: "💡 Information",
-    promotion: "✨ Promotion",
+    newsletter: "Newsletter",
+    general: "General Update",
+    blog: "Blog Article",
+    project: "Project Launch",
+    achievement: "Achievement",
+    information: "Information",
+    promotion: "Promotion",
   };
 
-  const badgeText = typeBadgeMap[type] || "📰 Newsletter";
+  const isTypePlaceholder = String(type || "").includes("{{");
+  const rawType = String(type || "newsletter").toLowerCase();
+  const badgeText = isTypePlaceholder ? type : (typeBadgeMap[rawType] || "Newsletter");
 
-  return `
-<!DOCTYPE html>
+  // If contentHtml is raw plain text without HTML paragraph tags, format enters into styled paragraphs
+  const rawContent = String(contentHtml || "").trim();
+  const hasHtmlTags = /<[a-z][\s\S]*>/i.test(rawContent);
+
+  const resolvedContent = hasHtmlTags
+    ? rawContent
+    : escapeHtml(rawContent)
+        .replace(/\r\n/g, "\n")
+        .replace(/\r/g, "\n")
+        .split(/\n\s*\n/)
+        .map((para) => {
+          const trimmed = para.trim();
+          if (!trimmed) return "";
+          const withBr = trimmed.replace(/\n/g, "<br/>");
+          return `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">${withBr}</p>`;
+        })
+        .filter(Boolean)
+        .join("");
+
+  const isButtonPlaceholder = String(buttonText || "").includes("{{");
+  let buttonHtml = "";
+  if (isButtonPlaceholder || (buttonText && buttonText.trim() && buttonUrl && buttonUrl.trim())) {
+    const safeText = isButtonPlaceholder ? buttonText : escapeHtml(buttonText!.trim());
+    const safeUrl = isButtonPlaceholder ? (buttonUrl || "{{buttonUrl}}") : escapeHtml(buttonUrl!.trim());
+    buttonHtml = `
+          <!-- CTA_BUTTON_START -->
+          <table border="0" cellspacing="0" cellpadding="0" style="margin: 28px 0 24px;">
+            <tr>
+              <td align="center" style="border-radius: 8px; background-color: #ffffff;">
+                <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 600; color: #090a0c; text-decoration: none; border-radius: 8px; letter-spacing: 0.2px;">
+                  ${safeText} &rarr;
+                </a>
+              </td>
+            </tr>
+          </table>
+          <!-- CTA_BUTTON_END -->`;
+  }
+
+  return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="supported-color-schemes" content="light dark">
   <title>${escapeHtml(subject)}</title>
+  <style>
+    :root, html, body {
+      margin: 0;
+      padding: 0;
+      background-color: transparent !important;
+      background: transparent !important;
+    }
+  </style>
 </head>
-<body style="margin: 0; padding: 0; background-color: #0c0d0e; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ededed; -webkit-font-smoothing: antialiased;">
-  <table width="100%" border="0" cellspacing="0" cellpadding="0" style="background-color: #0c0d0e; padding: 40px 16px;">
-    <tr>
-      <td align="center">
-        <table width="100%" border="0" cellspacing="0" cellpadding="0" style="max-width: 600px; background-color: #141517; border: 1px solid #282a2e; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.5);">
-          <!-- Header -->
-          <tr>
-            <td style="padding: 36px 32px 24px; border-bottom: 1px solid #232529;">
-              <span style="display: inline-block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: #38bdf8; background-color: #0c2d48; padding: 4px 10px; border-radius: 6px; margin-bottom: 12px;">
-                ${badgeText}
-              </span>
-              <h1 style="margin: 0; font-size: 24px; font-weight: 600; color: #ffffff; line-height: 1.3;">
-                ${escapeHtml(subject)}
-              </h1>
-            </td>
-          </tr>
+<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #ededed; -webkit-font-smoothing: antialiased; background-color: transparent;">
+  <div style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #282a2e; border-radius: 16px; overflow: hidden; background-color: #121316;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: collapse; background-color: #121316;">
+      <!-- Header (Dark Tone - Logo Only) -->
+      <tr>
+        <td style="padding: 28px 32px; background-color: #121316; border-bottom: 1px solid #232529; text-align: center;">
+          <a href="https://${escapeHtml(resolvedWebsite)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; text-decoration: none;">
+            <img src="https://fadil.bafagih.id/assets/images/fadilbaf-white.svg" alt="Fadil Bafagih" height="34" style="display: block; margin: 0 auto; height: 34px; width: auto; max-height: 34px; border: 0;" />
+          </a>
+        </td>
+      </tr>
 
-          <!-- Main Content -->
-          <tr>
-            <td style="padding: 32px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">
-              <div style="word-break: break-word;">
-                ${contentHtml}
-              </div>
+      <!-- Middle Section (Lighter Tone - Content) -->
+      <tr>
+        <td style="padding: 32px 32px 36px; background-color: #1c1e22;">
+          <!-- Campaign Type Badge -->
+          <div style="margin-bottom: 12px;">
+            <span style="display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #a1a1aa; background-color: #121316; border: 1px solid #282a2e; padding: 4px 10px; border-radius: 6px;">
+              ${escapeHtml(badgeText)}
+            </span>
+          </div>
 
-              <!-- Signature -->
-              <div style="margin-top: 36px; padding-top: 20px; border-top: 1px solid #232529;">
-                <p style="margin: 0; font-size: 14px; color: #a1a1aa;">
-                  Warm regards,<br/>
-                  <strong style="color: #ffffff; font-size: 15px;">Fadil Bafagih</strong><br/>
-                  <a href="https://bafagih.id" style="color: #38bdf8; text-decoration: none; font-size: 13px;">bafagih.id</a>
-                </p>
-              </div>
-            </td>
-          </tr>
+          <!-- Subject Heading -->
+          <h1 style="margin: 0 0 20px; font-size: 20px; font-weight: 700; color: #ffffff; line-height: 1.35;">
+            ${escapeHtml(subject)}
+          </h1>
 
-          <!-- Footer -->
-          <tr>
-            <td style="padding: 20px 32px; background-color: #0e0f11; border-top: 1px solid #232529; text-align: center;">
-              <p style="margin: 0 0 8px; font-size: 12px; color: #52525b;">
-                You are receiving this email because you subscribed to Fadil Bafagih's newsletter.
-              </p>
-              <p style="margin: 0; font-size: 12px; color: #52525b;">
-                <a href="https://bafagih.id/api/newsletter/unsubscribe?email=${encodeURIComponent(recipientEmail)}" style="color: #71717a; text-decoration: underline;">
-                  Unsubscribe
-                </a>
-              </p>
-            </td>
-          </tr>
-        </table>
-      </td>
-    </tr>
-  </table>
+          <!-- Main Broadcast Content (Seamless without divider) -->
+          <div style="font-size: 15px; line-height: 1.7; color: #d4d4d8; word-break: break-word;">
+            ${resolvedContent}
+          </div>
+${buttonHtml}
+          <!-- Sign-off (Warm regards) -->
+          <p style="margin: 24px 0 0; font-size: 14px; color: #a1a1aa; line-height: 1.6;">
+            Warm regards,<br/>
+            <strong style="color: #ffffff; font-size: 15px; display: inline-block; margin-top: 4px;">${escapeHtml(resolvedName)}</strong><br/>
+            <span style="font-size: 12px; color: #71717a;">Software Engineer</span>
+          </p>
+        </td>
+      </tr>
+
+      <!-- Footer Upper (Name, Email/Web, Sosmed) -->
+      <tr>
+        <td style="padding: 28px 32px 20px; background-color: #121316; border-top: 1px solid #232529; text-align: center;">
+          <!-- 1. Nama -->
+          <p style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: #ffffff; letter-spacing: 0.2px;">
+            ${escapeHtml(resolvedName)}
+          </p>
+
+          <!-- 2. Email & Web -->
+          <p style="margin: 0 0 12px; font-size: 12px; color: #858992;">
+            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #38bdf8; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #a1a1aa; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
+          </p>
+
+          <!-- 3. Sosmed -->
+          <p style="margin: 0; font-size: 12px; color: #71717a;">
+            <a href="${escapeHtml(resolvedInstagram)}" target="_blank" rel="noopener noreferrer" style="color: #a1a1aa; text-decoration: none; margin: 0 5px;">Instagram</a> &bull;
+            <a href="${escapeHtml(resolvedGithub)}" target="_blank" rel="noopener noreferrer" style="color: #a1a1aa; text-decoration: none; margin: 0 5px;">GitHub</a> &bull;
+            <a href="${escapeHtml(resolvedLinkedin)}" target="_blank" rel="noopener noreferrer" style="color: #a1a1aa; text-decoration: none; margin: 0 5px;">LinkedIn</a> &bull;
+            <a href="${escapeHtml(resolvedTiktok)}" target="_blank" rel="noopener noreferrer" style="color: #a1a1aa; text-decoration: none; margin: 0 5px;">TikTok</a>
+          </p>
+        </td>
+      </tr>
+
+      <!-- Footer Lower (Unsubscribe / Sent from - Full Width Divider) -->
+      <tr>
+        <td style="padding: 14px 32px 18px; background-color: #121316; border-top: 1px solid #1f2126; text-align: center;">
+          <p style="margin: 0 0 6px; font-size: 11px; color: #52525b; line-height: 1.5;">
+            You received this email because you subscribed to the newsletter at ${escapeHtml(resolvedWebsite)}.
+          </p>
+          <p style="margin: 0; font-size: 11px; color: #52525b;">
+            <a href="https://${escapeHtml(resolvedWebsite)}/api/newsletter/unsubscribe?email=${encodeURIComponent(recipientEmail)}" target="_blank" rel="noopener noreferrer" style="color: #71717a; text-decoration: underline;">
+              Unsubscribe
+            </a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
-</html>
-  `;
+</html>`;
 }
 
 function escapeHtml(str: string): string {

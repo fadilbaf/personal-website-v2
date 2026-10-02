@@ -356,7 +356,10 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
     supportsLocale: false,
     availableVariables: [
       { key: "subject", label: "{{subject}}", description: "Broadcast campaign subject" },
-      { key: "contentHtml", label: "{{contentHtml}}", description: "Broadcast main body HTML" },
+      { key: "type", label: "{{type}}", description: "Campaign type category (newsletter, project, blog, etc.)" },
+      { key: "contentHtml", label: "{{contentHtml}}", description: "Broadcast main body HTML / plain text" },
+      { key: "buttonText", label: "{{buttonText}}", description: "Optional call-to-action button label" },
+      { key: "buttonUrl", label: "{{buttonUrl}}", description: "Optional call-to-action destination URL" },
       { key: "recipientEmail", label: "{{recipientEmail}}", description: "Subscriber recipient email" },
     ],
     fields: [
@@ -375,30 +378,50 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         ],
         defaultValue: "project",
       },
-      { key: "recipientEmail", label: "Recipient Placeholder", type: "text", defaultValue: "aliyakherid@gmail.com" },
       {
         key: "contentHtml",
-        label: "Body Content (HTML allowed)",
+        label: "Message Content",
         type: "textarea",
         defaultValue:
-          `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">\n  Hey everyone! 👋\n</p>\n<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">\n  I'm thrilled to announce the launch of my latest project: <strong>Pixture</strong> — a modern visual curation and photography showcase platform built for high performance and seamless interactive experiences.\n</p>\n<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">\n  The platform is built using a modern technology stack with adaptive image optimization, dynamic masonry layouts, and lightning-fast cloud delivery.\n</p>\n<div style="margin: 28px 0 16px; text-align: left;">\n  <a href="https://bafagih.id/projects/pixture" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #ffffff; color: #09090b; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 14px rgba(255,255,255,0.12);">\n    Explore Pixture &rarr;\n  </a>\n</div>`,
+          "Hey everyone!\n\nI'm thrilled to announce the launch of my latest project: Pixture — a modern visual curation and photography showcase platform built for high performance and seamless interactive experiences.\n\nThe platform is built using a modern technology stack with adaptive image optimization, dynamic masonry layouts, and lightning-fast cloud delivery.",
       },
+      { key: "buttonText", label: "Button Text (CTA)", type: "text", defaultValue: "Explore Pixture" },
+      { key: "buttonUrl", label: "Button URL (CTA)", type: "text", defaultValue: "https://fadil.bafagih.id/projects/pixture" },
+      { key: "recipientEmail", label: "Recipient Placeholder", type: "text", defaultValue: "aliyakherid@gmail.com" },
     ],
     renderHtml: (params) =>
       renderNewsletterBroadcastEmail({
         subject: params.subject || "Introducing Pixture — A Modern Photography & Visual Showcase Platform",
         type: (params.type as any) || "project",
+        buttonText: params.buttonText,
+        buttonUrl: params.buttonUrl,
         recipientEmail: params.recipientEmail || "aliyakherid@gmail.com",
         contentHtml:
           params.contentHtml ||
-          `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">Hey everyone! 👋</p><p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">I'm thrilled to announce the launch of my latest project: <strong>Pixture</strong>.</p>`,
+          "Hey everyone!\n\nI'm thrilled to announce the launch of my latest project: Pixture — a modern visual curation and photography showcase platform built for high performance and seamless interactive experiences.",
+        adminName: params.adminName,
+        adminEmail: params.adminEmail,
+        adminWebsite: params.adminWebsite,
+        instagramUrl: params.instagramUrl,
+        githubUrl: params.githubUrl,
+        linkedinUrl: params.linkedinUrl,
+        tiktokUrl: params.tiktokUrl,
       }),
     getDefaultRawTemplate: () =>
       renderNewsletterBroadcastEmail({
         subject: "{{subject}}",
-        type: "project",
+        type: "{{type}}",
+        buttonText: "{{buttonText}}",
+        buttonUrl: "{{buttonUrl}}",
         recipientEmail: "{{recipientEmail}}",
         contentHtml: "{{contentHtml}}",
+        adminName: "{{adminName}}",
+        adminEmail: "{{adminEmail}}",
+        adminWebsite: "{{adminWebsite}}",
+        instagramUrl: "{{instagramUrl}}",
+        githubUrl: "{{githubUrl}}",
+        linkedinUrl: "{{linkedinUrl}}",
+        tiktokUrl: "{{tiktokUrl}}",
       }),
   },
 ];
