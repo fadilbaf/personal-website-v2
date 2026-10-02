@@ -280,11 +280,25 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
       renderNewsletterWelcomeEmail({
         email: params.email || "aliyakherid@gmail.com",
         locale,
+        adminName: params.adminName,
+        adminEmail: params.adminEmail,
+        adminWebsite: params.adminWebsite,
+        instagramUrl: params.instagramUrl,
+        githubUrl: params.githubUrl,
+        linkedinUrl: params.linkedinUrl,
+        tiktokUrl: params.tiktokUrl,
       }),
     getDefaultRawTemplate: (locale = "en") =>
       renderNewsletterWelcomeEmail({
         email: "{{email}}",
         locale,
+        adminName: "{{adminName}}",
+        adminEmail: "{{adminEmail}}",
+        adminWebsite: "{{adminWebsite}}",
+        instagramUrl: "{{instagramUrl}}",
+        githubUrl: "{{githubUrl}}",
+        linkedinUrl: "{{linkedinUrl}}",
+        tiktokUrl: "{{tiktokUrl}}",
       }),
   },
   {

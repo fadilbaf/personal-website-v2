@@ -88,13 +88,42 @@ export async function POST(req: Request) {
       timeStyle: "short",
     });
 
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("full_name, email")
+      .limit(1)
+      .maybeSingle();
+
+    const { data: contact } = await supabase
+      .from("contacts")
+      .select("email, instagram_url, github_url, linkedin_url, tiktok_url")
+      .limit(1)
+      .maybeSingle();
+
+    const adminName = profile?.full_name || "Fadil Bafagih";
+    const adminContactEmail = contact?.email || profile?.email || adminEmail || "fadil@bafagih.id";
+    const adminWebsite = "fadil.bafagih.id";
+    const instagramUrl = contact?.instagram_url || "https://instagram.com/fadilbafagih";
+    const githubUrl = contact?.github_url || "https://github.com/fadilbafagih";
+    const linkedinUrl = contact?.linkedin_url || "https://linkedin.com/in/fadilbafagih";
+    const tiktokUrl = contact?.tiktok_url || "https://tiktok.com/@fadilbafagih";
+
     // 4. Dispatch Welcome Email & Admin Notification via Resend
     try {
       if (process.env.RESEND_API_KEY) {
         // Send Welcome Email to Subscriber
         const resolvedWelcome = await resolveEmailTemplate({
           slug: "newsletter_welcome",
-          variables: { email },
+          variables: {
+            email,
+            adminName,
+            adminEmail: adminContactEmail,
+            adminWebsite,
+            instagramUrl,
+            githubUrl,
+            linkedinUrl,
+            tiktokUrl,
+          },
           locale: locale === "id" ? "id" : "en",
         });
 
@@ -103,8 +132,8 @@ export async function POST(req: Request) {
           to: email,
           subject:
             locale === "id"
-              ? "Selamat Datang di Newsletter Fadil Bafagih 🎉"
-              : "Welcome to Fadil Bafagih's Newsletter 🎉",
+              ? "Selamat Datang di Newsletter Fadil Bafagih"
+              : "Welcome to Fadil Bafagih's Newsletter",
           html: resolvedWelcome.html,
         });
 
