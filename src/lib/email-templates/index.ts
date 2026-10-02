@@ -220,7 +220,7 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         label: "Reply Message",
         type: "textarea",
         defaultValue:
-          "Hi Aliya,\n\nThank you so much for reaching out! The wedding planner & digital invitation platform sounds exciting, and I'd love to help bring this project to life.\n\nCould we schedule a quick Google Meet call tomorrow or the day after to go over the feature requirements, design direction, and timeline?\n\nWarm regards,\nFadil Bafagih",
+          "Thank you so much for reaching out! The wedding planner & digital invitation platform sounds exciting, and I'd love to help bring this project to life.\n\nCould we schedule a quick Google Meet call tomorrow or the day after to go over the feature requirements, design direction, and timeline?",
       },
       { key: "originalSubject", label: "Original Subject", type: "text", defaultValue: "Collaboration — Wedding Planner & Digital Invitation Project" },
       {
@@ -238,6 +238,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         replyMessage: params.replyMessage || "Thank you for reaching out!",
         originalMessage: params.originalMessage,
         originalSubject: params.originalSubject,
+        adminName: params.adminName,
+        adminEmail: params.adminEmail,
+        adminWebsite: params.adminWebsite,
+        instagramUrl: params.instagramUrl,
+        githubUrl: params.githubUrl,
+        linkedinUrl: params.linkedinUrl,
+        tiktokUrl: params.tiktokUrl,
       }),
     getDefaultRawTemplate: () =>
       renderContactReplyEmail({
@@ -246,6 +253,13 @@ export const EMAIL_TEMPLATES: EmailTemplateDefinition[] = [
         replyMessage: "{{replyMessage}}",
         originalMessage: "{{originalMessage}}",
         originalSubject: "{{originalSubject}}",
+        adminName: "{{adminName}}",
+        adminEmail: "{{adminEmail}}",
+        adminWebsite: "{{adminWebsite}}",
+        instagramUrl: "{{instagramUrl}}",
+        githubUrl: "{{githubUrl}}",
+        linkedinUrl: "{{linkedinUrl}}",
+        tiktokUrl: "{{tiktokUrl}}",
       }),
   },
   {
