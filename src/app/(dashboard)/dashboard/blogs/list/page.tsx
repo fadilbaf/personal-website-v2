@@ -50,12 +50,26 @@ export default function BlogsListPage() {
     }
   };
 
+  const formatDate = (dateStr?: string | null, lang: "en" | "id" = "en") => {
+    if (!dateStr) return "-";
+    try {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString(lang === "en" ? "en-US" : "id-ID", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return dateStr;
+    }
+  };
+
   const columns: Column<Blog>[] = [
     { 
       key: language === "en" ? "title_en" : "title_id", 
       header: language === "en" ? "Title" : "Judul",
       render: (b) => (
-        <span className="font-medium text-neutral-900 dark:text-white block max-w-[280px] truncate" title={language === "en" ? b.title_en : b.title_id}>
+        <span className="font-medium text-neutral-900 dark:text-white block max-w-[260px] truncate" title={language === "en" ? b.title_en : b.title_id}>
           {language === "en" ? b.title_en : b.title_id}
         </span>
       )
@@ -79,10 +93,19 @@ export default function BlogsListPage() {
       )
     },
     {
+      key: "created_at",
+      header: language === "en" ? "Date" : "Tanggal",
+      render: (b) => (
+        <span className="text-xs text-neutral-600 dark:text-neutral-400 whitespace-nowrap">
+          {formatDate(b.created_at, language)}
+        </span>
+      )
+    },
+    {
       key: "views_count",
       header: t("blogs.views_likes"),
       render: (b) => (
-        <div className="flex items-center gap-3 text-xs text-neutral-900 dark:text-neutral-100 font-medium">
+        <div className="flex items-center gap-3 text-xs text-neutral-900 dark:text-neutral-100 font-medium whitespace-nowrap">
           <span className="flex items-center gap-1">
             <Eye className="h-3.5 w-3.5" />
             {b.views_count}

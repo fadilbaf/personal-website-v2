@@ -42,10 +42,28 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+const formatDateTime = (dateStr?: string | null, lang: "en" | "id" = "en") => {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(lang === "en" ? "en-US" : "id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function BlogAddPage() {
   const { t, language } = useLanguage();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const [createdAt] = useState(() => new Date().toISOString());
   const [thumbFile, setThumbFile] = useState<File | null>(null);
   const [contentId, setContentId] = useState("");
   const [contentEn, setContentEn] = useState("");
@@ -111,6 +129,7 @@ export default function BlogAddPage() {
 
       const blog = await BlogService.create({
         ...blogData,
+        created_at: createdAt,
         author_id: user?.id,
         image_url,
         content_id: contentId || null,
@@ -150,11 +169,16 @@ export default function BlogAddPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card className="overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
             <CardContent className="p-6 space-y-8">
-              {/* Thumbnail Section - Large Banner Style */}
+              {/* Thumbnail Section with Top-Right Date Time */}
               <div className="space-y-3">
-                <Label className="text-base font-semibold text-neutral-900 dark:text-white">
-                  {language === "en" ? "Thumbnail Blog" : "Thumbnail Artikel"}
-                </Label>
+                <div className="flex items-center justify-between gap-4">
+                  <Label className="text-base font-semibold text-neutral-900 dark:text-white">
+                    {language === "en" ? "Thumbnail Blog" : "Thumbnail Artikel"}
+                  </Label>
+                  <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium select-none">
+                    {formatDateTime(createdAt, language)}
+                  </span>
+                </div>
                 <div className="max-w-2xl">
                   <ImageUpload 
                     accept="image" 

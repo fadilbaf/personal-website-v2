@@ -43,6 +43,23 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
+const formatDateTime = (dateStr?: string | null, lang: "en" | "id" = "en") => {
+  if (!dateStr) return "-";
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString(lang === "en" ? "en-US" : "id-ID", {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    });
+  } catch {
+    return dateStr;
+  }
+};
+
 export default function BlogEditPage() {
   const { t, language } = useLanguage();
   const router = useRouter();
@@ -179,11 +196,18 @@ export default function BlogEditPage() {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <Card className="overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
             <CardContent className="p-6 space-y-8">
-              {/* Thumbnail Section - Large Banner Style */}
+              {/* Thumbnail Section with Top-Right Date Time */}
               <div className="space-y-3">
-                <Label className="text-base font-semibold text-neutral-900 dark:text-white">
-                  {language === "en" ? "Thumbnail Blog" : "Thumbnail Artikel"}
-                </Label>
+                <div className="flex items-center justify-between gap-4">
+                  <Label className="text-base font-semibold text-neutral-900 dark:text-white">
+                    {language === "en" ? "Thumbnail Blog" : "Thumbnail Artikel"}
+                  </Label>
+                  {blog?.created_at && (
+                    <span className="text-xs text-neutral-500 dark:text-neutral-400 font-medium select-none">
+                      {formatDateTime(blog.created_at, language)}
+                    </span>
+                  )}
+                </div>
                 <div className="max-w-2xl">
                   {loading ? (
                     <Skeleton className="aspect-video w-full rounded-xl" />
