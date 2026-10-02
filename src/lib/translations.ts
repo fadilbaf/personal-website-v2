@@ -608,6 +608,8 @@ export const translations = {
     templates: {
       title: "Email Templates",
       description: "Customize layouts, live preview in real-time, and test delivery.",
+      select_template: "Select Email Template",
+      select_template_desc: "Choose an email template to customize, preview, or test delivery.",
       search_placeholder: "Search templates...",
       category_all: "All",
       category_contact: "Contact",
@@ -1292,6 +1294,8 @@ export const translations = {
     templates: {
       title: "Templat Email",
       description: "Kustomisasi tata letak, pratinjau live, dan uji coba pengiriman email.",
+      select_template: "Pilih Templat Email",
+      select_template_desc: "Pilih templat email untuk dikustomisasi, dipratinjau, atau diuji kirim.",
       search_placeholder: "Cari templat...",
       category_all: "Semua",
       category_contact: "Kontak",
