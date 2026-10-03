@@ -176,20 +176,20 @@ export default function MessagesPage() {
   const renderStatusBadge = (status: MessageStatus, is_read: boolean) => {
     if (status === "replied") {
       return (
-        <Badge variant="default" className="rounded-full text-xs font-medium">
+        <Badge variant="secondary" className="rounded-full text-xs font-medium bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none">
           {t("messages.status_replied")}
         </Badge>
       );
     }
     if (!is_read) {
       return (
-        <Badge variant="default" className="rounded-full text-xs font-medium animate-pulse">
+        <Badge variant="default" className="rounded-full text-xs font-medium bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 animate-pulse">
           {t("messages.status_unread")}
         </Badge>
       );
     }
     return (
-      <Badge variant="secondary" className="rounded-full text-xs font-medium">
+      <Badge variant="secondary" className="rounded-full text-xs font-medium bg-neutral-100 hover:bg-neutral-200 text-neutral-600 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-400 border-none">
         {t("messages.status_read")}
       </Badge>
     );
@@ -487,7 +487,7 @@ export default function MessagesPage() {
                     value={replySubject}
                     onChange={(e) => setReplySubject(e.target.value)}
                     placeholder="Re: Subject"
-                    className="h-9 text-xs"
+                    className="h-9 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
                   />
                 </div>
 
@@ -501,7 +501,7 @@ export default function MessagesPage() {
                     onChange={(e) => setReplyBody(e.target.value)}
                     placeholder={t("messages.reply_content_placeholder")}
                     rows={6}
-                    className="text-xs"
+                    className="text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
                   />
                 </div>
               </div>

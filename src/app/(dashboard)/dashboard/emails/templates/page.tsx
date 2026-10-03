@@ -720,10 +720,10 @@ export default function EmailTemplatesPage() {
         >
           <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 overflow-hidden shadow-sm">
             {/* Workspace Header Toolbar (Symmetrical py-2.5) */}
-            <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-950/50">
+            <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 {/* View Mode Tabs (Preview vs HTML Editor) */}
-                <div className="flex items-center gap-1 p-1 bg-neutral-200/60 dark:bg-neutral-900 rounded-lg border border-neutral-200/80 dark:border-white/10">
+                <div className="flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10">
                   <button
                     onClick={() => setViewMode("preview")}
                     className={cn(
@@ -756,7 +756,7 @@ export default function EmailTemplatesPage() {
                   {viewMode === "preview" && (
                     <>
                       {/* Viewport Toggles */}
-                      <div className="flex items-center p-0.5 bg-neutral-200/60 dark:bg-neutral-900 rounded-md border border-neutral-200/80 dark:border-white/10">
+                      <div className="flex items-center p-0.5 bg-neutral-100 dark:bg-neutral-900 rounded-md border border-neutral-200/60 dark:border-white/10">
                         <button
                           onClick={() => setViewport("desktop")}
                           title="Desktop (600px)"
@@ -788,7 +788,7 @@ export default function EmailTemplatesPage() {
                         className={cn(
                           "flex items-center p-0.5 rounded-md border text-xs transition-colors",
                           activeTemplate.supportsLocale
-                            ? "bg-neutral-200/60 dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
+                            ? "bg-neutral-100 dark:bg-neutral-900 border-neutral-200/60 dark:border-white/10"
                             : "bg-neutral-100/80 dark:bg-neutral-900/60 border-neutral-200/60 dark:border-white/10 cursor-not-allowed"
                         )}
                         title={!activeTemplate.supportsLocale ? "Template ini hanya mendukung satu bahasa (Single Language)" : undefined}
@@ -951,7 +951,7 @@ export default function EmailTemplatesPage() {
             <div>
               {viewMode === "preview" && (
                 /* LIVE EMAIL PREVIEW CANVAS (Pure template card rendering) */
-                <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-950/60 flex justify-center">
+                <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-900/60 flex justify-center">
                   <div
                     className={cn(
                       "w-full transition-[max-width] duration-200 ease-in-out flex justify-center",
@@ -979,7 +979,7 @@ export default function EmailTemplatesPage() {
 
               {viewMode === "html" && (
                 /* HTML CODE EDITOR (Seamless without divider between Subject & Editor) */
-                <div className="p-4 space-y-3 bg-neutral-50/40 dark:bg-neutral-950/40">
+                <div className="p-4 space-y-3 bg-neutral-50/40 dark:bg-neutral-900/40">
                   {/* Subject Input Bar */}
                   <div className="flex items-center gap-2.5">
                     <span className="text-xs font-medium text-neutral-700 dark:text-neutral-300 shrink-0">
@@ -989,7 +989,7 @@ export default function EmailTemplatesPage() {
                       value={currentSubjectCode}
                       onChange={(e) =>
                         setEditorSubjectState((prev) => ({
-                          ...prev,
+                           ...prev,
                           [activeTemplate.id]: e.target.value,
                         }))
                       }
@@ -1008,7 +1008,7 @@ export default function EmailTemplatesPage() {
                     spellCheck={false}
                     autoCorrect="off"
                     autoCapitalize="off"
-                    className="font-mono text-xs leading-relaxed min-h-[560px] max-h-[1950px] overflow-y-auto bg-white dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 resize-y p-3.5 scrollbar-custom"
+                    className="font-mono text-xs leading-relaxed min-h-[560px] max-h-[1950px] overflow-y-auto bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 resize-y p-3.5 scrollbar-custom"
                     placeholder="Enter email HTML markup..."
                   />
 
@@ -1027,7 +1027,7 @@ export default function EmailTemplatesPage() {
         {showParamsPanel && (
           <div className="lg:col-span-4 space-y-4">
             <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 shadow-sm overflow-hidden">
-              <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-950/50">
+              <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <SlidersHorizontal className="w-4 h-4 text-neutral-500 dark:text-neutral-400" />
@@ -1073,7 +1073,7 @@ export default function EmailTemplatesPage() {
                               handleVariableChange(field.key, e.target.value)
                             }
                             rows={3}
-                            className="text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 scrollbar-custom"
+                            className="text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 scrollbar-custom"
                           />
                         ) : field.type === "select" && field.options ? (
                           <Select
@@ -1085,7 +1085,7 @@ export default function EmailTemplatesPage() {
                           >
                             <SelectTrigger
                               size="sm"
-                              className="h-8 text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10 w-full cursor-pointer px-2.5"
+                              className="h-8 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 w-full cursor-pointer px-2.5"
                             >
                               <SelectValue className="text-xs" />
                             </SelectTrigger>
@@ -1108,7 +1108,7 @@ export default function EmailTemplatesPage() {
                             onChange={(e) =>
                               handleVariableChange(field.key, e.target.value)
                             }
-                            className="h-8 text-xs bg-neutral-50 dark:bg-neutral-950 border-neutral-200/80 dark:border-white/10"
+                            className="h-8 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
                           />
                         )}
                       </div>
@@ -1153,7 +1153,7 @@ export default function EmailTemplatesPage() {
               </p>
             </div>
 
-            <div className="p-3.5 bg-neutral-50/80 dark:bg-neutral-900/60 rounded-xl border border-neutral-200/60 dark:border-white/5 space-y-2">
+            <div className="p-3.5 bg-neutral-50 dark:bg-neutral-900/60 rounded-lg border border-neutral-200/80 dark:border-white/10 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="text-neutral-500 dark:text-neutral-400">Template:</span>
                 <span className="font-medium text-neutral-900 dark:text-white truncate max-w-[220px]">
@@ -1238,7 +1238,7 @@ export default function EmailTemplatesPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder={t("templates.search_placeholder") || "Search templates..."}
-                className="pl-9 h-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs placeholder:text-neutral-400"
+                className="pl-9 h-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
               />
             </div>
 
@@ -1258,7 +1258,7 @@ export default function EmailTemplatesPage() {
                 <Filter className="h-3.5 w-3.5" />
                 <span>{t("common.filter")}</span>
                 {activeFilterCount > 0 && (
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white">
+                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
                     {activeFilterCount}
                   </span>
                 )}
@@ -1266,7 +1266,7 @@ export default function EmailTemplatesPage() {
 
               {/* Filter Dropdown Panel */}
               {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-neutral-800 dark:bg-neutral-900 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-xl border border-neutral-200/80 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 animate-in fade-in zoom-in-95 duration-150">
                   <div className="space-y-4">
                     {/* Header */}
                     <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
@@ -1309,7 +1309,7 @@ export default function EmailTemplatesPage() {
                                 "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
                                 isSelected
                                   ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                  : "bg-neutral-100/80 hover:bg-neutral-200 text-neutral-600 border-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-700/80 dark:text-neutral-300 dark:border-neutral-700/50"
+                                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
                               )}
                             >
                               {opt.label}
@@ -1340,7 +1340,7 @@ export default function EmailTemplatesPage() {
                                 "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
                                 isSelected
                                   ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                  : "bg-neutral-100/80 hover:bg-neutral-200 text-neutral-600 border-neutral-200/80 dark:bg-neutral-800/80 dark:hover:bg-neutral-700/80 dark:text-neutral-300 dark:border-neutral-700/50"
+                                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
                               )}
                             >
                               {opt.label}
@@ -1358,7 +1358,7 @@ export default function EmailTemplatesPage() {
           {/* Template Cards Grid inside Modal (2 Columns for clean layout) */}
           <div className="overflow-y-auto max-h-[55vh] pr-1 -mr-1">
             {filteredTemplates.length === 0 ? (
-              <div className="py-12 text-center text-xs text-neutral-500 dark:text-neutral-400 rounded-xl border border-dashed border-neutral-200 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/40">
+              <div className="py-12 text-center text-xs text-neutral-500 dark:text-neutral-400 rounded-xl border border-dashed border-neutral-200/80 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/40">
                 {t("common.no_data")}
               </div>
             ) : (
@@ -1378,7 +1378,7 @@ export default function EmailTemplatesPage() {
                         "p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2.5 shadow-xs",
                         isSelected
                           ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white ring-1 ring-neutral-900/10 dark:ring-white/20"
-                          : "bg-white dark:bg-neutral-900/90 border-neutral-200/80 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50/80 dark:hover:bg-neutral-800/50"
+                          : "bg-white dark:bg-neutral-900/90 border-neutral-200/80 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
@@ -1393,8 +1393,8 @@ export default function EmailTemplatesPage() {
                                 ? "bg-white/20 text-white border-white/25 dark:bg-neutral-900/20 dark:text-neutral-900 dark:border-neutral-900/25"
                                 : "bg-white/10 text-neutral-300 border-white/15 dark:bg-neutral-900/10 dark:text-neutral-600 dark:border-neutral-900/15"
                               : isDbCustom
-                              ? "bg-neutral-100 text-neutral-900 border-neutral-300 dark:bg-neutral-800 dark:text-neutral-100 dark:border-neutral-700"
-                              : "bg-neutral-50 text-neutral-500 border-neutral-200/80 dark:bg-neutral-900/60 dark:text-neutral-400 dark:border-white/10"
+                              ? "bg-neutral-100 text-neutral-900 border-neutral-200/80 dark:bg-white/10 dark:text-neutral-100 dark:border-white/10"
+                              : "bg-neutral-50 text-neutral-500 border-neutral-200/60 dark:bg-white/5 dark:text-neutral-400 dark:border-white/10"
                           )}
                         >
                           {isDbCustom ? "Custom" : "Default"}

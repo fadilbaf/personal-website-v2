@@ -58,6 +58,7 @@ import type {
 } from "@/src/types/database";
 import { useLanguage } from "@/context/language-context";
 import { useTheme } from "next-themes";
+import { cn } from "@/lib/utils";
 import { renderNewsletterBroadcastEmail } from "@/src/lib/email-templates/newsletter-broadcast-email";
 
 /**
@@ -305,27 +306,22 @@ export default function NewsletterPage() {
       : "#000000";
 
     const iframeScrollbarStyle = `<style>
-      html, body {
+      :root, html, body {
         margin: 0 !important;
         padding: 0 !important;
         background-color: transparent !important;
-        scrollbar-width: thin !important;
-        scrollbar-color: ${scrollbarColor} !important;
-        overflow-x: hidden;
+        background: transparent !important;
+        color-scheme: light !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+      }
+      * {
+        box-sizing: border-box !important;
       }
       ::-webkit-scrollbar {
-        height: 6px !important;
-        width: 6px !important;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent !important;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: ${thumbColor} !important;
-        border-radius: 9999px !important;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: ${thumbHoverColor} !important;
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
       }
     </style>`;
 
@@ -353,42 +349,29 @@ export default function NewsletterPage() {
       return raw.replace("<body", `${iframeScrollbarStyle}<body`);
     }
     return `${iframeScrollbarStyle}${raw}`;
-  }, [broadcastSubject, broadcastContent, buttonText, buttonUrl, broadcastType, language, isDark]);
+  }, [broadcastSubject, broadcastContent, buttonText, buttonUrl, broadcastType, language]);
 
   // Generated email HTML for selected campaign preview in View Message modal
   const viewingCampaignHtml = useMemo(() => {
     if (!selectedCampaign) return "";
-    const scrollbarColor = isDark
-      ? "rgba(255, 255, 255, 0.85) transparent"
-      : "rgba(0, 0, 0, 0.8) transparent";
-    const thumbColor = isDark
-      ? "rgba(255, 255, 255, 0.8)"
-      : "rgba(0, 0, 0, 0.85)";
-    const thumbHoverColor = isDark
-      ? "#ffffff"
-      : "#000000";
 
     const iframeScrollbarStyle = `<style>
-      html, body {
+      :root, html, body {
         margin: 0 !important;
         padding: 0 !important;
-        scrollbar-width: thin !important;
-        scrollbar-color: ${scrollbarColor} !important;
-        overflow-x: hidden;
+        background-color: transparent !important;
+        background: transparent !important;
+        color-scheme: light !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+      }
+      * {
+        box-sizing: border-box !important;
       }
       ::-webkit-scrollbar {
-        height: 6px !important;
-        width: 6px !important;
-      }
-      ::-webkit-scrollbar-track {
-        background: transparent !important;
-      }
-      ::-webkit-scrollbar-thumb {
-        background: ${thumbColor} !important;
-        border-radius: 9999px !important;
-      }
-      ::-webkit-scrollbar-thumb:hover {
-        background: ${thumbHoverColor} !important;
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
       }
     </style>`;
 
@@ -413,7 +396,7 @@ export default function NewsletterPage() {
       return raw.replace("<body", `${iframeScrollbarStyle}<body`);
     }
     return `${iframeScrollbarStyle}${raw}`;
-  }, [selectedCampaign, isDark]);
+  }, [selectedCampaign]);
 
   // Dynamic iframe height measurement for Live Preview in Broadcast Tab
   const broadcastIframeRef = useRef<HTMLIFrameElement>(null);
@@ -421,23 +404,105 @@ export default function NewsletterPage() {
 
   const handleBroadcastIframeLoad = () => {
     if (broadcastIframeRef.current?.contentWindow) {
-      const doc = broadcastIframeRef.current.contentWindow.document;
-      const scrollHeight = Math.max(
-        doc.body?.scrollHeight || 0,
-        doc.documentElement?.scrollHeight || 0
-      );
-      if (scrollHeight > 0) {
-        setBroadcastIframeHeight(scrollHeight);
+      const win = broadcastIframeRef.current.contentWindow;
+      const doc = win.document;
+      if (!doc || !doc.body) return;
+
+      if (doc.documentElement) {
+        doc.documentElement.style.backgroundColor = "transparent";
+        doc.documentElement.style.colorScheme = "light";
+      }
+      if (doc.body) {
+        doc.body.style.backgroundColor = "transparent";
+        doc.body.style.colorScheme = "light";
+      }
+
+      const card =
+        (doc.body?.firstElementChild as HTMLElement) ||
+        doc.querySelector('table[style*="max-width: 600px"]') ||
+        doc.querySelector("table") ||
+        doc.body;
+
+      if (card) {
+        const height = Math.ceil(
+          (card.getBoundingClientRect ? card.getBoundingClientRect().height : 0) ||
+          card.offsetHeight ||
+          card.scrollHeight ||
+          doc.body.scrollHeight ||
+          0
+        );
+        if (height > 0) {
+          setBroadcastIframeHeight(height + 6); // +6px prevents bottom border cutoff
+        }
       }
     }
   };
 
   useEffect(() => {
     handleBroadcastIframeLoad();
+    const t1 = setTimeout(handleBroadcastIframeLoad, 50);
+    const t2 = setTimeout(handleBroadcastIframeLoad, 150);
+    const t3 = setTimeout(handleBroadcastIframeLoad, 350);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
   }, [generatedEmailHtml]);
 
   // Modal iframe ref for Sent Broadcast Email Preview
   const modalIframeRef = useRef<HTMLIFrameElement>(null);
+  const [modalIframeHeight, setModalIframeHeight] = useState(500);
+
+  const handleModalIframeLoad = () => {
+    if (modalIframeRef.current?.contentWindow) {
+      const win = modalIframeRef.current.contentWindow;
+      const doc = win.document;
+      if (!doc || !doc.body) return;
+
+      if (doc.documentElement) {
+        doc.documentElement.style.backgroundColor = "transparent";
+        doc.documentElement.style.colorScheme = "light";
+      }
+      if (doc.body) {
+        doc.body.style.backgroundColor = "transparent";
+        doc.body.style.colorScheme = "light";
+      }
+
+      const card =
+        (doc.body?.firstElementChild as HTMLElement) ||
+        doc.querySelector('table[style*="max-width: 600px"]') ||
+        doc.querySelector("table") ||
+        doc.body;
+
+      if (card) {
+        const height = Math.ceil(
+          (card.getBoundingClientRect ? card.getBoundingClientRect().height : 0) ||
+          card.offsetHeight ||
+          card.scrollHeight ||
+          doc.body.scrollHeight ||
+          0
+        );
+        if (height > 0) {
+          setModalIframeHeight(height + 6);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    if (isCampaignModalOpen) {
+      handleModalIframeLoad();
+      const t1 = setTimeout(handleModalIframeLoad, 50);
+      const t2 = setTimeout(handleModalIframeLoad, 150);
+      const t3 = setTimeout(handleModalIframeLoad, 350);
+      return () => {
+        clearTimeout(t1);
+        clearTimeout(t2);
+        clearTimeout(t3);
+      };
+    }
+  }, [isCampaignModalOpen, viewingCampaignHtml]);
 
   // Toggle subscriber status
   const handleToggleStatus = async (sub: NewsletterSubscriber) => {
@@ -577,7 +642,12 @@ export default function NewsletterPage() {
       render: (sub) => (
         <Badge
           variant={sub.status === "active" ? "default" : "secondary"}
-          className="rounded-full text-xs font-medium"
+          className={cn(
+            "rounded-full text-xs font-medium",
+            sub.status === "active"
+              ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
+          )}
         >
           {sub.status === "active"
             ? t("newsletter.status_active")
@@ -608,7 +678,10 @@ export default function NewsletterPage() {
       header: t("newsletter.broadcast_type"),
       className: "w-36",
       render: (camp) => (
-        <Badge variant="secondary" className="rounded-full text-xs font-medium">
+        <Badge
+          variant="secondary"
+          className="rounded-full text-xs font-medium bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
+        >
           {t(`newsletter.type_${camp.type}`) || camp.type}
         </Badge>
       ),
@@ -918,22 +991,30 @@ export default function NewsletterPage() {
             {/* Right Column: Pure Live Preview (6 cols) */}
             <div className="lg:col-span-6 lg:sticky lg:top-20 space-y-4">
               <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-sm">
-                <div className="py-3 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-950/50 flex items-center gap-2">
+                <div className="py-3 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center gap-2">
                   <Eye className="w-4 h-4 text-neutral-500" />
                   <span className="text-sm font-semibold text-neutral-900 dark:text-white">
                     {t("newsletter.live_preview")}
                   </span>
                 </div>
-                <div className="p-0 bg-[#0c0d0e]">
-                  <iframe
-                    ref={broadcastIframeRef}
-                    srcDoc={generatedEmailHtml}
-                    onLoad={handleBroadcastIframeLoad}
-                    title="Live Email Preview"
-                    style={{ height: `${broadcastIframeHeight}px` }}
-                    className="w-full border-0 block transition-[height] duration-150"
-                    sandbox="allow-same-origin"
-                  />
+                <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-900/60 flex justify-center">
+                  <div className="w-full max-w-[600px] flex justify-center">
+                    <iframe
+                      ref={broadcastIframeRef}
+                      srcDoc={generatedEmailHtml}
+                      onLoad={handleBroadcastIframeLoad}
+                      title="Live Email Preview"
+                      scrolling="no"
+                      {...{ allowtransparency: "true" }}
+                      style={{
+                        height: `${broadcastIframeHeight}px`,
+                        backgroundColor: "transparent",
+                        colorScheme: "light",
+                      }}
+                      className="w-full border-0 bg-transparent block overflow-hidden transition-[height] duration-150"
+                      sandbox="allow-same-origin"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -1017,7 +1098,7 @@ export default function NewsletterPage() {
               <Users className="w-4 h-4" />
               {t("newsletter.recipients_modal_title")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500">
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
               {t("newsletter.recipients_modal_desc")}
             </DialogDescription>
           </DialogHeader>
@@ -1043,7 +1124,7 @@ export default function NewsletterPage() {
                 size="sm"
                 variant="secondary"
                 onClick={handleAddDraftCustomRecipient}
-                className="h-9 text-xs px-3.5 gap-1.5 shrink-0 cursor-pointer font-medium"
+                className="h-9 text-xs px-3.5 gap-1.5 shrink-0 cursor-pointer font-medium bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
               >
                 <Plus className="w-3.5 h-3.5" />
                 {t("newsletter.add_recipient_btn")}
@@ -1090,7 +1171,7 @@ export default function NewsletterPage() {
             </div>
 
             {/* Scrollable Recipient List */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/70 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-950/30 scrollbar-custom">
+            <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/80 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-900/40 scrollbar-custom">
               {filteredDraftRecipientOptions.length === 0 ? (
                 <div className="py-8 text-center text-xs text-neutral-400">
                   {t("newsletter.no_recipients_found")}
@@ -1120,7 +1201,7 @@ export default function NewsletterPage() {
                           >
                             <Badge
                               variant="secondary"
-                              className="rounded-full text-xs font-normal px-2 py-0 h-5"
+                              className="rounded-full text-xs font-normal px-2 py-0 h-5 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
                             >
                               {t("newsletter.recipient_custom")}
                             </Badge>
@@ -1180,7 +1261,7 @@ export default function NewsletterPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-2 text-xs text-neutral-600 dark:text-neutral-400 bg-neutral-100 dark:bg-neutral-900 p-3 rounded-lg border border-neutral-200 dark:border-white/10 space-y-1">
+          <div className="py-2 text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 space-y-1.5">
             <p><strong>Subject:</strong> {broadcastSubject}</p>
             <p><strong>Type:</strong> <span>{t(`newsletter.type_${broadcastType}`) || broadcastType}</span></p>
             <p><strong>Recipients:</strong> {effectiveSelectedEmails.length} selected recipient(s)</p>
@@ -1223,12 +1304,15 @@ export default function NewsletterPage() {
 
       {/* Campaign Message Detail Modal */}
       <Dialog open={isCampaignModalOpen} onOpenChange={setIsCampaignModalOpen}>
-        <DialogContent className="sm:max-w-3xl max-h-[85vh] flex flex-col p-6 overflow-hidden">
+        <DialogContent className="sm:max-w-[648px] max-h-[90vh] flex flex-col p-5 sm:p-6 overflow-hidden">
           {selectedCampaign && (
             <>
               <DialogHeader className="pr-10 sm:pr-12 space-y-1 shrink-0 pb-1">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <Badge variant="secondary" className="rounded-full text-xs font-medium">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full text-xs font-medium bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
+                  >
                     {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
                   </Badge>
                   <span className="text-xs text-neutral-400">
@@ -1238,18 +1322,27 @@ export default function NewsletterPage() {
                 <DialogTitle className="text-base sm:text-lg font-semibold truncate">
                   {selectedCampaign.subject}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500">
+                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
                   {t("newsletter.sent_to_count", { count: String(selectedCampaign.sent_count) })}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="py-2 flex-1 min-h-0 flex flex-col">
-                <div className="w-full h-[55vh] sm:h-[60vh] rounded-lg border border-neutral-200/80 dark:border-white/10 overflow-hidden bg-white dark:bg-neutral-900">
+              {/* Direct email card display without outer container */}
+              <div className="py-2 flex-1 min-h-0 overflow-y-auto max-h-[64vh] scrollbar-custom flex justify-center">
+                <div className="w-full max-w-[600px] flex justify-center">
                   <iframe
                     ref={modalIframeRef}
                     srcDoc={viewingCampaignHtml}
+                    onLoad={handleModalIframeLoad}
                     title="Sent Broadcast Email Preview"
-                    className="w-full h-full border-0 bg-transparent block"
+                    scrolling="no"
+                    {...{ allowtransparency: "true" }}
+                    style={{
+                      height: `${modalIframeHeight}px`,
+                      backgroundColor: "transparent",
+                      colorScheme: "light",
+                    }}
+                    className="w-full border-0 bg-transparent block overflow-hidden transition-[height] duration-150"
                     sandbox="allow-same-origin"
                   />
                 </div>
@@ -1283,7 +1376,10 @@ export default function NewsletterPage() {
             <>
               <DialogHeader className="pr-10 sm:pr-12 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                  <Badge variant="secondary" className="rounded-full text-xs font-medium">
+                  <Badge
+                    variant="secondary"
+                    className="rounded-full text-xs font-medium bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
+                  >
                     {t(`newsletter.type_${selectedCampaign.type}`) || selectedCampaign.type}
                   </Badge>
                   <span className="text-xs text-neutral-400">
@@ -1316,7 +1412,7 @@ export default function NewsletterPage() {
 
                 {/* Recipient Email List */}
                 {selectedCampaign.recipients && selectedCampaign.recipients.length > 0 ? (
-                  <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/70 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-950/30 scrollbar-custom">
+                  <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/80 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-900/40 scrollbar-custom">
                     {selectedCampaign.recipients
                       .filter((email) =>
                         !recipientSearch.trim() ||
@@ -1327,14 +1423,14 @@ export default function NewsletterPage() {
                       .map((email) => (
                         <div
                           key={email}
-                          className="flex items-center justify-between p-2.5 rounded-md bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-white/10 text-xs sm:text-sm"
+                          className="flex items-center justify-between p-2.5 rounded-md bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm"
                         >
                           <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate pr-2">
                             {email}
                           </span>
                           <Badge
                             variant="default"
-                            className="rounded-full text-xs font-medium"
+                            className="rounded-full text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                           >
                             Delivered
                           </Badge>
@@ -1342,7 +1438,7 @@ export default function NewsletterPage() {
                       ))}
                   </div>
                 ) : (
-                  <div className="py-8 text-center text-xs text-neutral-400 bg-neutral-50/50 dark:bg-neutral-950/20 rounded-lg border border-dashed border-neutral-200 dark:border-white/10 px-4">
+                  <div className="py-8 text-center text-xs text-neutral-400 bg-neutral-50/50 dark:bg-neutral-900/40 rounded-lg border border-dashed border-neutral-200 dark:border-white/10 px-4">
                     {language === "id"
                       ? "Rincian list email tersimpan untuk broadcast yang dikirim setelah pembaruan database."
                       : "Detailed email list is recorded for broadcasts dispatched after database update."}
