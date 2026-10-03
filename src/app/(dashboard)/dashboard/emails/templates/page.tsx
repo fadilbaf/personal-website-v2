@@ -683,10 +683,20 @@ export default function EmailTemplatesPage() {
           { label: t("sidebar.Emails"), href: "/dashboard/emails/newsletter" },
           { label: t("templates.title") },
         ]}
+        actions={
+          <Button
+            onClick={() => setIsTestModalOpen(true)}
+            size="sm"
+            className="h-9 px-3.5 gap-2 text-xs font-medium cursor-pointer transition-all bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 shadow-xs shrink-0"
+          >
+            <Send className="h-3.5 w-3.5" />
+            <span>{t("templates.send_test")}</span>
+          </Button>
+        }
       />
 
-      {/* Top Control Bar: Active Template Selector Button on Left, Send Test Email Button on Right */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+      {/* Top Control Bar: Active Template Selector Button */}
+      <div className="flex items-center justify-between gap-3">
         {/* Template Selector Button (Opens Modal) */}
         <Button
           variant="outline"
@@ -696,16 +706,6 @@ export default function EmailTemplatesPage() {
         >
           <span className="font-semibold truncate">{activeTemplate.name}</span>
           <ChevronDown className="h-3.5 w-3.5 text-neutral-400 shrink-0 ml-0.5" />
-        </Button>
-
-        {/* Send Test Email Button (Placed at top right) */}
-        <Button
-          onClick={() => setIsTestModalOpen(true)}
-          size="sm"
-          className="h-9 px-3.5 gap-2 text-xs font-medium cursor-pointer transition-all bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 shadow-xs shrink-0"
-        >
-          <Send className="h-3.5 w-3.5" />
-          <span>{t("templates.send_test")}</span>
         </Button>
       </div>
 
@@ -1220,10 +1220,10 @@ export default function EmailTemplatesPage() {
       </Dialog>
       {/* Template Selection Modal */}
       <Dialog open={isTemplateModalOpen} onOpenChange={setIsTemplateModalOpen}>
-        <DialogContent className="max-w-3xl sm:max-w-4xl max-h-[85vh] flex flex-col p-6 gap-5 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[85vh] flex flex-col p-4 sm:p-6 gap-4 sm:gap-5 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 overflow-hidden">
           <DialogHeader className="space-y-1">
             <DialogTitle className="flex items-center gap-2 text-base font-semibold text-neutral-900 dark:text-white">
-              <LayoutTemplate className="h-4.5 w-4.5 text-neutral-500" />
+              <LayoutTemplate className="h-4.5 w-4.5 text-neutral-500 shrink-0" />
               {t("templates.select_template")}
             </DialogTitle>
             <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
@@ -1232,7 +1232,7 @@ export default function EmailTemplatesPage() {
           </DialogHeader>
 
           {/* Search Bar & Filter Row inside Modal */}
-          <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center justify-between gap-2.5 sm:gap-3">
             {/* Search Bar on the Left (Full Width up to Filter) */}
             <div className="relative flex-1 w-full">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500" />
@@ -1268,7 +1268,7 @@ export default function EmailTemplatesPage() {
 
               {/* Filter Dropdown Panel */}
               {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 z-50 w-80 rounded-xl border border-neutral-200/80 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 animate-in fade-in zoom-in-95 duration-150">
+                <div className="absolute right-0 top-full mt-2 z-50 w-[calc(100vw-3rem)] max-w-xs sm:w-80 rounded-xl border border-neutral-200/80 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 animate-in fade-in zoom-in-95 duration-150">
                   <div className="space-y-4">
                     {/* Header */}
                     <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
@@ -1358,13 +1358,13 @@ export default function EmailTemplatesPage() {
           </div>
 
           {/* Template Cards Grid inside Modal (2 Columns for clean layout) */}
-          <div className="overflow-y-auto max-h-[55vh] pr-1 -mr-1">
+          <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 scrollbar-custom pb-2">
             {filteredTemplates.length === 0 ? (
               <div className="py-12 text-center text-xs text-neutral-500 dark:text-neutral-400 rounded-xl border border-dashed border-neutral-200/80 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/40">
                 {t("common.no_data")}
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5 pb-1">
                 {filteredTemplates.map((tpl) => {
                   const isSelected = tpl.id === selectedTemplateId;
                   const isDbCustom = !!dbTemplates[tpl.id];
@@ -1377,14 +1377,14 @@ export default function EmailTemplatesPage() {
                         setIsTemplateModalOpen(false);
                       }}
                       className={cn(
-                        "p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2.5 shadow-none",
+                        "p-3.5 sm:p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2 sm:gap-2.5 shadow-none",
                         isSelected
                           ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white ring-1 ring-neutral-900/10 dark:ring-white/20"
                           : "bg-white dark:bg-neutral-900/90 border-neutral-200/80 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
                       )}
                     >
                       <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold whitespace-nowrap">
+                        <span className="text-xs font-semibold leading-snug">
                           {tpl.name}
                         </span>
                         <span
