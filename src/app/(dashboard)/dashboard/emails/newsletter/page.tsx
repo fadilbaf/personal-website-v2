@@ -860,7 +860,7 @@ export default function NewsletterPage() {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start animate-in fade-in duration-200">
             {/* Left Column: Form Composer (6 cols) */}
             <div className="lg:col-span-6 space-y-4">
-              <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 shadow-sm overflow-hidden">
+              <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 shadow-none overflow-hidden">
                 <div className="py-4 px-6 border-b border-neutral-200/60 dark:border-white/10">
                   <h3 className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white">
                     {t("newsletter.broadcast_title")}
@@ -990,7 +990,7 @@ export default function NewsletterPage() {
 
             {/* Right Column: Pure Live Preview (6 cols) */}
             <div className="lg:col-span-6 lg:sticky lg:top-20 space-y-4">
-              <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-sm">
+              <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-none">
                 <div className="py-3 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center gap-2">
                   <Eye className="w-4 h-4 text-neutral-500" />
                   <span className="text-sm font-semibold text-neutral-900 dark:text-white">

@@ -718,7 +718,7 @@ export default function EmailTemplatesPage() {
             showParamsPanel ? "lg:col-span-8" : "lg:col-span-12"
           )}
         >
-          <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 overflow-hidden shadow-sm">
+          <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 overflow-hidden shadow-none">
             {/* Workspace Header Toolbar (Symmetrical py-2.5) */}
             <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50">
               <div className="flex flex-wrap items-center justify-between gap-3">
@@ -1026,7 +1026,7 @@ export default function EmailTemplatesPage() {
         {/* Right Column: Dynamic Sample Variables Customizer */}
         {showParamsPanel && (
           <div className="lg:col-span-4 space-y-4">
-            <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 shadow-sm overflow-hidden">
+            <div className="rounded-xl border border-neutral-200/60 bg-white dark:border-white/10 dark:bg-neutral-900 shadow-none overflow-hidden">
               <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -1375,7 +1375,7 @@ export default function EmailTemplatesPage() {
                         setIsTemplateModalOpen(false);
                       }}
                       className={cn(
-                        "p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2.5 shadow-xs",
+                        "p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2.5 shadow-none",
                         isSelected
                           ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white ring-1 ring-neutral-900/10 dark:ring-white/20"
                           : "bg-white dark:bg-neutral-900/90 border-neutral-200/80 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
