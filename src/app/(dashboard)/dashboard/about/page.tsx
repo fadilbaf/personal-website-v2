@@ -405,12 +405,12 @@ export default function AboutPage() {
       </div>
 
       {activeTab === "general" && (
-        <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-          <CardContent className="p-6">
-            <form
-              onSubmit={handleSubmit(onSubmit, onInvalid)}
-              className="space-y-6"
-            >
+        <form
+          onSubmit={handleSubmit(onSubmit, onInvalid)}
+          className="space-y-6"
+        >
+          <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
+            <CardContent className="p-6 space-y-6">
               <div className="grid gap-6 md:grid-cols-2">
                 <div className="space-y-2">
                   <Label>{t("about.bio")} (ID)</Label>
@@ -513,33 +513,33 @@ export default function AboutPage() {
                   )}
                 </div>
               </div>
+            </CardContent>
+          </Card>
 
-              <div className="flex justify-end">
-                {isAboutLoading ? (
-                  <Skeleton className="h-10 w-32" />
+          <div className="flex justify-end">
+            {isAboutLoading ? (
+              <Skeleton className="h-10 w-32" />
+            ) : (
+              <Button
+                type="submit"
+                disabled={isSubmitting || (!isDirty && !cvFile)}
+                className="bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 gap-1.5 cursor-pointer"
+              >
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    {t("common.saving")}
+                  </>
                 ) : (
-                  <Button
-                    type="submit"
-                    disabled={isSubmitting || (!isDirty && !cvFile)}
-                    className="bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 gap-1.5 cursor-pointer"
-                  >
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        {t("common.saving")}
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4" />
-                        {t("common.save_changes")}
-                      </>
-                    )}
-                  </Button>
+                  <>
+                    <Save className="h-4 w-4" />
+                    {t("common.save_changes")}
+                  </>
                 )}
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+              </Button>
+            )}
+          </div>
+        </form>
       )}
 
       {activeTab === "badges" && (

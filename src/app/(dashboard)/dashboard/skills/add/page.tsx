@@ -75,9 +75,9 @@ export default function SkillAddPage() {
           { label: t("common.add") },
         ]}
       />
-      <Card className="overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card className="overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
+          <CardContent className="p-6 space-y-6">
             <div className="space-y-2">
               <Label>{t("skills.name")}</Label>
               <Input {...register("name")} placeholder="e.g., React.js" />
@@ -101,29 +101,33 @@ export default function SkillAddPage() {
               <Label>{t("skills.icon")}</Label>
               <ImageUpload accept="image" onChange={(file) => setIconFile(file)} />
             </div>
-            <div className="flex items-center gap-3">
-              <Switch checked={watch("is_active")} onCheckedChange={(v) => setValue("is_active", v, { shouldValidate: true, shouldDirty: true })} />
-              <Label>{t("skills.active")}</Label>
-            </div>
-            <div className="flex justify-end gap-3">
-              <Button type="button" variant="outline" onClick={() => router.back()} className="gap-1.5 cursor-pointer">
-                <X className="h-4 w-4" /> {t("common.cancel")}
-              </Button>
-              <Button type="submit" disabled={isSubmitting || !isValid} className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
-                {isSubmitting ? (
-                  <>
-                    <Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4" /> {t("skills.add_skill")}
-                  </>
-                )}
-              </Button>
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Switch checked={watch("is_active")} onCheckedChange={(v) => setValue("is_active", v, { shouldValidate: true, shouldDirty: true })} />
+            <Label>{t("skills.active")}</Label>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            <Button type="button" variant="outline" onClick={() => router.back()} className="gap-1.5 cursor-pointer">
+              <X className="h-4 w-4" /> {t("common.cancel")}
+            </Button>
+            <Button type="submit" disabled={isSubmitting || !isValid} className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
+              {isSubmitting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}
+                </>
+              ) : (
+                <>
+                  <Plus className="h-4 w-4" /> {t("skills.add_skill")}
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </form>
     </>
   );
 }

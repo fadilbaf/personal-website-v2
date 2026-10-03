@@ -220,33 +220,35 @@ export default function AchievementAddPage() {
                   onChange={(f) => setImageFile(f)} 
                 />
               </div>
-
-              <div className="flex items-center gap-3 pt-2">
-                <Switch 
-                  checked={watch("is_published")} 
-                  onCheckedChange={(v) => setValue("is_published", v, { shouldValidate: true, shouldDirty: true })} 
-                />
-                <Label>{t("common.publish")}</Label>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4">
-                <Button type="button" 
-                  variant="outline" 
-                  onClick={() => router.back()} className="gap-1.5 cursor-pointer">
-                  <X className="h-4 w-4" /> {t("common.cancel")}
-                </Button>
-                <Button type="submit" 
-                  disabled={isSubmitting || !isValid} 
-                  className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
-                  {isSubmitting ? (
-                    <><Loader2 className="h-4 w-4 animate-spin" /> {language === "en" ? "Creating..." : "Membuat..."}</>
-                  ) : (
-                    <><Plus className="h-4 w-4" /> {t("achievements.add_achievement")}</>
-                  )}
-                </Button>
-              </div>
             </CardContent>
           </Card>
+
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <Switch 
+                checked={watch("is_published")} 
+                onCheckedChange={(v) => setValue("is_published", v, { shouldValidate: true, shouldDirty: true })} 
+              />
+              <Label>{t("common.publish")}</Label>
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button type="button" 
+                variant="outline" 
+                onClick={() => router.back()} className="gap-1.5 cursor-pointer">
+                <X className="h-4 w-4" /> {t("common.cancel")}
+              </Button>
+              <Button type="submit" 
+                disabled={isSubmitting || !isValid} 
+                className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
+                {isSubmitting ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> {language === "en" ? "Creating..." : "Membuat..."}</>
+                ) : (
+                  <><Plus className="h-4 w-4" /> {t("achievements.add_achievement")}</>
+                )}
+              </Button>
+            </div>
+          </div>
         </form>
       </div>
     </>

@@ -256,7 +256,7 @@ export default function ProjectAddPage() {
         {/* Basic Information */}
         <Card className="relative z-30 overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
           <CardContent className="p-6 space-y-6">
-            <h3 className="font-semibold text-lg border-b pb-2">{language === "en" ? "Basic Information" : "Informasi Dasar"}</h3>
+            <h3 className="font-semibold text-lg">{language === "en" ? "Basic Information" : "Informasi Dasar"}</h3>
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
                 <Label>Slug</Label>
@@ -309,7 +309,7 @@ export default function ProjectAddPage() {
         {/* Classification & Links */}
         <Card className="relative z-20 overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
           <CardContent className="p-6 space-y-6">
-            <h3 className="font-semibold text-lg border-b pb-2">{language === "en" ? "Classification & Links" : "Klasifikasi & Tautan"}</h3>
+            <h3 className="font-semibold text-lg">{language === "en" ? "Classification & Links" : "Klasifikasi & Tautan"}</h3>
             <div className="grid gap-6 md:grid-cols-3">
               <div className="space-y-2">
                 <Label>{t("projects.type")}</Label>
@@ -359,7 +359,7 @@ export default function ProjectAddPage() {
         {/* Gallery */}
         <Card className="relative z-10 border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
           <CardContent className="p-6 space-y-4">
-            <div className="flex justify-between items-center border-b pb-2">
+            <div className="flex justify-between items-center">
               <h3 className="font-semibold text-lg">{language === "en" ? "Project Gallery" : "Galeri Proyek"}</h3>
               <Button type="button" variant="outline" size="sm" onClick={addImageSlot} className="gap-1.5 cursor-pointer">
                 <Plus className="h-4 w-4" /> {language === "en" ? "Add Image" : "Tambah Gambar"}
@@ -413,7 +413,7 @@ export default function ProjectAddPage() {
         {/* Roles & Features */}
         <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
           <CardContent className="p-6 space-y-6">
-            <h3 className="font-semibold text-lg border-b pb-2">{language === "en" ? "Responsibilities & Key Features" : "Tanggung Jawab & Fitur Utama"}</h3>
+            <h3 className="font-semibold text-lg">{language === "en" ? "Responsibilities & Key Features" : "Tanggung Jawab & Fitur Utama"}</h3>
             
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
@@ -462,7 +462,7 @@ export default function ProjectAddPage() {
         {/* Deep Dives (Challenge, Result, Lesson) */}
         <Card className="border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
           <CardContent className="p-6 space-y-8">
-            <h3 className="font-semibold text-lg border-b pb-2">{language === "en" ? "Deep Dive Sections" : "Bagian Deep Dive"}</h3>
+            <h3 className="font-semibold text-lg">{language === "en" ? "Deep Dive Sections" : "Bagian Deep Dive"}</h3>
             
             {/* Challenge */}
             <div className="space-y-4">

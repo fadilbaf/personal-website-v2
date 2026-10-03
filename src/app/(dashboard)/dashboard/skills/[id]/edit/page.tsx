@@ -95,9 +95,9 @@ export default function SkillEditPage() {
           { label: t("common.edit") },
         ]}
       />
-      <Card className="overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
-        <CardContent className="p-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <Card className="overflow-visible border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80">
+          <CardContent className="p-6 space-y-6">
             <div className="space-y-2">
               <Label>{t("skills.name")}</Label>
               {loading ? <Skeleton className="h-10 w-full" /> : <Input {...register("name")} />}
@@ -128,42 +128,46 @@ export default function SkillEditPage() {
                 <ImageUpload accept="image" value={currentIconUrl || undefined} onChange={(file) => { setIconFile(file); setIsImageChanged(true); if (!file) setCurrentIconUrl(null); }} />
               )}
             </div>
-            <div className="flex items-center gap-3">
-              {loading ? (
-                <Skeleton className="h-6 w-10 rounded-full" />
-              ) : (
-                <Switch checked={!!watch("is_active")} onCheckedChange={(v) => setValue("is_active", v, { shouldValidate: true, shouldDirty: true })} />
-              )}
-              <Label>{t("skills.active")}</Label>
-            </div>
-            <div className="flex justify-end gap-3">
-              {loading ? (
-                <>
-                  <Skeleton className="h-10 w-24" />
-                  <Skeleton className="h-10 w-32" />
-                </>
-              ) : (
-                <>
-                  <Button type="button" variant="outline" onClick={() => router.back()} className="gap-1.5 cursor-pointer">
-                    <X className="h-4 w-4" /> {t("common.cancel")}
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting || !isValid || (!isDirty && !isImageChanged)} className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
-                    {isSubmitting ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}
-                      </>
-                    ) : (
-                      <>
-                        <Save className="h-4 w-4" /> {t("common.save_changes")}
-                      </>
-                    )}
-                  </Button>
-                </>
-              )}
-            </div>
-          </form>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {loading ? (
+              <Skeleton className="h-6 w-10 rounded-full" />
+            ) : (
+              <Switch checked={!!watch("is_active")} onCheckedChange={(v) => setValue("is_active", v, { shouldValidate: true, shouldDirty: true })} />
+            )}
+            <Label>{t("skills.active")}</Label>
+          </div>
+
+          <div className="flex justify-end gap-3">
+            {loading ? (
+              <>
+                <Skeleton className="h-10 w-24" />
+                <Skeleton className="h-10 w-32" />
+              </>
+            ) : (
+              <>
+                <Button type="button" variant="outline" onClick={() => router.back()} className="gap-1.5 cursor-pointer">
+                  <X className="h-4 w-4" /> {t("common.cancel")}
+                </Button>
+                <Button type="submit" disabled={isSubmitting || !isValid || (!isDirty && !isImageChanged)} className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}
+                    </>
+                  ) : (
+                    <>
+                      <Save className="h-4 w-4" /> {t("common.save_changes")}
+                    </>
+                  )}
+                </Button>
+              </>
+            )}
+          </div>
+        </div>
+      </form>
     </>
   );
 }

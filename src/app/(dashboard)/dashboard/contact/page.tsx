@@ -206,23 +206,24 @@ export default function ContactPage() {
                 </div>
               </div>
 
-              <div className="flex justify-end pt-4">
-                {loading ? (
-                  <Skeleton className="h-10 w-32 ml-auto" />
-                ) : (
-                  <Button type="submit" 
-                    disabled={isSubmitting || !isDirty} 
-                    className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
-                    {isSubmitting ? (
-                      <><Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}</>
-                    ) : (
-                      <><Save className="h-4 w-4" /> {t("common.save_changes")}</>
-                    )}
-                  </Button>
-                )}
-              </div>
             </CardContent>
           </Card>
+
+          <div className="flex justify-end">
+            {loading ? (
+              <Skeleton className="h-10 w-32 ml-auto" />
+            ) : (
+              <Button type="submit" 
+                disabled={isSubmitting || !isDirty} 
+                className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer">
+                {isSubmitting ? (
+                  <><Loader2 className="h-4 w-4 animate-spin" /> {t("common.saving")}</>
+                ) : (
+                  <><Save className="h-4 w-4" /> {t("common.save_changes")}</>
+                )}
+              </Button>
+            )}
+          </div>
         </form>
       </div>
     </>
