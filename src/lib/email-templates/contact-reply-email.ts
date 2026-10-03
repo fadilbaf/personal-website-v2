@@ -149,8 +149,8 @@ export function renderContactReplyEmail({
 
       <!-- Footer Lower (Sent from - Full Width Divider) -->
       <tr>
-        <td style="padding: 14px 32px 18px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
-          <p style="margin: 0; font-size: 11px; color: #a1a1aa;">
+        <td style="padding: 16px 32px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+          <p style="margin: 0; font-size: 11px; color: #a1a1aa; line-height: 1.5;">
             You can reply directly to this email to continue the conversation.
           </p>
         </td>

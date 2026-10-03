@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   Inbox,
@@ -13,6 +13,9 @@ import {
   Send,
   Loader2,
   Mails,
+  Eye,
+  Calendar,
+  MessageSquare,
 } from "lucide-react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/dashboard/page-header";
@@ -41,6 +44,8 @@ import {
 import { MessageService } from "@/src/services/message.service";
 import type { ContactMessage, MessageStatus } from "@/src/types/database";
 import { useLanguage } from "@/context/language-context";
+import { renderContactNotificationEmail } from "@/src/lib/email-templates/contact-notification-email";
+import { renderContactReplyEmail } from "@/src/lib/email-templates/contact-reply-email";
 
 export default function MessagesPage() {
   const { t, language } = useLanguage();
@@ -49,6 +54,7 @@ export default function MessagesPage() {
   // Selected message for Detail Modal
   const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [detailTab, setDetailTab] = useState<"message" | "reply">("message");
 
   // Selected message for Reply Modal
   const [replyMessage, setReplyMessage] = useState<ContactMessage | null>(null);
@@ -80,6 +86,7 @@ export default function MessagesPage() {
 
   const handleOpenDetail = async (msg: ContactMessage) => {
     setSelectedMessage(msg);
+    setDetailTab("message");
     setIsDetailOpen(true);
 
     // Automatically mark as read when viewed if unread
@@ -171,6 +178,189 @@ export default function MessagesPage() {
       minute: "2-digit",
     })}`;
   };
+
+  // Helper to inject iframe scrollbar & transparent styles
+  const injectIframeStyle = (rawHtml: string) => {
+    const iframeScrollbarStyle = `<style>
+      :root, html, body {
+        margin: 0 !important;
+        padding: 0 !important;
+        background-color: transparent !important;
+        background: transparent !important;
+        color-scheme: light !important;
+        overflow: hidden !important;
+        box-sizing: border-box !important;
+      }
+      * {
+        box-sizing: border-box !important;
+      }
+      ::-webkit-scrollbar {
+        display: none !important;
+        width: 0 !important;
+        height: 0 !important;
+      }
+    </style>`;
+
+    if (rawHtml.includes("</head>")) {
+      return rawHtml.replace("</head>", `${iframeScrollbarStyle}</head>`);
+    } else if (rawHtml.includes("<body")) {
+      return rawHtml.replace("<body", `${iframeScrollbarStyle}<body`);
+    }
+    return `${iframeScrollbarStyle}${rawHtml}`;
+  };
+
+  // Generated email HTML for selected message preview in Detail Modal
+  const viewingDetailHtml = useMemo(() => {
+    if (!selectedMessage) return "";
+
+    if (detailTab === "reply" && selectedMessage.reply_content) {
+      const raw = renderContactReplyEmail({
+        recipientName: selectedMessage.name,
+        subject: selectedMessage.subject.startsWith("Re:")
+          ? selectedMessage.subject
+          : `Re: ${selectedMessage.subject}`,
+        replyMessage: selectedMessage.reply_content,
+        originalMessage: selectedMessage.message,
+        originalSubject: selectedMessage.subject,
+      });
+      return injectIframeStyle(raw);
+    }
+
+    const raw = renderContactNotificationEmail({
+      name: selectedMessage.name,
+      email: selectedMessage.email,
+      subject: selectedMessage.subject,
+      message: selectedMessage.message,
+      receivedAt: formatDateTime(selectedMessage.created_at),
+    });
+    return injectIframeStyle(raw);
+  }, [selectedMessage, detailTab, language]);
+
+  // Generated email HTML for live preview in Reply Modal
+  const generatedReplyHtml = useMemo(() => {
+    if (!replyMessage) return "";
+    const placeholderText =
+      language === "id"
+        ? "Ketik balasan Anda di kolom sebelah kiri..."
+        : "Type your reply message on the left...";
+
+    const raw = renderContactReplyEmail({
+      recipientName: replyMessage.name,
+      subject:
+        replySubject ||
+        (replyMessage.subject.startsWith("Re:")
+          ? replyMessage.subject
+          : `Re: ${replyMessage.subject}`),
+      replyMessage: replyBody || placeholderText,
+      originalMessage: replyMessage.message,
+      originalSubject: replyMessage.subject,
+    });
+    return injectIframeStyle(raw);
+  }, [replyMessage, replySubject, replyBody, language]);
+
+  // Dynamic iframe height measurement for Detail Modal
+  const detailIframeRef = useRef<HTMLIFrameElement>(null);
+  const [detailIframeHeight, setDetailIframeHeight] = useState(500);
+
+  const handleDetailIframeLoad = () => {
+    if (detailIframeRef.current?.contentWindow) {
+      const win = detailIframeRef.current.contentWindow;
+      const doc = win.document;
+      if (!doc || !doc.body) return;
+
+      if (doc.documentElement) {
+        doc.documentElement.style.backgroundColor = "transparent";
+        doc.documentElement.style.colorScheme = "light";
+      }
+      if (doc.body) {
+        doc.body.style.backgroundColor = "transparent";
+        doc.body.style.colorScheme = "light";
+      }
+
+      const card =
+        (doc.body?.firstElementChild as HTMLElement) ||
+        doc.querySelector('table[style*="max-width: 600px"]') ||
+        doc.querySelector("table") ||
+        doc.body;
+
+      if (card) {
+        const height = Math.ceil(
+          (card.getBoundingClientRect ? card.getBoundingClientRect().height : 0) ||
+          card.offsetHeight ||
+          card.scrollHeight ||
+          doc.body.scrollHeight ||
+          0
+        );
+        if (height > 0) {
+          setDetailIframeHeight(height + 6);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    handleDetailIframeLoad();
+    const t1 = setTimeout(handleDetailIframeLoad, 50);
+    const t2 = setTimeout(handleDetailIframeLoad, 150);
+    const t3 = setTimeout(handleDetailIframeLoad, 350);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [viewingDetailHtml, isDetailOpen, detailTab]);
+
+  // Dynamic iframe height measurement for Reply Live Preview
+  const replyIframeRef = useRef<HTMLIFrameElement>(null);
+  const [replyIframeHeight, setReplyIframeHeight] = useState(500);
+
+  const handleReplyIframeLoad = () => {
+    if (replyIframeRef.current?.contentWindow) {
+      const win = replyIframeRef.current.contentWindow;
+      const doc = win.document;
+      if (!doc || !doc.body) return;
+
+      if (doc.documentElement) {
+        doc.documentElement.style.backgroundColor = "transparent";
+        doc.documentElement.style.colorScheme = "light";
+      }
+      if (doc.body) {
+        doc.body.style.backgroundColor = "transparent";
+        doc.body.style.colorScheme = "light";
+      }
+
+      const card =
+        (doc.body?.firstElementChild as HTMLElement) ||
+        doc.querySelector('table[style*="max-width: 600px"]') ||
+        doc.querySelector("table") ||
+        doc.body;
+
+      if (card) {
+        const height = Math.ceil(
+          (card.getBoundingClientRect ? card.getBoundingClientRect().height : 0) ||
+          card.offsetHeight ||
+          card.scrollHeight ||
+          doc.body.scrollHeight ||
+          0
+        );
+        if (height > 0) {
+          setReplyIframeHeight(height + 6);
+        }
+      }
+    }
+  };
+
+  useEffect(() => {
+    handleReplyIframeLoad();
+    const t1 = setTimeout(handleReplyIframeLoad, 50);
+    const t2 = setTimeout(handleReplyIframeLoad, 150);
+    const t3 = setTimeout(handleReplyIframeLoad, 350);
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+    };
+  }, [generatedReplyHtml, isReplyOpen]);
 
   // Status badges matching standard dashboard style
   const renderStatusBadge = (status: MessageStatus, is_read: boolean) => {
@@ -374,70 +564,100 @@ export default function MessagesPage() {
         )}
       />
 
-      {/* Message Detail Modal */}
+      {/* Message Detail Modal (Rendered Email Preview) */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto scrollbar-custom">
+        <DialogContent className="sm:max-w-[648px] max-h-[90vh] flex flex-col p-6 scrollbar-custom">
           {selectedMessage && (
             <>
-              <DialogHeader className="space-y-1.5 pb-2 pr-10 sm:pr-12">
-                <div className="flex flex-wrap items-center justify-between gap-2">
+              <DialogHeader className="space-y-2 pb-2 pr-8 sm:pr-10 shrink-0">
+                {/* Row 1: Status Badge & Date Time aligned horizontally */}
+                <div className="flex items-center justify-between gap-2">
                   {renderStatusBadge(
                     selectedMessage.status,
                     selectedMessage.is_read
                   )}
                   <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                    {formatDateTime(selectedMessage.created_at)}
+                    {formatDateTime(
+                      detailTab === "reply" && selectedMessage.replied_at
+                        ? selectedMessage.replied_at
+                        : selectedMessage.created_at
+                    )}
                   </span>
                 </div>
-                <DialogTitle className="text-base font-semibold text-neutral-900 dark:text-white pt-1">
-                  {selectedMessage.subject}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5 pt-0.5">
-                  <User className="h-3.5 w-3.5 shrink-0" />
-                  <span className="font-medium text-neutral-900 dark:text-white">
-                    {selectedMessage.name}
-                  </span>
-                  &bull;
-                  <a
-                    href={`mailto:${selectedMessage.email}`}
-                    className="text-neutral-600 dark:text-neutral-300 hover:underline font-mono text-xs"
-                  >
-                    {selectedMessage.email}
-                  </a>
-                </DialogDescription>
-              </DialogHeader>
 
-              <div className="space-y-4 py-2">
-                <div>
-                  <Label className="text-xs font-medium text-neutral-700 dark:text-neutral-300 block mb-1.5">
-                    {t("messages.original_message")}
-                  </Label>
-                  <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto scrollbar-custom">
-                    {selectedMessage.message}
-                  </div>
-                </div>
-
+                {/* Row 2: Tab Switcher (Original Message vs Reply History) */}
                 {selectedMessage.reply_content && (
-                  <div>
-                    <div className="flex items-center justify-between mb-1.5">
-                      <Label className="text-xs font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-1.5">
-                        <Reply className="h-3.5 w-3.5" />
+                  <div className="pt-0.5">
+                    <div className="inline-flex items-center p-0.5 rounded-lg bg-neutral-100 dark:bg-neutral-800 border border-neutral-200/80 dark:border-white/10 text-xs">
+                      <button
+                        type="button"
+                        onClick={() => setDetailTab("message")}
+                        className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
+                          detailTab === "message"
+                            ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
+                            : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+                        }`}
+                      >
+                        {t("messages.original_message")}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setDetailTab("reply")}
+                        className={`px-2.5 py-1 rounded-md font-medium transition-colors cursor-pointer ${
+                          detailTab === "reply"
+                            ? "bg-white dark:bg-neutral-900 text-neutral-900 dark:text-white shadow-xs"
+                            : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
+                        }`}
+                      >
                         {t("messages.reply_history")}
-                      </Label>
-                      {selectedMessage.replied_at && (
-                        <span className="text-xs text-neutral-500 dark:text-neutral-400">
-                          {formatDateTime(selectedMessage.replied_at)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm text-neutral-800 dark:text-neutral-200 whitespace-pre-wrap leading-relaxed max-h-[220px] overflow-y-auto scrollbar-custom">
-                      {selectedMessage.reply_content}
+                      </button>
                     </div>
                   </div>
                 )}
+
+                {/* Row 3: Subject & Sender Info */}
+                <div>
+                  <DialogTitle className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white truncate">
+                    {selectedMessage.subject}
+                  </DialogTitle>
+                  <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-1.5 pt-1">
+                    <User className="h-3.5 w-3.5 shrink-0" />
+                    <span className="font-medium text-neutral-900 dark:text-white">
+                      {selectedMessage.name}
+                    </span>
+                    &bull;
+                    <a
+                      href={`mailto:${selectedMessage.email}`}
+                      className="text-neutral-600 dark:text-neutral-300 hover:underline font-mono text-xs"
+                    >
+                      {selectedMessage.email}
+                    </a>
+                  </DialogDescription>
+                </div>
+              </DialogHeader>
+
+              {/* Direct email card display without outer container */}
+              <div className="py-2 flex-1 min-h-0 overflow-y-auto max-h-[64vh] scrollbar-custom flex justify-center">
+                <div className="w-full max-w-[600px] flex justify-center">
+                  <iframe
+                    ref={detailIframeRef}
+                    srcDoc={viewingDetailHtml}
+                    onLoad={handleDetailIframeLoad}
+                    title="Message Email Preview"
+                    scrolling="no"
+                    {...{ allowtransparency: "true" }}
+                    style={{
+                      height: `${detailIframeHeight}px`,
+                      backgroundColor: "transparent",
+                      colorScheme: "light",
+                    }}
+                    className="w-full border-0 bg-transparent block overflow-hidden transition-[height] duration-150"
+                    sandbox="allow-same-origin"
+                  />
+                </div>
               </div>
 
-              <DialogFooter className="flex items-center justify-end gap-2.5 pt-2">
+              <DialogFooter className="flex items-center justify-end gap-2.5 pt-2 shrink-0">
                 <Button
                   variant="outline"
                   size="sm"
@@ -460,12 +680,12 @@ export default function MessagesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Reply Modal */}
+      {/* Reply Modal (2-Column: Form on Left, Live Preview on Right) */}
       <Dialog open={isReplyOpen} onOpenChange={setIsReplyOpen}>
-        <DialogContent className="sm:max-w-xl max-h-[85vh] overflow-y-auto scrollbar-custom">
+        <DialogContent className="sm:max-w-5xl lg:max-w-6xl max-h-[90vh] flex flex-col p-6 scrollbar-custom">
           {replyMessage && (
             <>
-              <DialogHeader className="pr-10 sm:pr-12">
+              <DialogHeader className="pr-10 sm:pr-12 pb-2 shrink-0">
                 <DialogTitle className="flex items-center gap-2 text-base font-semibold">
                   <Reply className="h-4 w-4 text-neutral-500" />
                   {t("messages.reply_dialog_title", {
@@ -477,36 +697,82 @@ export default function MessagesPage() {
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-4 py-2">
-                <div className="space-y-1.5">
-                  <Label htmlFor="replySubject" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                    {t("messages.reply_subject")}
-                  </Label>
-                  <Input
-                    id="replySubject"
-                    value={replySubject}
-                    onChange={(e) => setReplySubject(e.target.value)}
-                    placeholder="Re: Subject"
-                    className="h-9 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
-                  />
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-1 pb-3 flex-1 min-h-0 overflow-y-auto max-h-[68vh] scrollbar-custom">
+                {/* Left Column: Input Form */}
+                <div className="lg:col-span-6 flex flex-col space-y-4 p-1">
+                  {/* Recipient info box */}
+                  <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200/80 dark:border-white/10 text-xs space-y-1">
+                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
+                      <span className="font-semibold text-neutral-900 dark:text-white">To:</span>
+                      <span>{replyMessage.name} &lt;{replyMessage.email}&gt;</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 truncate">
+                      <span className="font-semibold text-neutral-700 dark:text-neutral-300">Subject Original:</span>
+                      <span className="truncate italic">{replyMessage.subject}</span>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="replySubject" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                      {t("messages.reply_subject")}
+                    </Label>
+                    <Input
+                      id="replySubject"
+                      value={replySubject}
+                      onChange={(e) => setReplySubject(e.target.value)}
+                      placeholder="Re: Subject"
+                      className="h-9 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
+                    />
+                  </div>
+
+                  <div className="space-y-1.5 pb-1">
+                    <Label htmlFor="replyBody" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                      {t("messages.reply_content")}
+                    </Label>
+                    <Textarea
+                      id="replyBody"
+                      value={replyBody}
+                      onChange={(e) => setReplyBody(e.target.value)}
+                      placeholder={t("messages.reply_content_placeholder")}
+                      rows={8}
+                      className="text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 min-h-[170px] resize-y scrollbar-custom"
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-1.5">
-                  <Label htmlFor="replyBody" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                    {t("messages.reply_content")}
-                  </Label>
-                  <Textarea
-                    id="replyBody"
-                    value={replyBody}
-                    onChange={(e) => setReplyBody(e.target.value)}
-                    placeholder={t("messages.reply_content_placeholder")}
-                    rows={6}
-                    className="text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
-                  />
+                {/* Right Column: Pure Live Preview (Matches Broadcast Campaign) */}
+                <div className="lg:col-span-6 p-1">
+                  <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-none flex flex-col">
+                    <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center gap-2">
+                      <Eye className="w-4 h-4 text-neutral-500" />
+                      <span className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white">
+                        {t("newsletter.live_preview") || "Live Preview"}
+                      </span>
+                    </div>
+                    <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-900/60 flex justify-center">
+                      <div className="w-full max-w-[600px] flex justify-center">
+                        <iframe
+                          ref={replyIframeRef}
+                          srcDoc={generatedReplyHtml}
+                          onLoad={handleReplyIframeLoad}
+                          title="Live Email Preview"
+                          scrolling="no"
+                          {...{ allowtransparency: "true" }}
+                          style={{
+                            height: `${replyIframeHeight}px`,
+                            backgroundColor: "transparent",
+                            colorScheme: "light",
+                          }}
+                          className="w-full border-0 bg-transparent block overflow-hidden transition-[height] duration-150"
+                          sandbox="allow-same-origin"
+                        />
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <DialogFooter className="flex items-center justify-end gap-2.5 pt-2">
+              <DialogFooter className="flex items-center justify-end gap-2.5 pt-3 shrink-0">
                 <Button
                   type="button"
                   variant="outline"
