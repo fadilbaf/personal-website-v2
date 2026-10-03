@@ -83,7 +83,7 @@ function formatBroadcastContentToHtml(
       const trimmed = para.trim();
       if (!trimmed) return "";
       const withBr = trimmed.replace(/\n/g, "<br/>");
-      return `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #d4d4d8;">${withBr}</p>`;
+      return `<p style="margin: 0 0 16px; font-size: 15px; line-height: 1.7; color: #3f3f46;">${withBr}</p>`;
     })
     .filter(Boolean)
     .join("");
@@ -98,7 +98,7 @@ function formatBroadcastContentToHtml(
       .replace(/>/g, "&gt;");
     buttonHtml = `
       <div style="margin: 28px 0 16px; text-align: left;">
-        <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #ffffff; color: #09090b; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; box-shadow: 0 4px 14px rgba(255,255,255,0.12);">
+        <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; background-color: #09090b; color: #ffffff !important; font-weight: 600; font-size: 14px; padding: 12px 24px; border-radius: 8px; text-decoration: none; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
           ${safeText} &rarr;
         </a>
       </div>
@@ -308,7 +308,7 @@ export default function NewsletterPage() {
       html, body {
         margin: 0 !important;
         padding: 0 !important;
-        background-color: #0c0d0e !important;
+        background-color: transparent !important;
         scrollbar-width: thin !important;
         scrollbar-color: ${scrollbarColor} !important;
         overflow-x: hidden;

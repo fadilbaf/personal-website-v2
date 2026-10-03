@@ -117,19 +117,22 @@ export default function EmailTemplatesPage() {
   const measureIframeHeight = () => {
     if (previewIframeRef.current?.contentWindow) {
       const doc = previewIframeRef.current.contentWindow.document;
-      const targetEl =
+      if (!doc || !doc.body) return;
+
+      const card =
         (doc.body?.firstElementChild as HTMLElement) ||
         doc.body?.querySelector("table") ||
         doc.body;
 
-      if (targetEl) {
-        const exactHeight = Math.ceil(
-          targetEl.getBoundingClientRect().height ||
-          targetEl.offsetHeight ||
+      if (card) {
+        const height = Math.ceil(
+          card.getBoundingClientRect().height ||
+          card.offsetHeight ||
+          card.scrollHeight ||
           0
         );
-        if (exactHeight > 0) {
-          setPreviewHeight(exactHeight);
+        if (height > 0) {
+          setPreviewHeight(height);
         }
       }
     }
@@ -142,14 +145,14 @@ export default function EmailTemplatesPage() {
 
       if (doc?.documentElement) {
         doc.documentElement.style.backgroundColor = "transparent";
-        doc.documentElement.style.colorScheme = isDark ? "dark" : "light";
+        doc.documentElement.style.colorScheme = "light";
       }
       if (doc?.body) {
         doc.body.style.backgroundColor = "transparent";
-        doc.body.style.colorScheme = isDark ? "dark" : "light";
+        doc.body.style.colorScheme = "light";
       }
 
-      const targetEl =
+      const card =
         (doc.body?.firstElementChild as HTMLElement) ||
         doc.body?.querySelector("table") ||
         doc.body;
@@ -163,15 +166,12 @@ export default function EmailTemplatesPage() {
       }
 
       const winAny = win as any;
-      if (typeof winAny.ResizeObserver !== "undefined" && targetEl) {
+      if (typeof winAny.ResizeObserver !== "undefined" && card) {
         try {
           const ro = new winAny.ResizeObserver(() => {
             measureIframeHeight();
           });
-          ro.observe(targetEl);
-          if (doc.body && doc.body !== targetEl) {
-            ro.observe(doc.body);
-          }
+          ro.observe(card);
           iframeResizeObserverRef.current = ro;
         } catch {}
       }
@@ -309,10 +309,14 @@ export default function EmailTemplatesPage() {
       :root, html, body {
         background-color: transparent !important;
         background: transparent !important;
-        color-scheme: ${isDark ? "dark" : "light"} !important;
+        color-scheme: light !important;
         margin: 0 !important;
         padding: 0 !important;
         overflow: hidden !important;
+        box-sizing: border-box !important;
+      }
+      * {
+        box-sizing: border-box !important;
       }
       ::-webkit-scrollbar {
         display: none !important;
@@ -964,7 +968,7 @@ export default function EmailTemplatesPage() {
                       style={{
                         height: `${previewHeight}px`,
                         backgroundColor: "transparent",
-                        colorScheme: isDark ? "dark" : "light",
+                        colorScheme: "light",
                       }}
                       className="w-full border-0 bg-transparent block overflow-hidden"
                       sandbox="allow-same-origin allow-popups allow-popups-to-escape-sandbox allow-top-navigation-by-user-activation"
