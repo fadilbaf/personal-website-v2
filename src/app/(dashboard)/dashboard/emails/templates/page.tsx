@@ -723,29 +723,31 @@ export default function EmailTemplatesPage() {
             <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 {/* View Mode Tabs (Preview vs HTML Editor) */}
-                <div className="flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10">
+                <div className="flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 shrink-0">
                   <button
+                    type="button"
                     onClick={() => setViewMode("preview")}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer",
+                      "flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
                       viewMode === "preview"
                         ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                         : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
                     )}
                   >
-                    <Eye className="w-3.5 h-3.5" />
+                    <Eye className="w-3.5 h-3.5 shrink-0" />
                     {t("templates.tab_preview")}
                   </button>
                   <button
+                    type="button"
                     onClick={() => setViewMode("html")}
                     className={cn(
-                      "flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer",
+                      "flex items-center gap-1.5 px-3 py-1 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
                       viewMode === "html"
                         ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                         : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
                     )}
                   >
-                    <Code2 className="w-3.5 h-3.5" />
+                    <Code2 className="w-3.5 h-3.5 shrink-0" />
                     {t("templates.tab_html")}
                   </button>
                 </div>

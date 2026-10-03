@@ -756,38 +756,53 @@ export default function NewsletterPage() {
         </div>
 
         {/* Tab Selector */}
-        <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit">
+        <div className="max-w-full w-full sm:w-fit overflow-x-auto scrollbar-none flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10">
           <button
-            onClick={() => setActiveTab("subscribers")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
+            type="button"
+            onClick={(e) => {
+              e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+              setActiveTab("subscribers");
+            }}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
               activeTab === "subscribers"
                 ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                 : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-            }`}
+            )}
           >
-            <Users className="w-4 h-4" />
+            <Users className="w-4 h-4 shrink-0" />
             {t("newsletter.tab_subscribers")}
           </button>
           <button
-            onClick={() => setActiveTab("broadcast")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
+            type="button"
+            onClick={(e) => {
+              e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+              setActiveTab("broadcast");
+            }}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
               activeTab === "broadcast"
                 ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                 : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-            }`}
+            )}
           >
-            <Send className="w-4 h-4" />
+            <Send className="w-4 h-4 shrink-0" />
             {t("newsletter.tab_broadcast")}
           </button>
           <button
-            onClick={() => setActiveTab("history")}
-            className={`flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer ${
+            type="button"
+            onClick={(e) => {
+              e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+              setActiveTab("history");
+            }}
+            className={cn(
+              "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
               activeTab === "history"
                 ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
                 : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
-            }`}
+            )}
           >
-            <History className="w-4 h-4" />
+            <History className="w-4 h-4 shrink-0" />
             {t("newsletter.campaign_history")}
           </button>
         </div>

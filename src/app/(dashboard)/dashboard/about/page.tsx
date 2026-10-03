@@ -365,41 +365,53 @@ export default function AboutPage() {
       />
 
       {/* Tab Selector */}
-      <div className="flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 w-fit mb-6">
+      <div className="max-w-full w-full sm:w-fit overflow-x-auto scrollbar-none flex items-center gap-1.5 p-1 bg-neutral-100 dark:bg-neutral-900 rounded-lg border border-neutral-200/60 dark:border-white/10 mb-6">
         <button
-          onClick={() => setActiveTab("general")}
+          type="button"
+          onClick={(e) => {
+            e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+            setActiveTab("general");
+          }}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
             activeTab === "general"
               ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
               : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           )}
         >
-          <User className="w-4 h-4" />
+          <User className="w-4 h-4 shrink-0" />
           {t("about.title")}
         </button>
         <button
-          onClick={() => setActiveTab("badges")}
+          type="button"
+          onClick={(e) => {
+            e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+            setActiveTab("badges");
+          }}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
             activeTab === "badges"
               ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
               : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           )}
         >
-          <Sparkles className="w-4 h-4" />
+          <Sparkles className="w-4 h-4 shrink-0" />
           {t("badges.title")}
         </button>
         <button
-          onClick={() => setActiveTab("roles")}
+          type="button"
+          onClick={(e) => {
+            e.currentTarget.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+            setActiveTab("roles");
+          }}
           className={cn(
-            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer",
+            "flex items-center gap-2 px-3.5 py-1.5 text-xs font-medium rounded-md transition-all cursor-pointer whitespace-nowrap shrink-0",
             activeTab === "roles"
               ? "bg-white text-neutral-900 shadow-xs dark:bg-neutral-800 dark:text-white"
               : "text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"
           )}
         >
-          <Briefcase className="w-4 h-4" />
+          <Briefcase className="w-4 h-4 shrink-0" />
           {t("roles.title")}
         </button>
       </div>
