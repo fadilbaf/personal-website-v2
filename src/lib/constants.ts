@@ -107,7 +107,6 @@ export const DASHBOARD_NAV: NavItem[] = [
     title: "Links",
     href: "/dashboard/links",
     icon: Link,
-    disabled: true,
   },
 ];
 

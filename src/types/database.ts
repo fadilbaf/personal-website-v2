@@ -351,3 +351,29 @@ export interface EmailTemplate {
   updated_at: string;
 }
 
+// --- Links (Link in Bio) ---
+export interface LinkItem {
+  id: string;
+  title_id: string;
+  title_en: string;
+  description_id: string | null;
+  description_en: string | null;
+  url: string;
+  icon: string | null;
+  is_featured: boolean;
+  group_name_id: string;
+  group_name_en: string;
+  sort_order: number;
+  is_active: boolean;
+  open_in_new_tab: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface LinksStatistics {
+  total_links: number;
+  active_links: number;
+  total_views: number;
+  unique_visitors: number;
+}
+

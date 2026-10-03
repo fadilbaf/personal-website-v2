@@ -20,7 +20,7 @@ export default async function LinksPage({ params }: PageProps) {
 
   // Fetch all public data concurrently on the server
   const supabase = await createClient();
-  const [profileRes, rolesRes, badgesRes, contactRes, aboutRes] = await Promise.all([
+  const [profileRes, rolesRes, badgesRes, contactRes, aboutRes, linksRes] = await Promise.all([
     supabase.from("profiles").select("*").limit(1).single(),
     supabase
       .from("roles")
@@ -34,15 +34,23 @@ export default async function LinksPage({ params }: PageProps) {
       .order("created_at", { ascending: true }),
     supabase.from("contacts").select("*").limit(1).single(),
     supabase.from("about").select("*").limit(1).single(),
+    supabase
+      .from("links")
+      .select("*")
+      .eq("is_active", true)
+      .order("sort_order", { ascending: true }),
   ]);
 
-  const initialData = sanitizeStorageUrls({
-    profile: (profileRes.data as Profile) ?? null,
-    roles: (rolesRes.data as Role[]) ?? [],
-    badges: (badgesRes.data as Badge[]) ?? [],
-    contact: (contactRes.data as Contact) ?? null,
-    about: (aboutRes.data as About) ?? null,
-  });
+  const initialData = {
+    ...sanitizeStorageUrls({
+      profile: (profileRes.data as Profile) ?? null,
+      roles: (rolesRes.data as Role[]) ?? [],
+      badges: (badgesRes.data as Badge[]) ?? [],
+      contact: (contactRes.data as Contact) ?? null,
+      about: (aboutRes.data as About) ?? null,
+    }),
+    links: (linksRes.data as any[]) ?? [],
+  };
 
   return <LinksClient locale={locale} initialData={initialData} />;
 }

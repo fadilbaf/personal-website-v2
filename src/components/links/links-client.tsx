@@ -42,6 +42,7 @@ export function LinksClient({ locale, initialData }: LinksClientProps) {
             />
 
             <LinksSection
+              links={data.links ?? []}
               contact={data.contact ?? null}
               locale={locale}
             />
