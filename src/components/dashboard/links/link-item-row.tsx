@@ -10,11 +10,18 @@ import {
   ArrowDown,
   Star,
   Copy,
-  Check,
+  MoreHorizontal,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,
@@ -49,7 +56,6 @@ export function LinkItemRow({
   onMoveDown,
 }: LinkItemRowProps) {
   const { t, language } = useLanguage();
-  const [copied, setCopied] = useState(false);
 
   const title = language === "id" ? item.title_id : item.title_en;
   const desc = language === "id" ? item.description_id : item.description_en;
@@ -58,8 +64,6 @@ export function LinkItemRow({
   const handleCopyUrl = async () => {
     try {
       await navigator.clipboard.writeText(item.url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
       toast.success(language === "en" ? "URL copied to clipboard" : "URL disalin ke clipboard");
     } catch {
       toast.error(t("common.failed"));
@@ -201,59 +205,37 @@ export function LinkItemRow({
             </TooltipContent>
           </Tooltip>
 
-          {/* Copy URL */}
-          <Tooltip>
-            <TooltipTrigger asChild>
+          {/* 3-Dots Dropdown Actions: Copy, Edit, Delete */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
               <Button
-                type="button"
                 variant="ghost"
                 size="icon"
-                onClick={handleCopyUrl}
-                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
+                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10 cursor-pointer"
               >
-                {copied ? <Check className="h-3.5 w-3.5" /> : <Copy className="h-3.5 w-3.5" />}
+                <MoreHorizontal className="h-4 w-4" />
+                <span className="sr-only">Open menu</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{language === "en" ? "Copy URL" : "Salin URL"}</p>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Edit */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => onEdit(item)}
-                className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
-              >
-                <Pencil className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{t("common.edit")}</p>
-            </TooltipContent>
-          </Tooltip>
-
-          {/* Delete */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40">
+              <DropdownMenuItem onClick={handleCopyUrl} className="cursor-pointer">
+                <Copy className="mr-2 h-4 w-4" />
+                <span>{language === "en" ? "Copy URL" : "Salin URL"}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onEdit(item)} className="cursor-pointer">
+                <Pencil className="mr-2 h-4 w-4" />
+                <span>{t("common.edit")}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem
+                variant="destructive"
                 onClick={() => onDelete(item)}
-                className="h-8 w-8 text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
+                className="cursor-pointer"
               >
-                <Trash2 className="h-3.5 w-3.5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent side="top">
-              <p>{t("common.delete")}</p>
-            </TooltipContent>
-          </Tooltip>
+                <Trash2 className="mr-2 h-4 w-4" />
+                <span>{t("common.delete")}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </TooltipProvider>

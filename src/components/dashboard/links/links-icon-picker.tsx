@@ -46,17 +46,17 @@ export function LinksIconPicker({
           role="combobox"
           aria-expanded={open}
           disabled={disabled}
-          className="w-full justify-between h-10 px-3 border-neutral-200/80 bg-white dark:border-white/10 dark:bg-neutral-900 cursor-pointer"
+          className="w-full justify-between h-10 px-3 rounded-lg border-neutral-200/80 bg-white dark:border-white/10 dark:bg-neutral-900 cursor-pointer font-normal text-sm hover:bg-neutral-50 dark:hover:bg-neutral-800"
         >
           <div className="flex items-center gap-2.5 truncate">
-            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white">
-              <LinkIcon name={value || "Globe"} className="h-4 w-4" />
+            <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-neutral-100 dark:bg-neutral-800 text-neutral-900 dark:text-white">
+              <LinkIcon name={value || "Globe"} className="h-3.5 w-3.5" />
             </div>
-            <span className="truncate text-sm font-medium text-neutral-900 dark:text-white">
+            <span className="truncate text-sm text-neutral-800 dark:text-neutral-200">
               {selectedItem ? selectedItem.label : value || "Globe"}
             </span>
           </div>
-          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+          <ChevronsUpDown className="ml-1.5 h-4 w-4 shrink-0 opacity-40" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-[320px] p-2.5" align="start">
@@ -72,7 +72,7 @@ export function LinksIconPicker({
         </div>
 
         {/* Icons Grid */}
-        <div className="max-h-[220px] overflow-y-auto scrollbar-thin space-y-1 pr-1">
+        <div className="max-h-[220px] overflow-y-auto scrollbar-custom space-y-1 pr-1">
           {filteredIcons.length === 0 ? (
             <p className="py-4 text-center text-xs text-neutral-500 dark:text-neutral-400">
               {language === "en" ? "No icons found." : "Ikon tidak ditemukan."}

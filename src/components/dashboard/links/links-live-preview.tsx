@@ -24,8 +24,23 @@ import type { LinkItem, Profile, Role, Badge as ProfileBadge, Contact } from "@/
 import logoBlack from "@/src/assets/images/fadilbaf-black.svg";
 import logoWhite from "@/src/assets/images/fadilbaf-white.svg";
 
+export type PreviewListItem =
+  | {
+      type: "group";
+      id: string;
+      name_id: string;
+      name_en: string;
+      itemCount?: number;
+    }
+  | {
+      type: "link";
+      id: string;
+      data: LinkItem;
+    };
+
 interface LinksLivePreviewProps {
-  links: LinkItem[];
+  items?: PreviewListItem[];
+  links?: LinkItem[];
   profile: Profile | null;
   roles: Role[];
   badges: ProfileBadge[];
@@ -33,7 +48,8 @@ interface LinksLivePreviewProps {
 }
 
 export function LinksLivePreview({
-  links,
+  items,
+  links = [],
   profile,
   roles,
   contact,
@@ -44,10 +60,10 @@ export function LinksLivePreview({
 
   const isDark = previewTheme === "dark";
 
-  // Filter active links for simulation
+  // Filter active links for fallback simulation
   const activeLinks = links.filter((l) => l.is_active);
 
-  // Group links dynamically by group name
+  // Group links fallback
   const groupedLinks = activeLinks.reduce<Record<string, LinkItem[]>>((acc, link) => {
     const groupName = previewLocale === "id" ? link.group_name_id : link.group_name_en;
     const key = groupName || (previewLocale === "id" ? "Utama" : "Main");
@@ -277,20 +293,105 @@ export function LinksLivePreview({
             </div>
 
             {/* Dynamic Links Section */}
-            <div className="px-3.5 space-y-4">
-              {Object.keys(groupedLinks).length === 0 ? (
+            <div className="px-3.5 space-y-3">
+              {items ? (
+                items.length === 0 ? (
+                  <div className="text-center py-6 opacity-40 text-xs">
+                    {previewLocale === "id" ? "Belum ada tautan aktif" : "No active links"}
+                  </div>
+                ) : (
+                  items.map((it) => {
+                    if (it.type === "group") {
+                      return (
+                        <p
+                          key={it.id}
+                          className="text-center text-[10px] font-semibold uppercase tracking-wider opacity-40 pt-2.5 pb-0.5"
+                        >
+                          {previewLocale === "id" ? it.name_id : it.name_en}
+                        </p>
+                      );
+                    }
+
+                    const link = it.data;
+                    if (!link.is_active) return null;
+
+                    const linkTitle = previewLocale === "id" ? link.title_id : link.title_en;
+                    const linkDesc = previewLocale === "id" ? link.description_id : link.description_en;
+
+                    if (link.is_featured) {
+                      return (
+                        <div
+                          key={link.id}
+                          className="relative p-[1.5px] rounded-xl bg-[radial-gradient(circle_80px_at_80%_-10%,#ffffff,#181b1b)] block w-full overflow-hidden shadow-xs"
+                        >
+                          <div className="flex items-center gap-3 rounded-[11px] bg-[radial-gradient(circle_80px_at_80%_-50%,#777777,#0f1111)] px-3 py-2.5 text-white">
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white/10 text-neutral-200">
+                              <LinkIcon name={link.icon} className="h-4 w-4" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="text-xs font-semibold truncate text-white">
+                                {linkTitle || link.title_en}
+                              </p>
+                              {linkDesc && (
+                                <p className="text-[10px] text-neutral-300 truncate">
+                                  {linkDesc}
+                                </p>
+                              )}
+                            </div>
+                            <ExternalLink className="h-3 w-3 text-neutral-400 shrink-0" />
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={link.id}
+                        className={cn(
+                          "flex items-center gap-3 rounded-xl border px-3 py-2.5 transition-colors shadow-2xs",
+                          isDark
+                            ? "border-white/10 bg-neutral-900/80 text-white"
+                            : "border-neutral-200/70 bg-white/90 text-neutral-900"
+                        )}
+                      >
+                        <div
+                          className={cn(
+                            "flex h-8 w-8 shrink-0 items-center justify-center rounded-lg",
+                            isDark
+                              ? "bg-white/10 text-neutral-300"
+                              : "bg-neutral-100 text-neutral-700"
+                          )}
+                        >
+                          <LinkIcon name={link.icon} className="h-4 w-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-xs font-semibold truncate">
+                            {linkTitle || link.title_en}
+                          </p>
+                          {linkDesc && (
+                            <p className="text-[10px] opacity-60 truncate">
+                              {linkDesc}
+                            </p>
+                          )}
+                        </div>
+                        <ExternalLink className="h-3 w-3 opacity-40 shrink-0" />
+                      </div>
+                    );
+                  })
+                )
+              ) : Object.keys(groupedLinks).length === 0 ? (
                 <div className="text-center py-6 opacity-40 text-xs">
                   {previewLocale === "id" ? "Belum ada tautan aktif" : "No active links"}
                 </div>
               ) : (
-                Object.entries(groupedLinks).map(([groupTitle, items]) => (
+                Object.entries(groupedLinks).map(([groupTitle, gLinks]) => (
                   <div key={groupTitle} className="space-y-2">
                     <p className="text-center text-[10px] font-semibold uppercase tracking-wider opacity-40 pt-1">
                       {groupTitle}
                     </p>
 
                     <div className="space-y-2">
-                      {items.map((link) => {
+                      {gLinks.map((link) => {
                         const linkTitle = previewLocale === "id" ? link.title_id : link.title_en;
                         const linkDesc = previewLocale === "id" ? link.description_id : link.description_en;
 

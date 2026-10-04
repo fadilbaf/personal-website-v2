@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Loader2,
   Save,
+  FolderPlus,
 } from "lucide-react";
 import { Reorder } from "framer-motion";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -29,22 +30,60 @@ import { useLanguage } from "@/context/language-context";
 import { LinksService } from "@/src/services/links.service";
 import { LinkItemRow } from "@/src/components/dashboard/links/link-item-row";
 import {
+  GroupItemRow,
+  type GroupRowItem,
+} from "@/src/components/dashboard/links/group-item-row";
+import {
   LinkFormDialog,
   type LinkFormData,
 } from "@/src/components/dashboard/links/link-form-dialog";
+import {
+  GroupFormDialog,
+  type LinkGroup,
+} from "@/src/components/dashboard/links/group-form-dialog";
 import { LinksLivePreview } from "@/src/components/dashboard/links/links-live-preview";
 import type { LinkItem } from "@/src/types/database";
+
+const DEFAULT_GROUPS: LinkGroup[] = [
+  { id: "Utama", en: "Main" },
+  { id: "Media Sosial", en: "Social Media" },
+];
+
+export type ListItem =
+  | {
+      type: "group";
+      id: string; // group:id:::en
+      name_id: string;
+      name_en: string;
+      itemCount: number;
+    }
+  | {
+      type: "link";
+      id: string; // link uuid
+      data: LinkItem;
+    };
 
 export default function LinksDashboardPage() {
   const { t, language } = useLanguage();
   const queryClient = useQueryClient();
 
-  // Dialog states
+  // Dialog states for Link
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<LinkItem | null>(null);
   const [deletingItem, setDeletingItem] = useState<LinkItem | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Dialog states for Group
+  const [isGroupDialogOpen, setIsGroupDialogOpen] = useState(false);
+  const [editingGroup, setEditingGroup] = useState<LinkGroup | null>(null);
+  const [deletingGroup, setDeletingGroup] = useState<GroupRowItem | null>(null);
+  const [isDeletingGroup, setIsDeletingGroup] = useState(false);
+  const [isSubmittingGroup, setIsSubmittingGroup] = useState(false);
+
+  // Custom Groups State
+  const [customGroups, setCustomGroups] = useState<LinkGroup[]>([]);
+  const [deletedGroupKeys, setDeletedGroupKeys] = useState<string[]>([]);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState("");
@@ -53,10 +92,22 @@ export default function LinksDashboardPage() {
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const filterDropdownRef = useRef<HTMLDivElement>(null);
 
-  // Local reorder items state
-  const [localItems, setLocalItems] = useState<LinkItem[]>([]);
+  // Combined Draggable Items List State
+  const [listItems, setListItems] = useState<ListItem[]>([]);
   const [isOrderDirty, setIsOrderDirty] = useState(false);
   const [isSavingOrder, setIsSavingOrder] = useState(false);
+
+  // Load custom groups & deleted groups from localStorage
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("custom_link_groups");
+      if (saved) setCustomGroups(JSON.parse(saved));
+      const delSaved = localStorage.getItem("deleted_link_groups");
+      if (delSaved) setDeletedGroupKeys(JSON.parse(delSaved));
+    } catch {
+      // Ignore
+    }
+  }, []);
 
   // 1. Fetch Links Data
   const { data: serverLinks, isLoading: isLoadingLinks } = useQuery({
@@ -76,6 +127,263 @@ export default function LinksDashboardPage() {
     queryFn: () => LinksService.getStats(),
   });
 
+  // Combine Default, Server, and Custom Groups (excluding deleted groups)
+  const availableGroups = useMemo(() => {
+    const map = new Map<string, LinkGroup>();
+
+    DEFAULT_GROUPS.forEach((g) => {
+      const key = `${g.id}:::${g.en}`.toLowerCase();
+      if (!deletedGroupKeys.includes(key)) {
+        map.set(key, g);
+      }
+    });
+
+    (serverLinks || []).forEach((l) => {
+      if (l.group_name_id && l.group_name_en) {
+        const key = `${l.group_name_id}:::${l.group_name_en}`.toLowerCase();
+        if (!deletedGroupKeys.includes(key)) {
+          map.set(key, {
+            id: l.group_name_id,
+            en: l.group_name_en,
+          });
+        }
+      }
+    });
+
+    customGroups.forEach((g) => {
+      const key = `${g.id}:::${g.en}`.toLowerCase();
+      if (!deletedGroupKeys.includes(key)) {
+        map.set(key, g);
+      }
+    });
+
+    return Array.from(map.values());
+  }, [serverLinks, customGroups, deletedGroupKeys]);
+
+  // Sync server links and groups into listItems state
+  useEffect(() => {
+    if (!serverLinks) return;
+
+    const links = [...serverLinks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+    
+    // Group links by their group composite key
+    const groupMap = new Map<string, LinkItem[]>();
+    const groupInfoMap = new Map<string, { id: string; en: string }>();
+
+    // Register all available groups
+    availableGroups.forEach((g) => {
+      const key = `${g.id}:::${g.en}`.toLowerCase();
+      groupMap.set(key, []);
+      groupInfoMap.set(key, g);
+    });
+
+    // Bucket links
+    links.forEach((l) => {
+      const key = `${l.group_name_id || "Utama"}:::${l.group_name_en || "Main"}`.toLowerCase();
+      if (!groupMap.has(key)) {
+        groupMap.set(key, []);
+        groupInfoMap.set(key, { id: l.group_name_id || "Utama", en: l.group_name_en || "Main" });
+      }
+      groupMap.get(key)!.push(l);
+    });
+
+    // Build ordered list items: Group Header followed by its links
+    const items: ListItem[] = [];
+    groupMap.forEach((gLinks, gKey) => {
+      const gInfo = groupInfoMap.get(gKey) || { id: "Utama", en: "Main" };
+      items.push({
+        type: "group",
+        id: `group:${gInfo.id}:::${gInfo.en}`,
+        name_id: gInfo.id,
+        name_en: gInfo.en,
+        itemCount: gLinks.length,
+      });
+
+      gLinks.forEach((link) => {
+        items.push({
+          type: "link",
+          id: link.id,
+          data: link,
+        });
+      });
+    });
+
+    setListItems(items);
+    setIsOrderDirty(false);
+  }, [serverLinks, availableGroups]);
+
+  // Extracted pure links from listItems for Live Preview and Stats
+  const currentLinks = useMemo(() => {
+    return listItems
+      .filter((item): item is Extract<ListItem, { type: "link" }> => item.type === "link")
+      .map((item) => item.data);
+  }, [listItems]);
+
+  // Handle Add/Edit Group Save
+  const handleSaveGroup = async (group: LinkGroup, oldGroup?: LinkGroup | null) => {
+    setIsSubmittingGroup(true);
+    try {
+      if (oldGroup) {
+        // Edit existing group: update links in DB with the old group name
+        const oldKey = `${oldGroup.id}:::${oldGroup.en}`.toLowerCase();
+        const linksToUpdate = (serverLinks || []).filter(
+          (l) => `${l.group_name_id}:::${l.group_name_en}`.toLowerCase() === oldKey
+        );
+
+        if (linksToUpdate.length > 0) {
+          await Promise.all(
+            linksToUpdate.map((l) =>
+              LinksService.updateLink(l.id, {
+                group_name_id: group.id,
+                group_name_en: group.en,
+              })
+            )
+          );
+        }
+
+        // Update customGroups state
+        setCustomGroups((prev) => {
+          const filtered = prev.filter(
+            (g) => `${g.id}:::${g.en}`.toLowerCase() !== oldKey
+          );
+          const updated = [...filtered, group];
+          try {
+            localStorage.setItem("custom_link_groups", JSON.stringify(updated));
+          } catch {
+            // Ignore
+          }
+          return updated;
+        });
+
+        toast.success(
+          language === "en"
+            ? `Group "${group.en}" updated successfully`
+            : `Grup "${group.id}" berhasil diperbarui`
+        );
+      } else {
+        // Add new group
+        setCustomGroups((prev) => {
+          const key = `${group.id}:::${group.en}`.toLowerCase();
+          const filtered = prev.filter(
+            (g) => `${g.id}:::${g.en}`.toLowerCase() !== key
+          );
+          const updated = [...filtered, group];
+          try {
+            localStorage.setItem("custom_link_groups", JSON.stringify(updated));
+          } catch {
+            // Ignore
+          }
+          return updated;
+        });
+
+        // Add Group Row to listItems immediately
+        setListItems((prev) => [
+          ...prev,
+          {
+            type: "group",
+            id: `group:${group.id}:::${group.en}`,
+            name_id: group.id,
+            name_en: group.en,
+            itemCount: 0,
+          },
+        ]);
+
+        toast.success(
+          language === "en"
+            ? `Group "${group.en}" added successfully`
+            : `Grup "${group.id}" berhasil ditambahkan`
+        );
+      }
+
+      setIsGroupDialogOpen(false);
+      setEditingGroup(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-links"] });
+      queryClient.invalidateQueries({ queryKey: ["public-links-context"] });
+    } catch (err: unknown) {
+      toast.error(
+        language === "en" ? "Failed to save group" : "Gagal menyimpan grup",
+        {
+          description: err instanceof Error ? err.message : undefined,
+        }
+      );
+    } finally {
+      setIsSubmittingGroup(false);
+    }
+  };
+
+  // Handle Delete Group Confirmation
+  const handleDeleteGroupConfirm = async () => {
+    if (!deletingGroup) return;
+    setIsDeletingGroup(true);
+    try {
+      const gKey = `${deletingGroup.name_id}:::${deletingGroup.name_en}`.toLowerCase();
+
+      // 1. Delete all links in this group from DB
+      const linksToDelete = (serverLinks || []).filter(
+        (l) => `${l.group_name_id}:::${l.group_name_en}`.toLowerCase() === gKey
+      );
+
+      if (linksToDelete.length > 0) {
+        await Promise.all(linksToDelete.map((l) => LinksService.deleteLink(l.id)));
+      }
+
+      // 2. Mark group as deleted in localStorage and customGroups
+      const newDeleted = [...deletedGroupKeys, gKey];
+      setDeletedGroupKeys(newDeleted);
+      try {
+        localStorage.setItem("deleted_link_groups", JSON.stringify(newDeleted));
+      } catch {
+        // Ignore
+      }
+
+      setCustomGroups((prev) => {
+        const updated = prev.filter(
+          (g) => `${g.id}:::${g.en}`.toLowerCase() !== gKey
+        );
+        try {
+          localStorage.setItem("custom_link_groups", JSON.stringify(updated));
+        } catch {
+          // Ignore
+        }
+        return updated;
+      });
+
+      // 3. Remove group and its links from listItems
+      setListItems((prev) =>
+        prev.filter((item) => {
+          if (item.type === "group" && item.id === deletingGroup.id) return false;
+          if (
+            item.type === "link" &&
+            `${item.data.group_name_id}:::${item.data.group_name_en}`.toLowerCase() === gKey
+          ) {
+            return false;
+          }
+          return true;
+        })
+      );
+
+      toast.success(
+        language === "en"
+          ? `Group "${deletingGroup.name_en}" and its links deleted`
+          : `Grup "${deletingGroup.name_id}" dan seluruh tautannya berhasil dihapus`
+      );
+
+      setDeletingGroup(null);
+      queryClient.invalidateQueries({ queryKey: ["admin-links"] });
+      queryClient.invalidateQueries({ queryKey: ["links-stats"] });
+      queryClient.invalidateQueries({ queryKey: ["public-links-context"] });
+    } catch (err: unknown) {
+      toast.error(
+        language === "en" ? "Failed to delete group" : "Gagal menghapus grup",
+        {
+          description: err instanceof Error ? err.message : undefined,
+        }
+      );
+    } finally {
+      setIsDeletingGroup(false);
+    }
+  };
+
   // Click outside listener for filter dropdown
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -90,25 +398,15 @@ export default function LinksDashboardPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Sync server links into local items state when fetched
-  useEffect(() => {
-    if (serverLinks) {
-      setLocalItems(serverLinks);
-      setIsOrderDirty(false);
-    }
-  }, [serverLinks]);
-
-  // Unique groups in the dataset for the filter dropdown
-  const uniqueGroups = useMemo(() => {
+  // Filter pills
+  const uniqueFilterGroups = useMemo(() => {
     const groups = new Set<string>();
-    (serverLinks || []).forEach((l) => {
-      const g = language === "id" ? l.group_name_id : l.group_name_en;
-      if (g) groups.add(g);
+    availableGroups.forEach((g) => {
+      groups.add(language === "id" ? g.id : g.en);
     });
     return Array.from(groups);
-  }, [serverLinks, language]);
+  }, [availableGroups, language]);
 
-  // Active filter count
   const activeFilterCount = useMemo(() => {
     let count = 0;
     if (selectedGroup !== "all") count++;
@@ -116,27 +414,43 @@ export default function LinksDashboardPage() {
     return count;
   }, [selectedGroup, selectedStatus]);
 
-  // Filtered links based on search & filters
+  // Filtered List items
   const filteredItems = useMemo(() => {
-    return localItems.filter((item) => {
-      // Group Filter
+    return listItems.filter((item) => {
+      if (item.type === "group") {
+        if (selectedGroup !== "all") {
+          const groupName = language === "id" ? item.name_id : item.name_en;
+          if (groupName !== selectedGroup) return false;
+        }
+        if (searchQuery.trim()) {
+          const q = searchQuery.toLowerCase().trim();
+          if (
+            !item.name_id.toLowerCase().includes(q) &&
+            !item.name_en.toLowerCase().includes(q)
+          ) {
+            return false;
+          }
+        }
+        return true;
+      }
+
+      // Link Item Filter
+      const link = item.data;
       if (selectedGroup !== "all") {
-        const itemGroup = language === "id" ? item.group_name_id : item.group_name_en;
+        const itemGroup = language === "id" ? link.group_name_id : link.group_name_en;
         if (itemGroup !== selectedGroup) return false;
       }
 
-      // Status Filter
-      if (selectedStatus === "active" && !item.is_active) return false;
-      if (selectedStatus === "inactive" && item.is_active) return false;
+      if (selectedStatus === "active" && !link.is_active) return false;
+      if (selectedStatus === "inactive" && link.is_active) return false;
 
-      // Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase().trim();
-        const tId = item.title_id?.toLowerCase() || "";
-        const tEn = item.title_en?.toLowerCase() || "";
-        const descId = item.description_id?.toLowerCase() || "";
-        const descEn = item.description_en?.toLowerCase() || "";
-        const url = item.url?.toLowerCase() || "";
+        const tId = link.title_id?.toLowerCase() || "";
+        const tEn = link.title_en?.toLowerCase() || "";
+        const descId = link.description_id?.toLowerCase() || "";
+        const descEn = link.description_en?.toLowerCase() || "";
+        const url = link.url?.toLowerCase() || "";
 
         if (
           !tId.includes(q) &&
@@ -151,51 +465,55 @@ export default function LinksDashboardPage() {
 
       return true;
     });
-  }, [localItems, selectedGroup, selectedStatus, searchQuery, language]);
+  }, [listItems, selectedGroup, selectedStatus, searchQuery, language]);
 
-  // Reorder mutations
-  const handleReorder = (newOrder: LinkItem[]) => {
+  // Reorder mutations for unified list
+  const handleReorder = (newOrder: ListItem[]) => {
     if (searchQuery || selectedGroup !== "all" || selectedStatus !== "all") {
-      setLocalItems(newOrder);
+      setListItems(newOrder);
       return;
     }
 
-    setLocalItems(newOrder);
+    setListItems(newOrder);
     setIsOrderDirty(true);
   };
 
-  // Move Up / Move Down Actions
   const handleMoveUp = (index: number) => {
     if (index <= 0) return;
-    const newItems = [...localItems];
+    const newItems = [...listItems];
     const target = newItems[index];
     newItems[index] = newItems[index - 1];
     newItems[index - 1] = target;
-    setLocalItems(newItems);
+    setListItems(newItems);
     setIsOrderDirty(true);
   };
 
   const handleMoveDown = (index: number) => {
-    if (index >= localItems.length - 1) return;
-    const newItems = [...localItems];
+    if (index >= listItems.length - 1) return;
+    const newItems = [...listItems];
     const target = newItems[index];
     newItems[index] = newItems[index + 1];
     newItems[index + 1] = target;
-    setLocalItems(newItems);
+    setListItems(newItems);
     setIsOrderDirty(true);
   };
 
-  // Save Order to Supabase
+  // Save Order to Supabase (propagates group assignment based on position)
   const handleSaveOrder = async () => {
     if (!isOrderDirty || isSavingOrder) return;
     setIsSavingOrder(true);
     try {
-      const payload = localItems.map((item, idx) => ({
-        id: item.id,
-        sort_order: idx + 1,
-      }));
+      const linkUpdates = listItems
+        .filter((it): it is Extract<ListItem, { type: "link" }> => it.type === "link")
+        .map((it, idx) => ({
+          id: it.data.id,
+          sort_order: idx + 1,
+        }));
 
-      await LinksService.reorderLinks(payload);
+      if (linkUpdates.length > 0) {
+        await LinksService.reorderLinks(linkUpdates);
+      }
+
       toast.success(t("links.order_saved"));
       setIsOrderDirty(false);
       queryClient.invalidateQueries({ queryKey: ["admin-links"] });
@@ -207,21 +525,29 @@ export default function LinksDashboardPage() {
     }
   };
 
-  // Toggle Active Status
-  const handleToggleActive = async (item: LinkItem, active: boolean) => {
-    setLocalItems((prev) =>
-      prev.map((l) => (l.id === item.id ? { ...l, is_active: active } : l))
+  // Toggle Active Status on a Link
+  const handleToggleActive = async (link: LinkItem, active: boolean) => {
+    setListItems((prev) =>
+      prev.map((item) =>
+        item.type === "link" && item.data.id === link.id
+          ? { ...item, data: { ...item.data, is_active: active } }
+          : item
+      )
     );
 
     try {
-      await LinksService.updateLink(item.id, { is_active: active });
+      await LinksService.updateLink(link.id, { is_active: active });
       queryClient.invalidateQueries({ queryKey: ["admin-links"] });
       queryClient.invalidateQueries({ queryKey: ["links-stats"] });
       queryClient.invalidateQueries({ queryKey: ["public-links-context"] });
     } catch {
       toast.error(t("common.update_status_failed"));
-      setLocalItems((prev) =>
-        prev.map((l) => (l.id === item.id ? { ...l, is_active: item.is_active } : l))
+      setListItems((prev) =>
+        prev.map((item) =>
+          item.type === "link" && item.data.id === link.id
+            ? { ...item, data: { ...item.data, is_active: link.is_active } }
+            : item
+        )
       );
     }
   };
@@ -252,7 +578,7 @@ export default function LinksDashboardPage() {
     }
   };
 
-  // Delete Link
+  // Delete Link Confirmation
   const handleDeleteConfirm = async () => {
     if (!deletingItem) return;
     setIsDeleting(true);
@@ -272,7 +598,7 @@ export default function LinksDashboardPage() {
 
   return (
     <div className="space-y-6 pb-12">
-      {/* Page Header: Dashboard > Links, Title "Links", Subtitle "Manage your link-in-bio..." */}
+      {/* Page Header: Dashboard > Links */}
       <PageHeader
         title={t("sidebar.Links")}
         icon={LinkIconLucide}
@@ -295,17 +621,17 @@ export default function LinksDashboardPage() {
         }
       />
 
-      {/* 4 Large Overview Stat Cards - Pure Monochrome */}
+      {/* 4 Large Overview Stat Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <OverviewStatCard
           title={t("links.total_links")}
-          value={stats?.total_links ?? localItems.length}
+          value={stats?.total_links ?? currentLinks.length}
           icon={Layers}
           loading={isLoadingStats}
         />
         <OverviewStatCard
           title={t("links.active_links")}
-          value={stats?.active_links ?? localItems.filter((l) => l.is_active).length}
+          value={stats?.active_links ?? currentLinks.filter((l) => l.is_active).length}
           icon={Link2}
           loading={isLoadingStats}
         />
@@ -323,161 +649,178 @@ export default function LinksDashboardPage() {
         />
       </div>
 
-      {/* Main Workspace (Split-Screen: Left List/Editor, Right Live Preview Card) */}
+      {/* Main Workspace */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: Filter Button + Dropdown & Draggable Link Items List (7 cols) */}
+        {/* Left Column: Controls & Draggable Unified List */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Controls Bar: Search Input + Filter Dropdown Button */}
-          <div className="flex items-center justify-between gap-3 relative z-30">
+          {/* Controls Bar: Search Input + Filter Dropdown + Add Group Button */}
+          <div className="flex flex-wrap items-center justify-between gap-2.5 relative z-30">
             {/* Search Input */}
-            <div className="relative flex-1 max-w-sm">
+            <div className="relative flex-1 min-w-[200px] max-w-sm">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <Input
                 placeholder={t("links.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm"
+                className="pl-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm h-9"
               />
             </div>
 
-            {/* Filter Trigger Button & Dropdown */}
-            <div className="relative z-30" ref={filterDropdownRef}>
-              <Button
-                type="button"
-                variant={activeFilterCount > 0 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={cn(
-                  "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
-                  activeFilterCount > 0
-                    ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
-                    : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800"
-                )}
-              >
-                <Filter className="h-3.5 w-3.5" />
-                <span>{t("common.filter")}</span>
-                {activeFilterCount > 0 && (
-                  <span
-                    className={cn(
-                      "flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold",
-                      activeFilterCount > 0
-                        ? "bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white"
-                        : "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
-                    )}
-                  >
-                    {activeFilterCount}
-                  </span>
-                )}
-              </Button>
-
-              {/* Dropdown Panel */}
-              {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 transition-all duration-200">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                        {t("common.filters")}
-                      </span>
-                      {activeFilterCount > 0 && (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setSelectedGroup("all");
-                            setSelectedStatus("all");
-                            setIsFilterOpen(false);
-                          }}
-                          className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          {t("common.clear_all")}
-                        </button>
+            {/* Action Buttons: Filter & Add Group */}
+            <div className="flex items-center gap-2">
+              {/* Filter Trigger Button & Dropdown */}
+              <div className="relative z-30" ref={filterDropdownRef}>
+                <Button
+                  type="button"
+                  variant={activeFilterCount > 0 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className={cn(
+                    "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
+                    activeFilterCount > 0
+                      ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
+                      : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800"
+                  )}
+                >
+                  <Filter className="h-3.5 w-3.5" />
+                  <span>{t("common.filter")}</span>
+                  {activeFilterCount > 0 && (
+                    <span
+                      className={cn(
+                        "flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold",
+                        activeFilterCount > 0
+                          ? "bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white"
+                          : "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
                       )}
-                    </div>
+                    >
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
 
-                    {/* Group Filter Section */}
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                        {language === "id" ? "Grup / Kategori" : "Group / Category"}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedGroup("all")}
-                          className={cn(
-                            "px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border",
-                            selectedGroup === "all"
-                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white"
-                              : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 dark:border-white/10"
-                          )}
-                        >
-                          {t("common.all")}
-                        </button>
-                        {uniqueGroups.map((grp) => (
+                {/* Dropdown Panel */}
+                {isFilterOpen && (
+                  <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 transition-all duration-200">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                          {t("common.filters")}
+                        </span>
+                        {activeFilterCount > 0 && (
                           <button
-                            key={grp}
                             type="button"
-                            onClick={() => setSelectedGroup(grp)}
+                            onClick={() => {
+                              setSelectedGroup("all");
+                              setSelectedStatus("all");
+                              setIsFilterOpen(false);
+                            }}
+                            className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            {t("common.clear_all")}
+                          </button>
+                        )}
+                      </div>
+
+                      {/* Group Filter Section */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                          {language === "id" ? "Grup" : "Group"}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto scrollbar-custom pr-1">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedGroup("all")}
                             className={cn(
-                              "px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border",
-                              selectedGroup === grp
-                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white"
-                                : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 dark:border-white/10"
+                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                              selectedGroup === "all"
+                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
                             )}
                           >
-                            {grp}
+                            {t("common.all")}
                           </button>
-                        ))}
+                          {uniqueFilterGroups.map((grp) => (
+                            <button
+                              key={grp}
+                              type="button"
+                              onClick={() => setSelectedGroup(grp)}
+                              className={cn(
+                                "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                                selectedGroup === grp
+                                  ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                              )}
+                            >
+                              {grp}
+                            </button>
+                          ))}
+                        </div>
                       </div>
-                    </div>
 
-                    {/* Status Filter Section */}
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                        {t("common.status")}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        <button
-                          type="button"
-                          onClick={() => setSelectedStatus("all")}
-                          className={cn(
-                            "px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border",
-                            selectedStatus === "all"
-                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white"
-                              : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 dark:border-white/10"
-                          )}
-                        >
-                          {t("common.all")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedStatus("active")}
-                          className={cn(
-                            "px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border",
-                            selectedStatus === "active"
-                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white"
-                              : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 dark:border-white/10"
-                          )}
-                        >
-                          {t("badges.active")}
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setSelectedStatus("inactive")}
-                          className={cn(
-                            "px-2.5 py-1 rounded-md text-xs font-medium transition-colors cursor-pointer border",
-                            selectedStatus === "inactive"
-                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white"
-                              : "bg-neutral-50 hover:bg-neutral-100 text-neutral-600 border-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700 dark:text-neutral-300 dark:border-white/10"
-                          )}
-                        >
-                          {t("badges.inactive")}
-                        </button>
+                      {/* Status Filter Section */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                          {t("common.status")}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStatus("all")}
+                            className={cn(
+                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                              selectedStatus === "all"
+                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                            )}
+                          >
+                            {t("common.all")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStatus("active")}
+                            className={cn(
+                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                              selectedStatus === "active"
+                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                            )}
+                          >
+                            {t("badges.active")}
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => setSelectedStatus("inactive")}
+                            className={cn(
+                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                              selectedStatus === "inactive"
+                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                            )}
+                          >
+                            {t("badges.inactive")}
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
+
+              {/* Add Group Button */}
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setEditingGroup(null);
+                  setIsGroupDialogOpen(true);
+                }}
+                className="h-9 px-3 gap-1.5 text-xs font-medium cursor-pointer border bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800 transition-colors"
+              >
+                <FolderPlus className="h-3.5 w-3.5" />
+                <span>{language === "id" ? "Tambah Grup" : "Add Group"}</span>
+              </Button>
             </div>
           </div>
 
@@ -485,11 +828,11 @@ export default function LinksDashboardPage() {
           <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
             <span>{t("links.drag_reorder_hint")}</span>
             <span>
-              {filteredItems.length} / {localItems.length} links
+              {currentLinks.length} {language === "id" ? "tautan" : "links"} • {availableGroups.length} {language === "id" ? "grup" : "groups"}
             </span>
           </div>
 
-          {/* Links List Container */}
+          {/* Draggable List Container */}
           {isLoadingLinks ? (
             <div className="space-y-3">
               {[1, 2, 3, 4].map((i) => (
@@ -508,27 +851,40 @@ export default function LinksDashboardPage() {
                   </p>
                   <p className="text-xs text-neutral-500 dark:text-neutral-400 max-w-sm mx-auto">
                     {language === "en"
-                      ? "Get started by adding your first link or adjust your filters."
-                      : "Mulai dengan menambahkan tautan pertama Anda atau sesuaikan filter."}
+                      ? "Get started by adding your first group or link."
+                      : "Mulai dengan menambahkan grup atau tautan pertama Anda."}
                   </p>
                 </div>
-                <Button
-                  onClick={() => {
-                    setEditingItem(null);
-                    setIsFormOpen(true);
-                  }}
-                  className="bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer"
-                >
-                  <Plus className="h-4 w-4" />
-                  <span>{t("links.add_link")}</span>
-                </Button>
+                <div className="flex items-center justify-center gap-2 pt-2">
+                  <Button
+                    onClick={() => {
+                      setEditingGroup(null);
+                      setIsGroupDialogOpen(true);
+                    }}
+                    variant="outline"
+                    className="gap-1.5 cursor-pointer"
+                  >
+                    <FolderPlus className="h-4 w-4" />
+                    <span>{language === "id" ? "Tambah Grup" : "Add Group"}</span>
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      setEditingItem(null);
+                      setIsFormOpen(true);
+                    }}
+                    className="bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer"
+                  >
+                    <Plus className="h-4 w-4" />
+                    <span>{t("links.add_link")}</span>
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ) : (
             <div className="space-y-3">
               <Reorder.Group
                 axis="y"
-                values={localItems}
+                values={listItems}
                 onReorder={handleReorder}
                 className="space-y-2.5"
               >
@@ -538,35 +894,45 @@ export default function LinksDashboardPage() {
                     value={item}
                     className="select-none cursor-default"
                   >
-                    <LinkItemRow
-                      item={item}
-                      index={index}
-                      totalItems={filteredItems.length}
-                      onEdit={(target) => {
-                        setEditingItem(target);
-                        setIsFormOpen(true);
-                      }}
-                      onDelete={(target) => setDeletingItem(target)}
-                      onToggleActive={handleToggleActive}
-                      onMoveUp={handleMoveUp}
-                      onMoveDown={handleMoveDown}
-                    />
+                    {item.type === "group" ? (
+                      <GroupItemRow
+                        group={item}
+                        index={index}
+                        totalItems={filteredItems.length}
+                        onEdit={(grp) => {
+                          setEditingGroup({ id: grp.name_id, en: grp.name_en });
+                          setIsGroupDialogOpen(true);
+                        }}
+                        onDelete={(grp) => setDeletingGroup(grp)}
+                        onMoveUp={handleMoveUp}
+                        onMoveDown={handleMoveDown}
+                      />
+                    ) : (
+                      <LinkItemRow
+                        item={item.data}
+                        index={index}
+                        totalItems={filteredItems.length}
+                        onEdit={(target) => {
+                          setEditingItem(target);
+                          setIsFormOpen(true);
+                        }}
+                        onDelete={(target) => setDeletingItem(target)}
+                        onToggleActive={handleToggleActive}
+                        onMoveUp={handleMoveUp}
+                        onMoveDown={handleMoveDown}
+                      />
+                    )}
                   </Reorder.Item>
                 ))}
               </Reorder.Group>
 
-              {/* Bottom Save Changes Button (Enabled only when order changes exist) */}
-              <div className="flex justify-end pt-3 border-t border-neutral-200/60 dark:border-white/10">
+              {/* Bottom Save Changes Button */}
+              <div className="flex justify-end pt-2">
                 <Button
                   type="button"
                   onClick={handleSaveOrder}
                   disabled={!isOrderDirty || isSavingOrder}
-                  className={cn(
-                    "gap-2 font-medium cursor-pointer transition-all",
-                    isOrderDirty
-                      ? "bg-neutral-900 hover:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:text-neutral-900 shadow-sm"
-                      : "opacity-40 cursor-not-allowed bg-neutral-100 text-neutral-400 dark:bg-neutral-800 dark:text-neutral-500"
-                  )}
+                  className="bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
                 >
                   {isSavingOrder ? (
                     <>
@@ -585,10 +951,11 @@ export default function LinksDashboardPage() {
           )}
         </div>
 
-        {/* Right Column: Live Preview Container Card (5 cols) */}
+        {/* Right Column: Live Preview Card */}
         <div className="lg:col-span-5 lg:sticky lg:top-20">
           <LinksLivePreview
-            links={localItems}
+            items={listItems}
+            links={currentLinks}
             profile={publicData?.profile ?? null}
             roles={publicData?.roles ?? []}
             badges={publicData?.badges ?? []}
@@ -597,7 +964,7 @@ export default function LinksDashboardPage() {
         </div>
       </div>
 
-      {/* Add / Edit Dialog */}
+      {/* Add / Edit Link Dialog */}
       <LinkFormDialog
         open={isFormOpen}
         onOpenChange={(open) => {
@@ -607,9 +974,26 @@ export default function LinksDashboardPage() {
         initialData={editingItem}
         onSubmit={handleFormSubmit}
         isSubmitting={isSubmitting}
+        availableGroups={availableGroups}
+        onOpenAddGroup={() => {
+          setEditingGroup(null);
+          setIsGroupDialogOpen(true);
+        }}
       />
 
-      {/* Delete Confirmation Dialog */}
+      {/* Add / Edit Group Dialog */}
+      <GroupFormDialog
+        open={isGroupDialogOpen}
+        onOpenChange={(open) => {
+          setIsGroupDialogOpen(open);
+          if (!open) setEditingGroup(null);
+        }}
+        initialData={editingGroup}
+        onSaveGroup={handleSaveGroup}
+        isSubmitting={isSubmittingGroup}
+      />
+
+      {/* Delete Link Confirmation Dialog */}
       <DeleteDialog
         open={!!deletingItem}
         onOpenChange={(open) => !open && setDeletingItem(null)}
@@ -620,6 +1004,20 @@ export default function LinksDashboardPage() {
           language === "en"
             ? `Are you sure you want to delete "${deletingItem?.title_en || deletingItem?.title_id}"? This action cannot be undone.`
             : `Apakah Anda yakin ingin menghapus "${deletingItem?.title_id || deletingItem?.title_en}"? Tindakan ini tidak dapat dibatalkan.`
+        }
+      />
+
+      {/* Delete Group Confirmation Dialog */}
+      <DeleteDialog
+        open={!!deletingGroup}
+        onOpenChange={(open) => !open && setDeletingGroup(null)}
+        onConfirm={handleDeleteGroupConfirm}
+        loading={isDeletingGroup}
+        title={language === "en" ? "Delete Group" : "Hapus Grup"}
+        description={
+          language === "en"
+            ? `Are you sure you want to delete group "${deletingGroup?.name_en}"? All links in this group will also be deleted.`
+            : `Apakah Anda yakin ingin menghapus grup "${deletingGroup?.name_id}"? Semua tautan di dalam grup ini juga akan dihapus.`
         }
       />
     </div>

@@ -131,6 +131,7 @@ export const AVAILABLE_LINK_ICONS: Array<{
   { name: "Video", label: "Video", category: "general", component: Video },
   { name: "Calendar", label: "Meeting / Booking", category: "general", component: Calendar },
   { name: "MessageCircle", label: "Community / Chat", category: "general", component: MessageCircle },
+  { name: "Link", label: "Link / URL", category: "general", component: LinkIconLucide },
   { name: "ExternalLink", label: "External Link", category: "general", component: ExternalLink },
 ];
 
