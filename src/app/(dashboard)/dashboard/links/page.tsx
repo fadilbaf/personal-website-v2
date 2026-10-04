@@ -597,7 +597,7 @@ export default function LinksDashboardPage() {
   };
 
   return (
-    <div className="space-y-6 pb-12">
+    <div className="space-y-6 pb-4">
       {/* Page Header: Dashboard > Links */}
       <PageHeader
         title={t("sidebar.Links")}
@@ -607,18 +607,6 @@ export default function LinksDashboardPage() {
           { label: t("dashboard.title"), href: "/dashboard" },
           { label: t("sidebar.Links") },
         ]}
-        actions={
-          <Button
-            onClick={() => {
-              setEditingItem(null);
-              setIsFormOpen(true);
-            }}
-            className="bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 gap-1.5 cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            <span>{t("links.add_link")}</span>
-          </Button>
-        }
       />
 
       {/* 4 Large Overview Stat Cards */}
@@ -653,183 +641,189 @@ export default function LinksDashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Controls & Draggable Unified List */}
         <div className="lg:col-span-7 space-y-4">
-          {/* Controls Bar: Search Input + Filter Dropdown + Add Group Button */}
-          <div className="flex flex-wrap items-center justify-between gap-2.5 relative z-30">
+          {/* Controls Bar: Search Input + Filter Dropdown */}
+          <div className="flex items-center gap-2.5 relative z-30">
             {/* Search Input */}
-            <div className="relative flex-1 min-w-[200px] max-w-sm">
+            <div className="relative flex-1 min-w-0">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400" />
               <Input
                 placeholder={t("links.search_placeholder")}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm h-9"
+                className="pl-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm h-9 w-full"
               />
             </div>
 
-            {/* Action Buttons: Filter & Add Group */}
-            <div className="flex items-center gap-2">
-              {/* Filter Trigger Button & Dropdown */}
-              <div className="relative z-30" ref={filterDropdownRef}>
-                <Button
-                  type="button"
-                  variant={activeFilterCount > 0 ? "default" : "outline"}
-                  size="sm"
-                  onClick={() => setIsFilterOpen(!isFilterOpen)}
-                  className={cn(
-                    "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
-                    activeFilterCount > 0
-                      ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
-                      : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800"
-                  )}
-                >
-                  <Filter className="h-3.5 w-3.5" />
-                  <span>{t("common.filter")}</span>
-                  {activeFilterCount > 0 && (
-                    <span
-                      className={cn(
-                        "flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold",
-                        activeFilterCount > 0
-                          ? "bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white"
-                          : "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+            {/* Filter Trigger Button & Dropdown */}
+            <div className="relative z-30 shrink-0" ref={filterDropdownRef}>
+              <Button
+                type="button"
+                variant={activeFilterCount > 0 ? "default" : "outline"}
+                size="sm"
+                onClick={() => setIsFilterOpen(!isFilterOpen)}
+                className={cn(
+                  "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
+                  activeFilterCount > 0
+                    ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
+                    : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800"
+                )}
+              >
+                <Filter className="h-3.5 w-3.5" />
+                <span>{t("common.filter")}</span>
+                {activeFilterCount > 0 && (
+                  <span
+                    className={cn(
+                      "flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold",
+                      activeFilterCount > 0
+                        ? "bg-white text-neutral-950 dark:bg-neutral-950 dark:text-white"
+                        : "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                    )}
+                  >
+                    {activeFilterCount}
+                  </span>
+                )}
+              </Button>
+
+              {/* Dropdown Panel */}
+              {isFilterOpen && (
+                <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 transition-all duration-200">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
+                      <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                        {t("common.filters")}
+                      </span>
+                      {activeFilterCount > 0 && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedGroup("all");
+                            setSelectedStatus("all");
+                            setIsFilterOpen(false);
+                          }}
+                          className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
+                        >
+                          <RotateCcw className="h-3 w-3" />
+                          {t("common.clear_all")}
+                        </button>
                       )}
-                    >
-                      {activeFilterCount}
-                    </span>
-                  )}
-                </Button>
+                    </div>
 
-                {/* Dropdown Panel */}
-                {isFilterOpen && (
-                  <div className="absolute right-0 top-full mt-2 z-50 w-72 rounded-xl border border-neutral-200 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 transition-all duration-200">
-                    <div className="space-y-4">
-                      <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
-                        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                          {t("common.filters")}
-                        </span>
-                        {activeFilterCount > 0 && (
+                    {/* Group Filter Section */}
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                        {language === "id" ? "Grup" : "Group"}
+                      </span>
+                      <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto scrollbar-custom pr-1">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedGroup("all")}
+                          className={cn(
+                            "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                            selectedGroup === "all"
+                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                          )}
+                        >
+                          {t("common.all")}
+                        </button>
+                        {uniqueFilterGroups.map((grp) => (
                           <button
+                            key={grp}
                             type="button"
-                            onClick={() => {
-                              setSelectedGroup("all");
-                              setSelectedStatus("all");
-                              setIsFilterOpen(false);
-                            }}
-                            className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
+                            onClick={() => setSelectedGroup(grp)}
+                            className={cn(
+                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                              selectedGroup === grp
+                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                            )}
                           >
-                            <RotateCcw className="h-3 w-3" />
-                            {t("common.clear_all")}
+                            {grp}
                           </button>
-                        )}
+                        ))}
                       </div>
+                    </div>
 
-                      {/* Group Filter Section */}
-                      <div className="space-y-2">
-                        <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                          {language === "id" ? "Grup" : "Group"}
-                        </span>
-                        <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto scrollbar-custom pr-1">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedGroup("all")}
-                            className={cn(
-                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                              selectedGroup === "all"
-                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                            )}
-                          >
-                            {t("common.all")}
-                          </button>
-                          {uniqueFilterGroups.map((grp) => (
-                            <button
-                              key={grp}
-                              type="button"
-                              onClick={() => setSelectedGroup(grp)}
-                              className={cn(
-                                "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                                selectedGroup === grp
-                                  ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                              )}
-                            >
-                              {grp}
-                            </button>
-                          ))}
-                        </div>
-                      </div>
-
-                      {/* Status Filter Section */}
-                      <div className="space-y-2">
-                        <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                          {t("common.status")}
-                        </span>
-                        <div className="flex flex-wrap gap-1.5">
-                          <button
-                            type="button"
-                            onClick={() => setSelectedStatus("all")}
-                            className={cn(
-                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                              selectedStatus === "all"
-                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                            )}
-                          >
-                            {t("common.all")}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedStatus("active")}
-                            className={cn(
-                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                              selectedStatus === "active"
-                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                            )}
-                          >
-                            {t("badges.active")}
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setSelectedStatus("inactive")}
-                            className={cn(
-                              "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                              selectedStatus === "inactive"
-                                ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                            )}
-                          >
-                            {t("badges.inactive")}
-                          </button>
-                        </div>
+                    {/* Status Filter Section */}
+                    <div className="space-y-2">
+                      <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                        {t("common.status")}
+                      </span>
+                      <div className="flex flex-wrap gap-1.5">
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStatus("all")}
+                          className={cn(
+                            "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                            selectedStatus === "all"
+                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                          )}
+                        >
+                          {t("common.all")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStatus("active")}
+                          className={cn(
+                            "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                            selectedStatus === "active"
+                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                          )}
+                        >
+                          {t("badges.active")}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedStatus("inactive")}
+                          className={cn(
+                            "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                            selectedStatus === "inactive"
+                              ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                              : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                          )}
+                        >
+                          {t("badges.inactive")}
+                        </button>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Add Group Button */}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setEditingGroup(null);
-                  setIsGroupDialogOpen(true);
-                }}
-                className="h-9 px-3 gap-1.5 text-xs font-medium cursor-pointer border bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800 transition-colors"
-              >
-                <FolderPlus className="h-3.5 w-3.5" />
-                <span>{language === "id" ? "Tambah Grup" : "Add Group"}</span>
-              </Button>
+                </div>
+              )}
             </div>
           </div>
 
+          {/* Action Buttons: Add Link & Add Group full-width side-by-side */}
+          <div className="grid grid-cols-2 gap-2.5 w-full">
+            <Button
+              type="button"
+              onClick={() => {
+                setEditingItem(null);
+                setIsFormOpen(true);
+              }}
+              className="h-9 w-full gap-1.5 text-xs font-medium cursor-pointer bg-neutral-900 hover:bg-neutral-800 active:bg-neutral-800 text-white dark:bg-white dark:hover:bg-neutral-200 dark:active:bg-neutral-200 dark:text-neutral-900 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              <span>{t("links.add_link")}</span>
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => {
+                setEditingGroup(null);
+                setIsGroupDialogOpen(true);
+              }}
+              className="h-9 w-full gap-1.5 text-xs font-medium cursor-pointer border bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-neutral-800 transition-colors"
+            >
+              <FolderPlus className="h-3.5 w-3.5" />
+              <span>{language === "id" ? "Tambah Grup" : "Add Group"}</span>
+            </Button>
+          </div>
+
           {/* Reorder Hint Bar */}
-          <div className="flex items-center justify-between text-xs text-neutral-500 dark:text-neutral-400 px-1">
+          <div className="flex items-center text-xs text-neutral-500 dark:text-neutral-400 px-1">
             <span>{t("links.drag_reorder_hint")}</span>
-            <span>
-              {currentLinks.length} {language === "id" ? "tautan" : "links"} • {availableGroups.length} {language === "id" ? "grup" : "groups"}
-            </span>
           </div>
 
           {/* Draggable List Container */}
