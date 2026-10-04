@@ -193,12 +193,12 @@ export default function ProjectCategoriesPage() {
       />
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{editingCategory ? t("projects.edit_category") : t("projects.add_category")}</DialogTitle>
+        <DialogContent className="sm:max-w-md max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
+            <DialogTitle className="text-base font-semibold">{editingCategory ? t("projects.edit_category") : t("projects.add_category")}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom">
+            <div className="space-y-1.5">
               <Label>{t("skills.name_en")}</Label>
               <Input
                 placeholder="e.g., Web Development"
@@ -206,7 +206,7 @@ export default function ProjectCategoriesPage() {
                 onChange={(e) => setFormData({ ...formData, name_en: e.target.value })}
               />
             </div>
-            <div className="grid gap-2">
+            <div className="space-y-1.5">
               <Label>{t("skills.name_id")}</Label>
               <Input
                 placeholder="e.g., Pengembangan Web"
@@ -222,7 +222,7 @@ export default function ProjectCategoriesPage() {
               <Label>{t("skills.active")}</Label>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button variant="outline" onClick={() => setIsModalOpen(false)} className="gap-1.5 cursor-pointer">
               <X className="h-4 w-4" /> {t("common.cancel")}
             </Button>

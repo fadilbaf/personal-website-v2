@@ -71,9 +71,9 @@ export function GroupFormDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md p-0 flex flex-col gap-0 overflow-hidden">
-        {/* Header */}
-        <DialogHeader className="p-6 pb-4 border-b border-neutral-100 dark:border-white/10 shrink-0">
+      <DialogContent className="sm:max-w-md max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+        {/* Sticky Header */}
+        <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-neutral-100 dark:bg-neutral-800 text-neutral-800 dark:text-neutral-200">
               {isEdit ? <Pencil className="h-4 w-4" /> : <FolderPlus className="h-4 w-4" />}
@@ -93,9 +93,9 @@ export function GroupFormDialog({
           </div>
         </DialogHeader>
 
-        {/* Form Body */}
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1">
-          <div className="p-6 space-y-4 scrollbar-custom">
+        {/* Form Body with custom scrollbar */}
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom">
             <div className="space-y-1.5">
               <Label className="text-xs font-medium text-neutral-800 dark:text-neutral-200">
                 {language === "en" ? "Group Name (ID)" : "Nama Grup (ID)"}
@@ -122,8 +122,8 @@ export function GroupFormDialog({
             </div>
           </div>
 
-          {/* Footer */}
-          <DialogFooter className="p-4 px-6 border-t border-neutral-100 dark:border-white/10 bg-neutral-50/40 dark:bg-neutral-900/40 shrink-0 flex items-center justify-end gap-2">
+          {/* Sticky Footer */}
+          <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button
               type="button"
               variant="outline"

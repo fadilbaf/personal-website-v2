@@ -566,10 +566,10 @@ export default function MessagesPage() {
 
       {/* Message Detail Modal (Rendered Email Preview) */}
       <Dialog open={isDetailOpen} onOpenChange={setIsDetailOpen}>
-        <DialogContent className="sm:max-w-[648px] max-h-[90vh] flex flex-col p-6 scrollbar-custom">
+        <DialogContent className="sm:max-w-[648px] max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
           {selectedMessage && (
             <>
-              <DialogHeader className="space-y-2 pb-2 pr-8 sm:pr-10 shrink-0">
+              <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10 space-y-2">
                 {/* Row 1: Status Badge & Date Time aligned horizontally */}
                 <div className="flex items-center justify-between gap-2">
                   {renderStatusBadge(
@@ -637,7 +637,7 @@ export default function MessagesPage() {
               </DialogHeader>
 
               {/* Direct email card display without outer container */}
-              <div className="py-2 flex-1 min-h-0 overflow-y-auto max-h-[64vh] scrollbar-custom flex justify-center">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 max-h-[calc(85vh-130px)] scrollbar-custom flex justify-center">
                 <div className="w-full max-w-[600px] flex justify-center">
                   <iframe
                     ref={detailIframeRef}
@@ -657,7 +657,7 @@ export default function MessagesPage() {
                 </div>
               </div>
 
-              <DialogFooter className="flex items-center justify-end gap-2.5 pt-2 shrink-0">
+              <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
                 <Button
                   variant="outline"
                   size="sm"
@@ -682,97 +682,99 @@ export default function MessagesPage() {
 
       {/* Reply Modal (2-Column: Form on Left, Live Preview on Right) */}
       <Dialog open={isReplyOpen} onOpenChange={setIsReplyOpen}>
-        <DialogContent className="sm:max-w-5xl lg:max-w-6xl max-h-[90vh] flex flex-col p-6 scrollbar-custom">
+        <DialogContent className="sm:max-w-5xl lg:max-w-6xl max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
           {replyMessage && (
             <>
-              <DialogHeader className="pr-10 sm:pr-12 pb-2 shrink-0">
+              <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
                 <DialogTitle className="flex items-center gap-2 text-base font-semibold">
                   <Reply className="h-4 w-4 text-neutral-500" />
                   {t("messages.reply_dialog_title", {
                     name: replyMessage.name,
                   })}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
+                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                   {t("messages.send_reply")} ({replyMessage.email})
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 p-1 pb-3 flex-1 min-h-0 overflow-y-auto max-h-[68vh] scrollbar-custom">
-                {/* Left Column: Input Form */}
-                <div className="lg:col-span-6 flex flex-col space-y-4 p-1">
-                  {/* Recipient info box */}
-                  <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200/80 dark:border-white/10 text-xs space-y-1">
-                    <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
-                      <span className="font-semibold text-neutral-900 dark:text-white">To:</span>
-                      <span>{replyMessage.name} &lt;{replyMessage.email}&gt;</span>
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 max-h-[calc(85vh-130px)] scrollbar-custom">
+                <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                  {/* Left Column: Input Form */}
+                  <div className="lg:col-span-6 flex flex-col space-y-4">
+                    {/* Recipient info box */}
+                    <div className="p-3 rounded-lg bg-neutral-50 dark:bg-neutral-900/60 border border-neutral-200/80 dark:border-white/10 text-xs space-y-1">
+                      <div className="flex items-center gap-2 text-neutral-600 dark:text-neutral-300">
+                        <span className="font-semibold text-neutral-900 dark:text-white">To:</span>
+                        <span>{replyMessage.name} &lt;{replyMessage.email}&gt;</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 truncate">
+                        <span className="font-semibold text-neutral-700 dark:text-neutral-300">Subject Original:</span>
+                        <span className="truncate italic">{replyMessage.subject}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 text-neutral-500 dark:text-neutral-400 truncate">
-                      <span className="font-semibold text-neutral-700 dark:text-neutral-300">Subject Original:</span>
-                      <span className="truncate italic">{replyMessage.subject}</span>
+
+                    <div className="space-y-1.5">
+                      <Label htmlFor="replySubject" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                        {t("messages.reply_subject")}
+                      </Label>
+                      <Input
+                        id="replySubject"
+                        value={replySubject}
+                        onChange={(e) => setReplySubject(e.target.value)}
+                        placeholder="Re: Subject"
+                        className="h-9 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
+                      />
+                    </div>
+
+                    <div className="space-y-1.5 pb-1">
+                      <Label htmlFor="replyBody" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
+                        {t("messages.reply_content")}
+                      </Label>
+                      <Textarea
+                        id="replyBody"
+                        value={replyBody}
+                        onChange={(e) => setReplyBody(e.target.value)}
+                        placeholder={t("messages.reply_content_placeholder")}
+                        rows={8}
+                        className="text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 min-h-[170px] resize-y scrollbar-custom"
+                      />
                     </div>
                   </div>
 
-                  <div className="space-y-1.5">
-                    <Label htmlFor="replySubject" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                      {t("messages.reply_subject")}
-                    </Label>
-                    <Input
-                      id="replySubject"
-                      value={replySubject}
-                      onChange={(e) => setReplySubject(e.target.value)}
-                      placeholder="Re: Subject"
-                      className="h-9 text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10"
-                    />
-                  </div>
-
-                  <div className="space-y-1.5 pb-1">
-                    <Label htmlFor="replyBody" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
-                      {t("messages.reply_content")}
-                    </Label>
-                    <Textarea
-                      id="replyBody"
-                      value={replyBody}
-                      onChange={(e) => setReplyBody(e.target.value)}
-                      placeholder={t("messages.reply_content_placeholder")}
-                      rows={8}
-                      className="text-xs bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 min-h-[170px] resize-y scrollbar-custom"
-                    />
-                  </div>
-                </div>
-
-                {/* Right Column: Pure Live Preview (Matches Broadcast Campaign) */}
-                <div className="lg:col-span-6 p-1">
-                  <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-none flex flex-col">
-                    <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center gap-2">
-                      <Eye className="w-4 h-4 text-neutral-500" />
-                      <span className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white">
-                        {t("newsletter.live_preview") || "Live Preview"}
-                      </span>
-                    </div>
-                    <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-900/60 flex justify-center">
-                      <div className="w-full max-w-[600px] flex justify-center">
-                        <iframe
-                          ref={replyIframeRef}
-                          srcDoc={generatedReplyHtml}
-                          onLoad={handleReplyIframeLoad}
-                          title="Live Email Preview"
-                          scrolling="no"
-                          {...{ allowtransparency: "true" }}
-                          style={{
-                            height: `${replyIframeHeight}px`,
-                            backgroundColor: "transparent",
-                            colorScheme: "light",
-                          }}
-                          className="w-full border-0 bg-transparent block overflow-hidden transition-[height] duration-150"
-                          sandbox="allow-same-origin"
-                        />
+                  {/* Right Column: Pure Live Preview (Matches Broadcast Campaign) */}
+                  <div className="lg:col-span-6">
+                    <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 overflow-hidden shadow-none flex flex-col">
+                      <div className="py-2.5 px-4 border-b border-neutral-200/60 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/50 flex items-center gap-2">
+                        <Eye className="w-4 h-4 text-neutral-500" />
+                        <span className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white">
+                          {t("newsletter.live_preview") || "Live Preview"}
+                        </span>
+                      </div>
+                      <div className="p-4 sm:p-5 bg-neutral-100/60 dark:bg-neutral-900/60 flex justify-center">
+                        <div className="w-full max-w-[600px] flex justify-center">
+                          <iframe
+                            ref={replyIframeRef}
+                            srcDoc={generatedReplyHtml}
+                            onLoad={handleReplyIframeLoad}
+                            title="Live Email Preview"
+                            scrolling="no"
+                            {...{ allowtransparency: "true" }}
+                            style={{
+                              height: `${replyIframeHeight}px`,
+                              backgroundColor: "transparent",
+                              colorScheme: "light",
+                            }}
+                            className="w-full border-0 bg-transparent block overflow-hidden transition-[height] duration-150"
+                            sandbox="allow-same-origin"
+                          />
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <DialogFooter className="flex items-center justify-end gap-2.5 pt-3 shrink-0">
+              <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
                 <Button
                   type="button"
                   variant="outline"

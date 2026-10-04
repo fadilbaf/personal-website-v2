@@ -168,8 +168,8 @@ export function LinkFormDialog({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
-        {/* Fixed Header */}
-        <DialogHeader className="p-6 pb-4 border-b border-neutral-100 dark:border-white/10 shrink-0">
+        {/* Sticky Header */}
+        <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
           <DialogTitle className="text-lg font-semibold text-neutral-900 dark:text-white">
             {isEdit ? t("links.edit_link") : t("links.add_link")}
           </DialogTitle>
@@ -413,8 +413,8 @@ export function LinkFormDialog({
             </div>
           </div>
 
-          {/* Fixed Footer */}
-          <DialogFooter className="p-4 px-6 border-t border-neutral-100 dark:border-white/10 bg-neutral-50/40 dark:bg-neutral-900/40 shrink-0 flex items-center justify-end gap-2">
+          {/* Sticky Footer */}
+          <DialogFooter className="p-4 px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button
               type="button"
               variant="outline"

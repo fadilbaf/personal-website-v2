@@ -553,15 +553,15 @@ export default function ProfilePage() {
 
       {/* Edit Modal */}
       <Dialog open={isEditModalOpen} onOpenChange={setIsEditModalOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>{t("profile.edit_profile")}</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="sm:max-w-md max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
+            <DialogTitle className="text-base font-semibold">{t("profile.edit_profile")}</DialogTitle>
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
               {t("profile.edit_profile_desc")}
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom">
+            <div className="space-y-1.5">
               <Label htmlFor="fullname">{t("profile.full_name")}</Label>
               <Input
                 id="fullname"
@@ -570,7 +570,7 @@ export default function ProfilePage() {
                 placeholder={t("profile.fullname_placeholder")}
               />
             </div>
-            <div className="grid gap-2">
+            <div className="space-y-1.5">
               <Label htmlFor="username">{t("profile.username")}</Label>
               <Input
                 id="username"
@@ -579,7 +579,7 @@ export default function ProfilePage() {
                 placeholder={t("profile.username_placeholder")}
               />
             </div>
-            <div className="grid gap-2">
+            <div className="space-y-1.5">
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
@@ -590,7 +590,7 @@ export default function ProfilePage() {
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button
               variant="outline"
               onClick={() => setIsEditModalOpen(false)}

@@ -1107,18 +1107,18 @@ export default function NewsletterPage() {
 
       {/* Recipient Configuration Modal */}
       <Dialog open={isRecipientModalOpen} onOpenChange={setIsRecipientModalOpen}>
-        <DialogContent className="sm:max-w-lg max-h-[90vh] flex flex-col p-6 scrollbar-custom">
-          <DialogHeader className="pr-10 sm:pr-12 space-y-1">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10 space-y-1">
             <DialogTitle className="text-base font-semibold flex items-center gap-2">
               <Users className="w-4 h-4" />
               {t("newsletter.recipients_modal_title")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
               {t("newsletter.recipients_modal_desc")}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-3.5 py-2 flex-1 flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3.5 max-h-[calc(85vh-130px)] scrollbar-custom flex flex-col min-h-0">
             {/* Add Custom Email Bar */}
             <div className="flex items-center gap-2">
               <Input
@@ -1249,7 +1249,7 @@ export default function NewsletterPage() {
             </div>
           </div>
 
-          <DialogFooter className="pt-2">
+          <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button
               type="button"
               size="sm"
@@ -1266,26 +1266,28 @@ export default function NewsletterPage() {
 
       {/* Confirmation Blast Dialog */}
       <Dialog open={isConfirmBlastOpen} onOpenChange={setIsConfirmBlastOpen}>
-        <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto scrollbar-custom">
-          <DialogHeader className="pr-10 sm:pr-12">
+        <DialogContent className="sm:max-w-md max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
             <DialogTitle className="text-base font-semibold">
               {language === "id" ? "Konfirmasi Kirim Broadcast" : "Confirm Newsletter Blast"}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 pt-1">
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
               {t("newsletter.send_blast_confirm", { count: String(effectiveSelectedEmails.length) })}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="py-2 text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 space-y-1.5">
-            <p><strong>Subject:</strong> {broadcastSubject}</p>
-            <p><strong>Type:</strong> <span>{t(`newsletter.type_${broadcastType}`) || broadcastType}</span></p>
-            <p><strong>Recipients:</strong> {effectiveSelectedEmails.length} selected recipient(s)</p>
-            {buttonText && buttonUrl && (
-              <p><strong>Action Button:</strong> {buttonText} ({buttonUrl})</p>
-            )}
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom">
+            <div className="text-xs text-neutral-700 dark:text-neutral-300 bg-neutral-50 dark:bg-neutral-900/60 p-3.5 rounded-lg border border-neutral-200/80 dark:border-white/10 space-y-1.5">
+              <p><strong>Subject:</strong> {broadcastSubject}</p>
+              <p><strong>Type:</strong> <span>{t(`newsletter.type_${broadcastType}`) || broadcastType}</span></p>
+              <p><strong>Recipients:</strong> {effectiveSelectedEmails.length} selected recipient(s)</p>
+              {buttonText && buttonUrl && (
+                <p><strong>Action Button:</strong> {buttonText} ({buttonUrl})</p>
+              )}
+            </div>
           </div>
 
-          <DialogFooter className="gap-2 pt-2">
+          <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button
               variant="outline"
               size="sm"
@@ -1319,10 +1321,10 @@ export default function NewsletterPage() {
 
       {/* Campaign Message Detail Modal */}
       <Dialog open={isCampaignModalOpen} onOpenChange={setIsCampaignModalOpen}>
-        <DialogContent className="sm:max-w-[648px] max-h-[90vh] flex flex-col p-5 sm:p-6 overflow-hidden">
+        <DialogContent className="sm:max-w-[648px] max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
           {selectedCampaign && (
             <>
-              <DialogHeader className="pr-10 sm:pr-12 space-y-1 shrink-0 pb-1">
+              <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <Badge
                     variant="secondary"
@@ -1337,13 +1339,13 @@ export default function NewsletterPage() {
                 <DialogTitle className="text-base sm:text-lg font-semibold truncate">
                   {selectedCampaign.subject}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
+                <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
                   {t("newsletter.sent_to_count", { count: String(selectedCampaign.sent_count) })}
                 </DialogDescription>
               </DialogHeader>
 
               {/* Direct email card display without outer container */}
-              <div className="py-2 flex-1 min-h-0 overflow-y-auto max-h-[64vh] scrollbar-custom flex justify-center">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 max-h-[calc(85vh-130px)] scrollbar-custom flex justify-center">
                 <div className="w-full max-w-[600px] flex justify-center">
                   <iframe
                     ref={modalIframeRef}
@@ -1363,7 +1365,7 @@ export default function NewsletterPage() {
                 </div>
               </div>
 
-              <DialogFooter className="pt-2 shrink-0">
+              <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
                 <Button
                   size="sm"
                   variant="outline"
@@ -1386,10 +1388,10 @@ export default function NewsletterPage() {
           if (!open) setRecipientSearch("");
         }}
       >
-        <DialogContent className="sm:max-w-lg max-h-[85vh] flex flex-col p-6 scrollbar-custom">
+        <DialogContent className="sm:max-w-lg max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
           {selectedCampaign && (
             <>
-              <DialogHeader className="pr-10 sm:pr-12 space-y-1">
+              <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap mb-0.5">
                   <Badge
                     variant="secondary"
@@ -1404,12 +1406,12 @@ export default function NewsletterPage() {
                 <DialogTitle className="text-base sm:text-lg font-semibold truncate">
                   {selectedCampaign.subject}
                 </DialogTitle>
-                <DialogDescription className="text-xs text-neutral-500">
+                <DialogDescription className="text-xs text-neutral-500 mt-0.5">
                   {selectedCampaign.sent_count} {selectedCampaign.sent_count === 1 ? "subscriber" : "subscribers"}
                 </DialogDescription>
               </DialogHeader>
 
-              <div className="space-y-3 py-2 flex-1 flex flex-col min-h-0">
+              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3 max-h-[calc(85vh-130px)] scrollbar-custom flex flex-col min-h-0">
                 {/* Search Bar */}
                 <div className="relative">
                   <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-neutral-400 pointer-events-none" />
@@ -1461,7 +1463,7 @@ export default function NewsletterPage() {
                 )}
               </div>
 
-              <DialogFooter className="pt-2">
+              <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
                 <Button
                   size="sm"
                   variant="outline"

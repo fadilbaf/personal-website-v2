@@ -1125,18 +1125,18 @@ export default function EmailTemplatesPage() {
 
       {/* Send Test Email Modal */}
       <Dialog open={isTestModalOpen} onOpenChange={setIsTestModalOpen}>
-        <DialogContent className="sm:max-w-md max-h-[85vh] overflow-y-auto scrollbar-custom">
-          <DialogHeader className="pr-10 sm:pr-12">
+        <DialogContent className="sm:max-w-md max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10">
             <DialogTitle className="flex items-center gap-2 text-base font-semibold">
               <Send className="w-4 h-4 text-neutral-500" />
               {t("templates.test_modal_title")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed mt-0.5">
               {t("templates.test_modal_desc", { name: activeTemplate.name })}
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-4 py-1">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom">
             <div className="space-y-1.5">
               <Label htmlFor="test-recipient" className="text-xs font-medium text-neutral-700 dark:text-neutral-300">
                 {t("templates.test_recipient")}
@@ -1177,7 +1177,7 @@ export default function EmailTemplatesPage() {
             </div>
           </div>
 
-          <DialogFooter className="flex items-center justify-end gap-2.5 pt-2">
+          <DialogFooter className="p-4 px-5 sm:px-6 border-t border-neutral-200/80 dark:border-white/10 bg-white dark:bg-neutral-900 shrink-0 flex items-center justify-end gap-2 sticky bottom-0 z-10">
             <Button
               variant="outline"
               size="sm"
@@ -1220,204 +1220,207 @@ export default function EmailTemplatesPage() {
       </Dialog>
       {/* Template Selection Modal */}
       <Dialog open={isTemplateModalOpen} onOpenChange={setIsTemplateModalOpen}>
-        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[85vh] flex flex-col p-4 sm:p-6 gap-4 sm:gap-5 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 overflow-hidden">
-          <DialogHeader className="space-y-1">
+        <DialogContent className="max-w-[calc(100%-2rem)] sm:max-w-3xl lg:max-w-4xl max-h-[85vh] p-0 flex flex-col gap-0 overflow-hidden">
+          <DialogHeader className="p-5 sm:p-6 pr-14 sm:pr-16 pb-4 border-b border-neutral-200/80 dark:border-white/10 shrink-0 bg-white dark:bg-neutral-900 sticky top-0 z-10 space-y-1">
             <DialogTitle className="flex items-center gap-2 text-base font-semibold text-neutral-900 dark:text-white">
               <LayoutTemplate className="h-4.5 w-4.5 text-neutral-500 shrink-0" />
               {t("templates.select_template")}
             </DialogTitle>
-            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400">
+            <DialogDescription className="text-xs text-neutral-500 dark:text-neutral-400 mt-0.5">
               {t("templates.select_template_desc")}
             </DialogDescription>
           </DialogHeader>
 
-          {/* Search Bar & Filter Row inside Modal */}
-          <div className="flex items-center justify-between gap-2.5 sm:gap-3">
-            {/* Search Bar on the Left (Full Width up to Filter) */}
-            <div className="relative flex-1 w-full">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500" />
-              <Input
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder={t("templates.search_placeholder") || "Search templates..."}
-                className="pl-9 h-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
-              />
-            </div>
+          {/* Scrollable Modal Content */}
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom">
+            {/* Search Bar & Filter Row inside Modal */}
+            <div className="flex items-center justify-between gap-2.5 sm:gap-3">
+              {/* Search Bar on the Left (Full Width up to Filter) */}
+              <div className="relative flex-1 w-full">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-neutral-400 dark:text-neutral-500" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder={t("templates.search_placeholder") || "Search templates..."}
+                  className="pl-9 h-9 bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/10 text-xs placeholder:text-neutral-400 dark:placeholder:text-neutral-500"
+                />
+              </div>
 
-            {/* Filter Button on the Right */}
-            <div className="relative z-30 shrink-0" ref={filterDropdownRef}>
-              <Button
-                variant={activeFilterCount > 0 ? "default" : "outline"}
-                size="sm"
-                onClick={() => setIsFilterOpen(!isFilterOpen)}
-                className={cn(
-                  "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
-                  activeFilterCount > 0
-                    ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
-                    : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200/80 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-white/10"
-                )}
-              >
-                <Filter className="h-3.5 w-3.5" />
-                <span>{t("common.filter")}</span>
-                {activeFilterCount > 0 && (
-                  <span className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
-                    {activeFilterCount}
-                  </span>
-                )}
-              </Button>
+              {/* Filter Button on the Right */}
+              <div className="relative z-30 shrink-0" ref={filterDropdownRef}>
+                <Button
+                  variant={activeFilterCount > 0 ? "default" : "outline"}
+                  size="sm"
+                  onClick={() => setIsFilterOpen(!isFilterOpen)}
+                  className={cn(
+                    "h-9 px-3 gap-2 text-xs font-medium transition-all duration-200 cursor-pointer border",
+                    activeFilterCount > 0
+                      ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white hover:bg-neutral-800 active:bg-neutral-800 dark:hover:bg-neutral-200 dark:active:bg-neutral-200"
+                      : "bg-white hover:bg-neutral-100 active:bg-neutral-100 text-neutral-700 border-neutral-200/80 dark:bg-neutral-900 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 dark:text-neutral-300 dark:border-white/10"
+                  )}
+                >
+                  <Filter className="h-3.5 w-3.5" />
+                  <span>{t("common.filter")}</span>
+                  {activeFilterCount > 0 && (
+                    <span className="flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold bg-neutral-900 text-white dark:bg-white dark:text-neutral-900">
+                      {activeFilterCount}
+                    </span>
+                  )}
+                </Button>
 
-              {/* Filter Dropdown Panel */}
-              {isFilterOpen && (
-                <div className="absolute right-0 top-full mt-2 z-50 w-[calc(100vw-3rem)] max-w-xs sm:w-80 rounded-xl border border-neutral-200/80 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 animate-in fade-in zoom-in-95 duration-150">
-                  <div className="space-y-4">
-                    {/* Header */}
-                    <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
-                      <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
-                        {t("common.filters")}
-                      </span>
-                      {activeFilterCount > 0 && (
-                        <button
-                          onClick={() => {
-                            setSelectedCategoryFilter("all");
-                            setSelectedStatusFilter("all");
-                            setIsFilterOpen(false);
-                          }}
-                          className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
-                        >
-                          <RotateCcw className="h-3 w-3" />
-                          {t("common.clear_all")}
-                        </button>
-                      )}
-                    </div>
-
-                    {/* Category Filter */}
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                        {t("sidebar.Categories")}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {[
-                          { label: t("templates.category_all") || "All", value: "all" },
-                          { label: t("templates.category_contact") || "Contact", value: "contact" },
-                          { label: t("templates.category_newsletter") || "Newsletter", value: "newsletter" },
-                        ].map((opt) => {
-                          const isSelected = selectedCategoryFilter === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => setSelectedCategoryFilter(opt.value)}
-                              className={cn(
-                                "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                                isSelected
-                                  ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                              )}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
+                {/* Filter Dropdown Panel */}
+                {isFilterOpen && (
+                  <div className="absolute right-0 top-full mt-2 z-50 w-[calc(100vw-3rem)] max-w-xs sm:w-80 rounded-xl border border-neutral-200/80 bg-white p-4 shadow-xl dark:border-white/10 dark:bg-neutral-900 animate-in fade-in zoom-in-95 duration-150">
+                    <div className="space-y-4">
+                      {/* Header */}
+                      <div className="flex items-center justify-between pb-2 border-b border-neutral-100 dark:border-white/10">
+                        <span className="text-[11px] font-semibold uppercase tracking-wider text-neutral-400 dark:text-neutral-500">
+                          {t("common.filters")}
+                        </span>
+                        {activeFilterCount > 0 && (
+                          <button
+                            onClick={() => {
+                              setSelectedCategoryFilter("all");
+                              setSelectedStatusFilter("all");
+                              setIsFilterOpen(false);
+                            }}
+                            className="text-[10px] flex items-center gap-1 text-neutral-400 hover:text-neutral-900 active:text-neutral-900 dark:hover:text-white dark:active:text-white transition-colors cursor-pointer"
+                          >
+                            <RotateCcw className="h-3 w-3" />
+                            {t("common.clear_all")}
+                          </button>
+                        )}
                       </div>
-                    </div>
 
-                    {/* Status Filter */}
-                    <div className="space-y-2">
-                      <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
-                        {t("common.status")}
-                      </span>
-                      <div className="flex flex-wrap gap-1.5">
-                        {[
-                          { label: t("common.all") || "All", value: "all" },
-                          { label: t("templates.status_customized") || "Custom", value: "custom" },
-                          { label: t("templates.status_default") || "Default", value: "default" },
-                        ].map((opt) => {
-                          const isSelected = selectedStatusFilter === opt.value;
-                          return (
-                            <button
-                              key={opt.value}
-                              type="button"
-                              onClick={() => setSelectedStatusFilter(opt.value)}
-                              className={cn(
-                                "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
-                                isSelected
-                                  ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
-                                  : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
-                              )}
-                            >
-                              {opt.label}
-                            </button>
-                          );
-                        })}
+                      {/* Category Filter */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                          {t("sidebar.Categories")}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            { label: t("templates.category_all") || "All", value: "all" },
+                            { label: t("templates.category_contact") || "Contact", value: "contact" },
+                            { label: t("templates.category_newsletter") || "Newsletter", value: "newsletter" },
+                          ].map((opt) => {
+                            const isSelected = selectedCategoryFilter === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => setSelectedCategoryFilter(opt.value)}
+                                className={cn(
+                                  "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                                  isSelected
+                                    ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                                )}
+                              >
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
+                      </div>
+
+                      {/* Status Filter */}
+                      <div className="space-y-2">
+                        <span className="text-[11px] font-medium text-neutral-400 dark:text-neutral-500 uppercase tracking-wider block">
+                          {t("common.status")}
+                        </span>
+                        <div className="flex flex-wrap gap-1.5">
+                          {[
+                            { label: t("common.all") || "All", value: "all" },
+                            { label: t("templates.status_customized") || "Custom", value: "custom" },
+                            { label: t("templates.status_default") || "Default", value: "default" },
+                          ].map((opt) => {
+                            const isSelected = selectedStatusFilter === opt.value;
+                            return (
+                              <button
+                                key={opt.value}
+                                type="button"
+                                onClick={() => setSelectedStatusFilter(opt.value)}
+                                className={cn(
+                                  "px-2.5 py-1 text-xs rounded-full border transition-all duration-150 cursor-pointer",
+                                  isSelected
+                                    ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white font-medium"
+                                    : "bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border-neutral-200/80 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-200 dark:border-white/10"
+                                )}
+                              >
+                                {opt.label}
+                              </button>
+                            );
+                          })}
+                        </div>
                       </div>
                     </div>
                   </div>
+                )}
+              </div>
+            </div>
+
+            {/* Template Cards Grid inside Modal (2 Columns for clean layout) */}
+            <div className="pt-1">
+              {filteredTemplates.length === 0 ? (
+                <div className="py-12 text-center text-xs text-neutral-500 dark:text-neutral-400 rounded-xl border border-dashed border-neutral-200/80 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/40">
+                  {t("common.no_data")}
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5 pb-1">
+                  {filteredTemplates.map((tpl) => {
+                    const isSelected = tpl.id === selectedTemplateId;
+                    const isDbCustom = !!dbTemplates[tpl.id];
+
+                    return (
+                      <div
+                        key={tpl.id}
+                        onClick={() => {
+                          setSelectedTemplateId(tpl.id);
+                          setIsTemplateModalOpen(false);
+                        }}
+                        className={cn(
+                          "p-3.5 sm:p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2 sm:gap-2.5 shadow-none",
+                          isSelected
+                            ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white ring-1 ring-neutral-900/10 dark:ring-white/20"
+                            : "bg-white dark:bg-neutral-900/90 border-neutral-200/80 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
+                        )}
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="text-xs font-semibold leading-snug">
+                            {tpl.name}
+                          </span>
+                          <span
+                            className={cn(
+                              "text-[10px] px-2 py-0.5 rounded-full font-mono font-medium shrink-0 border transition-colors",
+                              isSelected
+                                ? isDbCustom
+                                  ? "bg-white/20 text-white border-white/25 dark:bg-neutral-900/20 dark:text-neutral-900 dark:border-neutral-900/25"
+                                  : "bg-white/10 text-neutral-300 border-white/15 dark:bg-neutral-900/10 dark:text-neutral-600 dark:border-neutral-900/15"
+                                : isDbCustom
+                                ? "bg-neutral-100 text-neutral-900 border-neutral-200/80 dark:bg-white/10 dark:text-neutral-100 dark:border-white/10"
+                                : "bg-neutral-50 text-neutral-500 border-neutral-200/60 dark:bg-white/5 dark:text-neutral-400 dark:border-white/10"
+                            )}
+                          >
+                            {isDbCustom ? "Custom" : "Default"}
+                          </span>
+                        </div>
+
+                        <p
+                          className={cn(
+                            "text-xs leading-relaxed",
+                            isSelected
+                              ? "text-neutral-300 dark:text-neutral-600"
+                              : "text-neutral-500 dark:text-neutral-400"
+                          )}
+                        >
+                          {tpl.description}
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Template Cards Grid inside Modal (2 Columns for clean layout) */}
-          <div className="flex-1 min-h-0 overflow-y-auto pr-1 -mr-1 scrollbar-custom pb-2">
-            {filteredTemplates.length === 0 ? (
-              <div className="py-12 text-center text-xs text-neutral-500 dark:text-neutral-400 rounded-xl border border-dashed border-neutral-200/80 dark:border-white/10 bg-neutral-50/50 dark:bg-neutral-900/40">
-                {t("common.no_data")}
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-3.5 pb-1">
-                {filteredTemplates.map((tpl) => {
-                  const isSelected = tpl.id === selectedTemplateId;
-                  const isDbCustom = !!dbTemplates[tpl.id];
-
-                  return (
-                    <div
-                      key={tpl.id}
-                      onClick={() => {
-                        setSelectedTemplateId(tpl.id);
-                        setIsTemplateModalOpen(false);
-                      }}
-                      className={cn(
-                        "p-3.5 sm:p-4 rounded-xl border text-left transition-all duration-150 cursor-pointer flex flex-col justify-between gap-2 sm:gap-2.5 shadow-none",
-                        isSelected
-                          ? "bg-neutral-900 text-white border-neutral-900 dark:bg-white dark:text-neutral-900 dark:border-white ring-1 ring-neutral-900/10 dark:ring-white/20"
-                          : "bg-white dark:bg-neutral-900/90 border-neutral-200/80 dark:border-white/10 hover:border-neutral-300 dark:hover:border-white/20 hover:bg-neutral-50 dark:hover:bg-neutral-800/50"
-                      )}
-                    >
-                      <div className="flex items-center justify-between gap-2">
-                        <span className="text-xs font-semibold leading-snug">
-                          {tpl.name}
-                        </span>
-                        <span
-                          className={cn(
-                            "text-[10px] px-2 py-0.5 rounded-full font-mono font-medium shrink-0 border transition-colors",
-                            isSelected
-                              ? isDbCustom
-                                ? "bg-white/20 text-white border-white/25 dark:bg-neutral-900/20 dark:text-neutral-900 dark:border-neutral-900/25"
-                                : "bg-white/10 text-neutral-300 border-white/15 dark:bg-neutral-900/10 dark:text-neutral-600 dark:border-neutral-900/15"
-                              : isDbCustom
-                              ? "bg-neutral-100 text-neutral-900 border-neutral-200/80 dark:bg-white/10 dark:text-neutral-100 dark:border-white/10"
-                              : "bg-neutral-50 text-neutral-500 border-neutral-200/60 dark:bg-white/5 dark:text-neutral-400 dark:border-white/10"
-                          )}
-                        >
-                          {isDbCustom ? "Custom" : "Default"}
-                        </span>
-                      </div>
-
-                      <p
-                        className={cn(
-                          "text-xs leading-relaxed",
-                          isSelected
-                            ? "text-neutral-300 dark:text-neutral-600"
-                            : "text-neutral-500 dark:text-neutral-400"
-                        )}
-                      >
-                        {tpl.description}
-                      </p>
-                    </div>
-                  );
-                })}
-              </div>
-            )}
           </div>
         </DialogContent>
       </Dialog>

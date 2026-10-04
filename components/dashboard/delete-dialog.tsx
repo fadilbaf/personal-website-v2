@@ -44,12 +44,14 @@ export function DeleteDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{displayTitle}</DialogTitle>
-          <DialogDescription>{displayDescription}</DialogDescription>
+          <DialogDescription>
+            {displayDescription}
+          </DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex flex-row flex-wrap items-center sm:justify-end gap-2.5">
+        <DialogFooter className="flex flex-row flex-wrap items-center sm:justify-end gap-2.5 pt-2">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
