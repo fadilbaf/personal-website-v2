@@ -603,15 +603,21 @@ export function LinksLivePreview({
 
       {/* Preview Content Area */}
       <div className="p-2 sm:p-3 bg-neutral-100/60 dark:bg-neutral-900/60 flex justify-center items-center">
-        {/* Sleek Minimal Mockup Frame (No shadow, no notch) */}
-        <div className="relative w-full max-w-[360px] rounded-[36px] p-2 bg-neutral-900 dark:bg-neutral-800 border-2 border-neutral-700/80 dark:border-neutral-600/60 overflow-hidden">
+        {/* Sleek Minimal Mockup Frame (No shadow) */}
+        <div className="relative w-full max-w-[360px] rounded-[44px] p-1.5 bg-neutral-900 dark:bg-neutral-800 border-2 border-neutral-700/80 dark:border-neutral-600/60 overflow-hidden">
           {/* Screen Viewport with smooth internal scroll */}
           <div
             className={cn(
-              "w-full h-[560px] rounded-[28px] overflow-hidden flex flex-col relative select-none isolate transition-none",
+              "w-full h-[680px] rounded-[38px] overflow-hidden flex flex-col relative select-none isolate transition-none",
               isDark ? "bg-neutral-950 text-white" : "bg-white text-neutral-900"
             )}
           >
+            {/* Dynamic Island */}
+            <div className="absolute top-2.5 left-1/2 -translate-x-1/2 z-40 h-[22px] w-[96px] bg-black rounded-full pointer-events-none flex items-center justify-between px-3">
+              <div className="h-2.5 w-2.5 rounded-full bg-neutral-900 ring-1 ring-neutral-800/80" />
+              <div className="h-2 w-2 rounded-full bg-[#0d1b2a] ring-1 ring-blue-950/60" />
+            </div>
+
             {/* Scrollable Container */}
             <div className="flex-1 overflow-y-auto scrollbar-none overscroll-contain">
               {/* Header inside Phone (Exact match to LinksHeader, Static) */}
