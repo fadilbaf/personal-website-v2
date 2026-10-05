@@ -393,12 +393,11 @@ export default function MessagesPage() {
       render: (msg) => (
         <div className="flex flex-col min-w-[160px]">
           <span
-            className={`text-sm truncate cursor-pointer hover:underline ${
+            className={`text-sm truncate ${
               !msg.is_read
                 ? "font-bold text-neutral-900 dark:text-white"
                 : "font-medium text-neutral-800 dark:text-neutral-200"
             }`}
-            onClick={() => handleOpenDetail(msg)}
           >
             {msg.name}
           </span>
@@ -412,10 +411,7 @@ export default function MessagesPage() {
       key: "subject",
       header: t("messages.subject"),
       render: (msg) => (
-        <div
-          className="flex flex-col max-w-[320px] cursor-pointer"
-          onClick={() => handleOpenDetail(msg)}
-        >
+        <div className="flex flex-col max-w-[320px]">
           <span
             className={`text-sm truncate ${
               !msg.is_read
@@ -497,6 +493,7 @@ export default function MessagesPage() {
         error={isError}
         searchPlaceholder={t("messages.search_placeholder")}
         pageSize={10}
+        onRowClick={(msg) => handleOpenDetail(msg)}
         filters={[
           {
             key: "status",
@@ -637,8 +634,8 @@ export default function MessagesPage() {
               </DialogHeader>
 
               {/* Direct email card display without outer container */}
-              <div className="flex-1 overflow-y-auto p-5 sm:p-6 max-h-[calc(85vh-130px)] scrollbar-custom flex justify-center">
-                <div className="w-full max-w-[600px] flex justify-center">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 max-h-[calc(85vh-130px)] scrollbar-custom flex flex-col items-center">
+                <div className="w-full max-w-[600px] py-6 sm:py-7">
                   <iframe
                     ref={detailIframeRef}
                     srcDoc={viewingDetailHtml}

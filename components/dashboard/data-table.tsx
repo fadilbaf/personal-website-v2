@@ -41,6 +41,7 @@ interface DataTableProps<T> {
   loading?: boolean;
   error?: boolean;
   filters?: TableFilterConfig[];
+  onRowClick?: (item: T) => void;
 }
 
 /**
@@ -58,6 +59,7 @@ export function DataTable<T>({
   loading = false,
   error = false,
   filters = [],
+  onRowClick,
 }: DataTableProps<T>) {
   const { t, language } = useLanguage();
   const actualPlaceholder = searchPlaceholder || t("common.search");
@@ -416,7 +418,11 @@ export function DataTable<T>({
               paginatedData.map((item, index) => (
                 <TableRow
                   key={(item as Record<string, unknown>).id as string ?? index}
-                  className="transition-colors border-b border-neutral-100 dark:border-white/5 last:border-none even:bg-neutral-100/60 dark:even:bg-neutral-800/30 hover:bg-neutral-100 active:bg-neutral-100 dark:hover:bg-neutral-800/60 dark:active:bg-neutral-800/60"
+                  onClick={() => onRowClick?.(item)}
+                  className={cn(
+                    "transition-colors border-b border-neutral-100 dark:border-white/5 last:border-none even:bg-neutral-100/60 dark:even:bg-neutral-800/30 hover:bg-neutral-100 active:bg-neutral-100 dark:hover:bg-neutral-800/60 dark:active:bg-neutral-800/60",
+                    onRowClick && "cursor-pointer"
+                  )}
                 >
                   {columns.map((col, colIndex) => {
                     const isPrimary = colIndex === 0 || (colIndex === 1 && (columns[0].key.includes("icon") || columns[0].key.includes("logo")));
@@ -438,7 +444,12 @@ export function DataTable<T>({
                     );
                   })}
                   {actions && (
-                    <TableCell className="py-3.5 pr-6">{actions(item)}</TableCell>
+                    <TableCell
+                      className="py-3.5 pr-6"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {actions(item)}
+                    </TableCell>
                   )}
                 </TableRow>
               ))

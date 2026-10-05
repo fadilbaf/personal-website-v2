@@ -59,7 +59,12 @@ export function LinksIconPicker({
           <ChevronsUpDown className="ml-1.5 h-4 w-4 shrink-0 opacity-40" />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[320px] p-2.5" align="start">
+      <PopoverContent
+        className="w-[320px] p-2.5"
+        align="start"
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
+      >
         {/* Search input */}
         <div className="relative mb-2">
           <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-neutral-400" />
@@ -72,7 +77,11 @@ export function LinksIconPicker({
         </div>
 
         {/* Icons Grid */}
-        <div className="max-h-[220px] overflow-y-auto scrollbar-custom space-y-1 pr-1">
+        <div
+          className="max-h-[220px] overflow-y-auto scrollbar-custom space-y-1 pr-1 overscroll-contain"
+          onWheel={(e) => e.stopPropagation()}
+          onTouchMove={(e) => e.stopPropagation()}
+        >
           {filteredIcons.length === 0 ? (
             <p className="py-4 text-center text-xs text-neutral-500 dark:text-neutral-400">
               {language === "en" ? "No icons found." : "Ikon tidak ditemukan."}

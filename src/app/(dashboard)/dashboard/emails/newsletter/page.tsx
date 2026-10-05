@@ -876,7 +876,7 @@ export default function NewsletterPage() {
             {/* Left Column: Form Composer (6 cols) */}
             <div className="lg:col-span-6 space-y-4">
               <div className="rounded-xl border border-neutral-200/60 bg-white/80 backdrop-blur-sm dark:border-white/10 dark:bg-neutral-900/80 shadow-none overflow-hidden">
-                <div className="py-4 px-6 border-b border-neutral-200/60 dark:border-white/10">
+                <div className="pt-6 px-6 pb-2">
                   <h3 className="text-base sm:text-lg font-semibold text-neutral-900 dark:text-white">
                     {t("newsletter.broadcast_title")}
                   </h3>
@@ -884,7 +884,7 @@ export default function NewsletterPage() {
                     {t("newsletter.broadcast_desc")}
                   </p>
                 </div>
-                <div className="space-y-5 p-6">
+                <div className="space-y-5 p-6 pt-3">
                   {/* Row 1: Subject & Type */}
                   <div className="grid sm:grid-cols-3 gap-4">
                     <div className="sm:col-span-2 space-y-2">
@@ -970,7 +970,7 @@ export default function NewsletterPage() {
                   </div>
 
                   {/* Action Row: Recipients Setting & Send Blast Button */}
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3 border-t border-neutral-200 dark:border-white/10">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -1043,6 +1043,10 @@ export default function NewsletterPage() {
               columns={campaignColumns}
               data={campaigns}
               loading={isCampaignsLoading}
+              onRowClick={(camp) => {
+                setSelectedCampaign(camp);
+                setIsCampaignModalOpen(true);
+              }}
               searchPlaceholder={
                 language === "id"
                   ? "Cari riwayat broadcast berdasarkan subjek..."
@@ -1345,8 +1349,8 @@ export default function NewsletterPage() {
               </DialogHeader>
 
               {/* Direct email card display without outer container */}
-              <div className="flex-1 overflow-y-auto p-5 sm:p-6 max-h-[calc(85vh-130px)] scrollbar-custom flex justify-center">
-                <div className="w-full max-w-[600px] flex justify-center">
+              <div className="flex-1 overflow-y-auto px-4 sm:px-6 max-h-[calc(85vh-130px)] scrollbar-custom flex flex-col items-center">
+                <div className="w-full max-w-[600px] py-6 sm:py-7">
                   <iframe
                     ref={modalIframeRef}
                     srcDoc={viewingCampaignHtml}
