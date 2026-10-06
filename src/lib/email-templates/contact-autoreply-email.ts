@@ -52,15 +52,19 @@ export function renderContactAutoReplyEmail({
     : `This is an automated confirmation email. Please do not reply directly to this noreply address.`;
 
   return `<!DOCTYPE html>
-<html lang="${isId ? "id" : "en"}">
+<html lang="${isId ? "id" : "en"}" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <meta name="supported-color-schemes" content="light">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
   <title>${escapeHtml(title)}</title>
   <style>
-    :root, html, body {
+    :root {
+      color-scheme: light only;
+      supported-color-schemes: light only;
+    }
+    html, body {
       margin: 0;
       padding: 0;
       background-color: transparent !important;
@@ -69,14 +73,36 @@ export function renderContactAutoReplyEmail({
     * {
       box-sizing: border-box;
     }
+    a, a:link, a:visited {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    a[x-apple-data-detectors] {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .email-card {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #27272a !important;
+      }
+    }
+    u + .email-body a {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    u + .email-body .email-card {
+      background-color: #ffffff !important;
+    }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #27272a; -webkit-font-smoothing: antialiased; background-color: transparent;">
-  <div style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; background-color: #ffffff; box-sizing: border-box;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: collapse; background-color: #ffffff; box-sizing: border-box;">
+<body class="email-body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #27272a; -webkit-font-smoothing: antialiased; background-color: transparent;">
+  <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); box-sizing: border-box;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: separate; border-radius: 16px; overflow: hidden; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); box-sizing: border-box;">
       <!-- Header (Logo Only - Same #fafafa Background as Footer) -->
       <tr>
-        <td style="padding: 28px 32px; background-color: #fafafa; border-bottom: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 28px 32px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-bottom: 1px solid #f4f4f5; text-align: center; border-top-left-radius: 15px; border-top-right-radius: 15px;">
           <a href="https://${escapeHtml(resolvedWebsite)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; text-decoration: none;">
             <img src="https://fadil.bafagih.id/assets/images/fadilbaf-black.svg" alt="Fadil Bafagih" height="34" style="display: block; margin: 0 auto; height: 34px; width: auto; max-height: 34px; border: 0;" />
           </a>
@@ -85,7 +111,7 @@ export function renderContactAutoReplyEmail({
 
       <!-- Middle Section (Content) -->
       <tr>
-        <td style="padding: 32px 32px 36px; background-color: #ffffff;">
+        <td style="padding: 32px 32px 36px; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff);">
           <!-- Greeting -->
           <p style="margin: 0 0 16px; font-size: 15px; color: #09090b; font-weight: 600;">
             ${greeting}
@@ -102,10 +128,10 @@ export function renderContactAutoReplyEmail({
           </p>
 
           <!-- Callout / Note Box -->
-          <div style="background-color: #f8fafc; border: 1px solid #e4e4e7; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
+          <div style="background-color: #f8fafc; background-image: linear-gradient(#f8fafc, #f8fafc); border: 1px solid #e4e4e7; border-radius: 10px; padding: 14px 18px; margin-bottom: 24px;">
             <p style="margin: 0; font-size: 13px; color: #71717a; line-height: 1.55;">
               ${isId ? "Sementara menunggu, Anda dapat melihat karya dan proyek terbaru saya di:" : "In the meantime, feel free to explore my latest works and projects at:"}
-              <a href="https://${escapeHtml(resolvedWebsite)}" target="_blank" rel="noopener noreferrer" style="color: #0284c7; text-decoration: none; font-weight: 500;"> ${escapeHtml(resolvedWebsite)}</a>
+              <a href="https://${escapeHtml(resolvedWebsite)}" target="_blank" rel="noopener noreferrer" style="color: #0284c7 !important; text-decoration: none; font-weight: 600;"> ${escapeHtml(resolvedWebsite)}</a>
             </p>
           </div>
 
@@ -120,7 +146,7 @@ export function renderContactAutoReplyEmail({
 
       <!-- Footer Upper (Name, Email/Web, Sosmed) -->
       <tr>
-        <td style="padding: 28px 32px 20px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 28px 32px 20px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-top: 1px solid #f4f4f5; text-align: center;">
           <!-- 1. Nama -->
           <p style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: #09090b; letter-spacing: 0.2px;">
             ${escapeHtml(resolvedName)}
@@ -128,7 +154,7 @@ export function renderContactAutoReplyEmail({
 
           <!-- 2. Email & Web -->
           <p style="margin: 0 0 12px; font-size: 12px; color: #71717a;">
-            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #0284c7; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
+            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #0284c7 !important; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
           </p>
 
           <!-- 3. Sosmed -->
@@ -143,7 +169,7 @@ export function renderContactAutoReplyEmail({
 
       <!-- Footer Lower (Footnote / Sent from - Full Width Divider) -->
       <tr>
-        <td style="padding: 14px 32px 18px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 14px 32px 18px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-top: 1px solid #f4f4f5; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
           <p style="margin: 0; font-size: 11px; color: #a1a1aa; line-height: 1.5;">
             ${footnote}
           </p>

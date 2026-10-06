@@ -42,15 +42,19 @@ export function renderContactNotificationEmail({
   const resolvedTiktok = tiktokUrl || "https://tiktok.com/@fadilbafagih";
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <meta name="supported-color-schemes" content="light">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
   <title>New Message: ${escapeHtml(subject)}</title>
   <style>
-    :root, html, body {
+    :root {
+      color-scheme: light only;
+      supported-color-schemes: light only;
+    }
+    html, body {
       margin: 0;
       padding: 0;
       background-color: transparent !important;
@@ -59,14 +63,36 @@ export function renderContactNotificationEmail({
     * {
       box-sizing: border-box;
     }
+    a, a:link, a:visited {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    a[x-apple-data-detectors] {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .email-card {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #27272a !important;
+      }
+    }
+    u + .email-body a {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    u + .email-body .email-card {
+      background-color: #ffffff !important;
+    }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #27272a; -webkit-font-smoothing: antialiased; background-color: transparent;">
-  <div style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; background-color: #ffffff; box-sizing: border-box;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: collapse; background-color: #ffffff; box-sizing: border-box;">
+<body class="email-body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #27272a; -webkit-font-smoothing: antialiased; background-color: transparent;">
+  <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); box-sizing: border-box;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: separate; border-radius: 16px; overflow: hidden; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); box-sizing: border-box;">
       <!-- Header (Logo Only - Same #fafafa Background as Footer) -->
       <tr>
-        <td style="padding: 28px 32px; background-color: #fafafa; border-bottom: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 28px 32px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-bottom: 1px solid #f4f4f5; text-align: center; border-top-left-radius: 15px; border-top-right-radius: 15px;">
           <a href="https://${escapeHtml(resolvedWebsite)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; text-decoration: none;">
             <img src="https://fadil.bafagih.id/assets/images/fadilbaf-black.svg" alt="Fadil Bafagih" height="34" style="display: block; margin: 0 auto; height: 34px; width: auto; max-height: 34px; border: 0;" />
           </a>
@@ -75,7 +101,7 @@ export function renderContactNotificationEmail({
 
       <!-- Middle Section (Details to Message) -->
       <tr>
-        <td style="padding: 32px 32px 36px; background-color: #ffffff;">
+        <td style="padding: 32px 32px 36px; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff);">
           <!-- Sender & Message Details -->
           <table width="100%" border="0" cellspacing="0" cellpadding="0">
             <tr>
@@ -93,7 +119,7 @@ export function renderContactNotificationEmail({
             <tr>
               <td style="padding-bottom: 14px;">
                 <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #71717a;">EMAIL ADDRESS</span>
-                <a href="mailto:${escapeHtml(email)}" style="display: block; font-size: 14px; color: #0284c7; text-decoration: none; margin-top: 3px; font-weight: 500;">${escapeHtml(email)}</a>
+                <a href="mailto:${escapeHtml(email)}" style="display: block; font-size: 14px; color: #0284c7 !important; text-decoration: none; margin-top: 3px; font-weight: 600;">${escapeHtml(email)}</a>
               </td>
             </tr>
             <tr>
@@ -109,14 +135,14 @@ export function renderContactNotificationEmail({
             <span style="font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.2px; color: #71717a; display: block; margin-bottom: 8px;">
               MESSAGE
             </span>
-            <div style="background-color: #f8fafc; border: 1px solid #e4e4e7; border-radius: 12px; padding: 18px 20px; color: #27272a; font-size: 14.5px; line-height: 1.65; word-break: break-word;">${formattedMessage}</div>
+            <div style="background-color: #f8fafc; background-image: linear-gradient(#f8fafc, #f8fafc); border: 1px solid #e4e4e7; border-radius: 12px; padding: 18px 20px; color: #27272a; font-size: 14.5px; line-height: 1.65; word-break: break-word;">${formattedMessage}</div>
           </div>
 
           <!-- Action Button -->
           <table width="100%" border="0" cellspacing="0" cellpadding="0" style="margin-top: 26px;">
             <tr>
               <td>
-                <a href="mailto:${escapeHtml(email)}?subject=Re:%20${subject.includes("{{") ? subject : encodeURIComponent(subject)}" target="_blank" style="display: inline-block; background-color: #09090b; color: #ffffff !important; font-weight: 600; font-size: 13px; padding: 12px 22px; border-radius: 8px; text-decoration: none; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
+                <a href="mailto:${escapeHtml(email)}?subject=Re:%20${subject.includes("{{") ? subject : encodeURIComponent(subject)}" target="_blank" style="display: inline-block; background-color: #09090b; background-image: linear-gradient(#09090b, #09090b); color: #ffffff !important; font-weight: 600; font-size: 13px; padding: 12px 22px; border-radius: 8px; text-decoration: none; text-align: center; box-shadow: 0 2px 6px rgba(0,0,0,0.08);">
                   Reply to ${escapeHtml(name)} &rarr;
                 </a>
               </td>
@@ -127,7 +153,7 @@ export function renderContactNotificationEmail({
 
       <!-- Footer Upper (Name, Email/Web, Sosmed) -->
       <tr>
-        <td style="padding: 28px 32px 20px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 28px 32px 20px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-top: 1px solid #f4f4f5; text-align: center;">
           <!-- 1. Nama -->
           <p style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: #09090b; letter-spacing: 0.2px;">
             ${escapeHtml(resolvedName)}
@@ -135,7 +161,7 @@ export function renderContactNotificationEmail({
 
           <!-- 2. Email & Web -->
           <p style="margin: 0 0 12px; font-size: 12px; color: #71717a;">
-            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #0284c7; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
+            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #0284c7 !important; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
           </p>
 
           <!-- 3. Sosmed -->
@@ -150,7 +176,7 @@ export function renderContactNotificationEmail({
 
       <!-- Footer Lower (Sent from - Full Width Divider) -->
       <tr>
-        <td style="padding: 14px 32px 18px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 14px 32px 18px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-top: 1px solid #f4f4f5; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
           <p style="margin: 0; font-size: 11px; color: #a1a1aa;">
             Sent from your personal website contact form (<a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a; text-decoration: underline;">${escapeHtml(resolvedWebsite)}</a>).
           </p>

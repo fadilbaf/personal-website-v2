@@ -79,7 +79,7 @@ export function renderNewsletterBroadcastEmail({
           <!-- CTA_BUTTON_START -->
           <table border="0" cellspacing="0" cellpadding="0" style="margin: 28px 0 24px;">
             <tr>
-              <td align="center" style="border-radius: 8px; background-color: #09090b;">
+              <td align="center" style="border-radius: 8px; background-color: #09090b; background-image: linear-gradient(#09090b, #09090b);">
                 <a href="${safeUrl}" target="_blank" rel="noopener noreferrer" style="display: inline-block; padding: 12px 24px; font-size: 14px; font-weight: 600; color: #ffffff !important; text-decoration: none; border-radius: 8px; letter-spacing: 0.2px;">
                   ${safeText} &rarr;
                 </a>
@@ -90,15 +90,19 @@ export function renderNewsletterBroadcastEmail({
   }
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="color-scheme" content="light">
-  <meta name="supported-color-schemes" content="light">
+  <meta name="color-scheme" content="light only">
+  <meta name="supported-color-schemes" content="light only">
   <title>${escapeHtml(subject)}</title>
   <style>
-    :root, html, body {
+    :root {
+      color-scheme: light only;
+      supported-color-scheme: light only;
+    }
+    html, body {
       margin: 0;
       padding: 0;
       background-color: transparent !important;
@@ -107,14 +111,36 @@ export function renderNewsletterBroadcastEmail({
     * {
       box-sizing: border-box;
     }
+    a, a:link, a:visited {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    a[x-apple-data-detectors] {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    @media (prefers-color-scheme: dark) {
+      .email-card {
+        background-color: #ffffff !important;
+        background: #ffffff !important;
+        color: #27272a !important;
+      }
+    }
+    u + .email-body a {
+      color: #0284c7 !important;
+      text-decoration: none !important;
+    }
+    u + .email-body .email-card {
+      background-color: #ffffff !important;
+    }
   </style>
 </head>
-<body style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #27272a; -webkit-font-smoothing: antialiased; background-color: transparent;">
-  <div style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; background-color: #ffffff; box-sizing: border-box;">
-    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: collapse; background-color: #ffffff; box-sizing: border-box;">
+<body class="email-body" style="margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color: #27272a; -webkit-font-smoothing: antialiased; background-color: transparent;">
+  <div class="email-card" style="max-width: 600px; width: 100%; margin: 0 auto; border: 1px solid #e4e4e7; border-radius: 16px; overflow: hidden; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); box-sizing: border-box;">
+    <table width="100%" border="0" cellspacing="0" cellpadding="0" style="width: 100%; margin: 0; padding: 0; border-collapse: separate; border-radius: 16px; overflow: hidden; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff); box-sizing: border-box;">
       <!-- Header (Logo Only - Same #fafafa Background as Footer) -->
       <tr>
-        <td style="padding: 28px 32px; background-color: #fafafa; border-bottom: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 28px 32px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-bottom: 1px solid #f4f4f5; text-align: center; border-top-left-radius: 15px; border-top-right-radius: 15px;">
           <a href="https://${escapeHtml(resolvedWebsite)}" target="_blank" rel="noopener noreferrer" style="display: inline-block; text-decoration: none;">
             <img src="https://fadil.bafagih.id/assets/images/fadilbaf-black.svg" alt="Fadil Bafagih" height="34" style="display: block; margin: 0 auto; height: 34px; width: auto; max-height: 34px; border: 0;" />
           </a>
@@ -123,10 +149,10 @@ export function renderNewsletterBroadcastEmail({
 
       <!-- Middle Section (Content) -->
       <tr>
-        <td style="padding: 32px 32px 36px; background-color: #ffffff;">
+        <td style="padding: 32px 32px 36px; background-color: #ffffff; background-image: linear-gradient(#ffffff, #ffffff);">
           <!-- Campaign Type Badge -->
           <div style="margin-bottom: 12px;">
-            <span style="display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #52525b; background-color: #f4f4f5; border: 1px solid #e4e4e7; padding: 4px 10px; border-radius: 6px;">
+            <span style="display: inline-block; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 1.2px; color: #52525b; background-color: #f4f4f5; background-image: linear-gradient(#f4f4f5, #f4f4f5); border: 1px solid #e4e4e7; padding: 4px 10px; border-radius: 6px;">
               ${escapeHtml(badgeText)}
             </span>
           </div>
@@ -152,7 +178,7 @@ ${buttonHtml}
 
       <!-- Footer Upper (Name, Email/Web, Sosmed) -->
       <tr>
-        <td style="padding: 28px 32px 20px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 28px 32px 20px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-top: 1px solid #f4f4f5; text-align: center;">
           <!-- 1. Nama -->
           <p style="margin: 0 0 6px; font-size: 14px; font-weight: 600; color: #09090b; letter-spacing: 0.2px;">
             ${escapeHtml(resolvedName)}
@@ -160,27 +186,27 @@ ${buttonHtml}
 
           <!-- 2. Email & Web -->
           <p style="margin: 0 0 12px; font-size: 12px; color: #71717a;">
-            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #0284c7; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
+            <a href="mailto:${escapeHtml(resolvedEmail)}" style="color: #0284c7 !important; text-decoration: none;">${escapeHtml(resolvedEmail)}</a> &bull; <a href="https://${escapeHtml(resolvedWebsite)}" style="color: #71717a !important; text-decoration: none;">${escapeHtml(resolvedWebsite)}</a>
           </p>
 
           <!-- 3. Sosmed -->
           <p style="margin: 0; font-size: 12px; color: #71717a;">
-            <a href="${escapeHtml(resolvedInstagram)}" target="_blank" rel="noopener noreferrer" style="color: #71717a; text-decoration: none; margin: 0 5px;">Instagram</a> &bull;
-            <a href="${escapeHtml(resolvedGithub)}" target="_blank" rel="noopener noreferrer" style="color: #71717a; text-decoration: none; margin: 0 5px;">GitHub</a> &bull;
-            <a href="${escapeHtml(resolvedLinkedin)}" target="_blank" rel="noopener noreferrer" style="color: #71717a; text-decoration: none; margin: 0 5px;">LinkedIn</a> &bull;
-            <a href="${escapeHtml(resolvedTiktok)}" target="_blank" rel="noopener noreferrer" style="color: #71717a; text-decoration: none; margin: 0 5px;">TikTok</a>
+            <a href="${escapeHtml(resolvedInstagram)}" target="_blank" rel="noopener noreferrer" style="color: #71717a !important; text-decoration: none; margin: 0 5px;">Instagram</a> &bull;
+            <a href="${escapeHtml(resolvedGithub)}" target="_blank" rel="noopener noreferrer" style="color: #71717a !important; text-decoration: none; margin: 0 5px;">GitHub</a> &bull;
+            <a href="${escapeHtml(resolvedLinkedin)}" target="_blank" rel="noopener noreferrer" style="color: #71717a !important; text-decoration: none; margin: 0 5px;">LinkedIn</a> &bull;
+            <a href="${escapeHtml(resolvedTiktok)}" target="_blank" rel="noopener noreferrer" style="color: #71717a !important; text-decoration: none; margin: 0 5px;">TikTok</a>
           </p>
         </td>
       </tr>
 
       <!-- Footer Lower (Unsubscribe / Sent from - Full Width Divider) -->
       <tr>
-        <td style="padding: 14px 32px 18px; background-color: #fafafa; border-top: 1px solid #f4f4f5; text-align: center;">
+        <td style="padding: 14px 32px 18px; background-color: #fafafa; background-image: linear-gradient(#fafafa, #fafafa); border-top: 1px solid #f4f4f5; text-align: center; border-bottom-left-radius: 15px; border-bottom-right-radius: 15px;">
           <p style="margin: 0 0 6px; font-size: 11px; color: #a1a1aa; line-height: 1.5;">
             You received this email because you subscribed to the newsletter at ${escapeHtml(resolvedWebsite)}.
           </p>
           <p style="margin: 0; font-size: 11px; color: #a1a1aa;">
-            <a href="https://${escapeHtml(resolvedWebsite)}/api/newsletter/unsubscribe?email=${encodeURIComponent(recipientEmail)}" target="_blank" rel="noopener noreferrer" style="color: #71717a; text-decoration: underline;">
+            <a href="https://${escapeHtml(resolvedWebsite)}/api/newsletter/unsubscribe?email=${encodeURIComponent(recipientEmail)}" target="_blank" rel="noopener noreferrer" style="color: #71717a !important; text-decoration: underline;">
               Unsubscribe
             </a>
           </p>

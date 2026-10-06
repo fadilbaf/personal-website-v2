@@ -1205,8 +1205,8 @@ export default function NewsletterPage() {
                       className={cn(
                         "flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm transition-colors cursor-pointer select-none",
                         isChecked
-                          ? "bg-neutral-50/80 dark:bg-white/[0.04]"
-                          : "hover:bg-neutral-50/50 dark:hover:bg-white/[0.02]"
+                          ? "bg-neutral-50/80 dark:bg-white/4"
+                          : "hover:bg-neutral-50/50 dark:hover:bg-white/2"
                       )}
                     >
                       {/* Left: Checkbox + Email */}
@@ -1450,7 +1450,7 @@ export default function NewsletterPage() {
                       .map((email) => (
                         <div
                           key={email}
-                          className="flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm hover:bg-neutral-50/50 dark:hover:bg-white/[0.02] transition-colors"
+                          className="flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm hover:bg-neutral-50/50 dark:hover:bg-white/2 transition-colors"
                         >
                           <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate pr-3">
                             {email}
