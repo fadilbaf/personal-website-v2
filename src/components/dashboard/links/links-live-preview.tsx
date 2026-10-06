@@ -506,6 +506,28 @@ export function LinksLivePreview({
   const isDark = previewTheme === "dark";
   const otherLocale = previewLocale === "en" ? "id" : "en";
 
+  // Dynamic resolution for public website links URL (handling admin. subdomain vs public domain)
+  const [publicLinksUrl, setPublicLinksUrl] = useState(`/${previewLocale}/links`);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hostname = window.location.hostname.toLowerCase();
+      // Admin subdomain: admin.fadil.bafagih.id -> https://fadil.bafagih.id/{locale}/links
+      if (hostname.startsWith("admin.")) {
+        const publicHost = hostname.replace(/^admin\./, "");
+        const port = window.location.port ? `:${window.location.port}` : "";
+        setPublicLinksUrl(`${window.location.protocol}//${publicHost}${port}/${previewLocale}/links`);
+      } else if (hostname === "admin") {
+        setPublicLinksUrl(`https://fadil.bafagih.id/${previewLocale}/links`);
+      } else if (process.env.NEXT_PUBLIC_SITE_URL) {
+        const siteUrl = process.env.NEXT_PUBLIC_SITE_URL.replace(/\/$/, "");
+        setPublicLinksUrl(`${siteUrl}/${previewLocale}/links`);
+      } else {
+        setPublicLinksUrl(`/${previewLocale}/links`);
+      }
+    }
+  }, [previewLocale]);
+
   // Fallback grouped links if items array is not provided
   const activeLinks = links.filter((l) => l.is_active);
   const fallbackGrouped = activeLinks.reduce<Record<string, LinkItem[]>>((acc, link) => {
@@ -594,7 +616,7 @@ export function LinksLivePreview({
             className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
             title={t("links.open_preview_tab")}
           >
-            <a href={`/${previewLocale}/links`} target="_blank" rel="noopener noreferrer">
+            <a href={publicLinksUrl} target="_blank" rel="noopener noreferrer">
               <ExternalLink className="h-3.5 w-3.5" />
             </a>
           </Button>
