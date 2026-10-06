@@ -1122,7 +1122,7 @@ export default function NewsletterPage() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-3.5 max-h-[calc(85vh-130px)] scrollbar-custom flex flex-col min-h-0">
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 max-h-[calc(85vh-130px)] scrollbar-custom flex flex-col min-h-0">
             {/* Add Custom Email Bar */}
             <div className="flex items-center gap-2">
               <Input
@@ -1161,8 +1161,8 @@ export default function NewsletterPage() {
               />
             </div>
 
-            {/* Counter and Single Master Checkbox */}
-            <div className="flex items-center justify-between px-1 text-xs text-neutral-500">
+            {/* Counter and Select All Bar */}
+            <div className="flex items-center justify-between px-0.5 text-xs text-neutral-500">
               <span className="font-medium">
                 {t("newsletter.selected_recipients_count", {
                   count: String(draftSelectedEmails.length),
@@ -1189,10 +1189,10 @@ export default function NewsletterPage() {
               </label>
             </div>
 
-            {/* Scrollable Recipient List */}
-            <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/80 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-900/40 scrollbar-custom">
+            {/* Clean Single Container Recipient List */}
+            <div className="flex-1 overflow-y-auto max-h-[300px] rounded-lg border border-neutral-200/80 dark:border-white/10 divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-900/40 scrollbar-custom">
               {filteredDraftRecipientOptions.length === 0 ? (
-                <div className="py-8 text-center text-xs text-neutral-400">
+                <div className="py-10 text-center text-xs text-neutral-400">
                   {t("newsletter.no_recipients_found")}
                 </div>
               ) : (
@@ -1202,50 +1202,56 @@ export default function NewsletterPage() {
                     <div
                       key={opt.email}
                       onClick={() => toggleDraftRecipient(opt.email)}
-                      className={`flex items-center justify-between p-2.5 rounded-lg text-xs sm:text-sm transition-colors cursor-pointer border ${
+                      className={cn(
+                        "flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm transition-colors cursor-pointer select-none",
                         isChecked
-                          ? "bg-white dark:bg-neutral-900 border-neutral-200/80 dark:border-white/15 shadow-2xs"
-                          : "bg-transparent border-transparent opacity-60 hover:opacity-100 hover:bg-neutral-100/60 dark:hover:bg-neutral-800/40"
-                      }`}
+                          ? "bg-neutral-50/80 dark:bg-white/[0.04]"
+                          : "hover:bg-neutral-50/50 dark:hover:bg-white/[0.02]"
+                      )}
                     >
-                      {/* Left: Email + Non-Subscriber Badge / Delete */}
-                      <div className="flex items-center gap-2 min-w-0 pr-3">
-                        <span className="font-medium truncate text-neutral-900 dark:text-neutral-100 text-xs sm:text-sm">
-                          {opt.email}
-                        </span>
-                        {opt.type === "custom" && (
-                          <div
-                            className="flex items-center gap-1 shrink-0"
-                            onClick={(e) => e.stopPropagation()}
-                          >
-                            <Badge
-                              variant="secondary"
-                              className="rounded-full text-xs font-normal px-2 py-0 h-5 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 dark:bg-white/10 dark:hover:bg-white/20 dark:text-neutral-100 border-none"
-                            >
-                              {t("newsletter.recipient_custom")}
-                            </Badge>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleRemoveDraftCustomRecipient(opt.email)}
-                              className="h-5 w-5 text-neutral-400 hover:text-red-500 cursor-pointer"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-
-                      {/* Right: Checkbox */}
-                      <div className="shrink-0 flex items-center">
+                      {/* Left: Checkbox + Email */}
+                      <div className="flex items-center gap-3 min-w-0 pr-3">
                         <input
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}} // Handled by parent div onClick
-                          className="h-4 w-4 rounded border-neutral-300 dark:border-white/20 text-neutral-900 accent-neutral-900 dark:accent-white cursor-pointer pointer-events-none"
+                          className="h-4 w-4 rounded border-neutral-300 dark:border-white/20 text-neutral-900 accent-neutral-900 dark:accent-white cursor-pointer pointer-events-none shrink-0"
                         />
+                        <span
+                          className={cn(
+                            "truncate font-medium",
+                            isChecked
+                              ? "text-neutral-900 dark:text-neutral-100"
+                              : "text-neutral-500 dark:text-neutral-400"
+                          )}
+                        >
+                          {opt.email}
+                        </span>
                       </div>
+
+                      {/* Right: Custom Non-Subscriber Badge & Delete Button */}
+                      {opt.type === "custom" && (
+                        <div
+                          className="flex items-center gap-1.5 shrink-0"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Badge
+                            variant="secondary"
+                            className="rounded-full text-[11px] font-normal px-2 py-0 h-5 bg-neutral-100 dark:bg-white/10 text-neutral-600 dark:text-neutral-300 border-none"
+                          >
+                            {t("newsletter.recipient_custom")}
+                          </Badge>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleRemoveDraftCustomRecipient(opt.email)}
+                            className="h-6 w-6 text-neutral-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-md cursor-pointer"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   );
                 })
@@ -1433,7 +1439,7 @@ export default function NewsletterPage() {
 
                 {/* Recipient Email List */}
                 {selectedCampaign.recipients && selectedCampaign.recipients.length > 0 ? (
-                  <div className="flex-1 overflow-y-auto space-y-1.5 max-h-[280px] pr-1 rounded-lg border border-neutral-200/80 dark:border-white/10 p-2 bg-neutral-50/50 dark:bg-neutral-900/40 scrollbar-custom">
+                  <div className="flex-1 overflow-y-auto max-h-[300px] rounded-lg border border-neutral-200/80 dark:border-white/10 divide-y divide-neutral-100 dark:divide-white/5 bg-white dark:bg-neutral-900/40 scrollbar-custom">
                     {selectedCampaign.recipients
                       .filter((email) =>
                         !recipientSearch.trim() ||
@@ -1444,14 +1450,14 @@ export default function NewsletterPage() {
                       .map((email) => (
                         <div
                           key={email}
-                          className="flex items-center justify-between p-2.5 rounded-md bg-white dark:bg-neutral-900 border border-neutral-200/80 dark:border-white/10 text-xs sm:text-sm"
+                          className="flex items-center justify-between px-3.5 py-2.5 text-xs sm:text-sm hover:bg-neutral-50/50 dark:hover:bg-white/[0.02] transition-colors"
                         >
-                          <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate pr-2">
+                          <span className="font-medium text-neutral-900 dark:text-neutral-100 truncate pr-3">
                             {email}
                           </span>
                           <Badge
-                            variant="default"
-                            className="rounded-full text-xs font-medium bg-neutral-900 text-white dark:bg-white dark:text-neutral-900"
+                            variant="secondary"
+                            className="rounded-full text-[11px] font-medium px-2.5 py-0.5 bg-neutral-100 dark:bg-white/10 text-neutral-800 dark:text-neutral-200 border-none shrink-0"
                           >
                             Delivered
                           </Badge>
