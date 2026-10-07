@@ -3,9 +3,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
-import Image from "next/image";
-import { Mail, ArrowRight } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Mail, Download } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import {
   Tooltip,
@@ -14,8 +12,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { Profile, Contact, About, Role, Badge as HeroBadge } from "@/src/types/database";
-import fadilbafBlackImage from "@/src/assets/images/fadilbaf-black.png";
-import fadilbafWhiteImage from "@/src/assets/images/fadilbaf-white.png";
+import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
+import { toStorageUrl } from "@/src/lib/storage-url";
 
 /** Inline SVG brand icons — consistent B&W style */
 function LinkedInIcon({ className }: { className?: string }) {
@@ -63,47 +61,31 @@ const containerVariants = {
   hidden: {},
   visible: {
     transition: {
-      staggerChildren: 0.15,
-      delayChildren: 0.1,
+      staggerChildren: 0.12,
+      delayChildren: 0.05,
     },
   },
 };
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 30, filter: "blur(8px)", scale: 1 },
+  hidden: { opacity: 0, y: 25, filter: "blur(6px)" },
   visible: {
     opacity: 1,
     y: 0,
     filter: "blur(0px)",
-    scale: 1,
     transition: { 
-      duration: 0.7, 
+      duration: 0.6, 
       ease: "easeOut" as const,
-      scale: { duration: 0.5, ease: "easeOut" }
     },
   },
 };
 
-export function MainHero({ profile, roles, badges = [], about, contact, locale }: MainHeroProps) {
+export function MainHero({ profile, roles, about, contact, locale }: MainHeroProps) {
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
-  const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
-  const [mounted, setMounted] = useState(false);
-  const { resolvedTheme } = useTheme();
+  const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
 
-  const currentBadge = badges.length > 0 ? badges[currentBadgeIndex] : null;
-  const badgeText = currentBadge
-    ? locale === "id"
-      ? currentBadge.name_id
-      : currentBadge.name_en
-    : null;
   const bioText = locale === "id" ? about?.bio_id : about?.bio_en;
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  const heroImage = mounted && resolvedTheme === "dark" ? fadilbafBlackImage : fadilbafWhiteImage;
-  
   // Cycle through roles every 3 seconds
   useEffect(() => {
     if (roles.length <= 1) return;
@@ -112,80 +94,6 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
     }, 3000);
     return () => clearInterval(interval);
   }, [roles.length]);
-
-  // Cycle through badges every 3.5 seconds
-  useEffect(() => {
-    if (badges.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentBadgeIndex((prev) => (prev + 1) % badges.length);
-    }, 3500);
-    return () => clearInterval(interval);
-  }, [badges.length]);
-
-  // Handle smooth scroll from other pages via sessionStorage or URL hash
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-
-    const hashTarget = window.location.hash ? window.location.hash.replace("#", "") : null;
-    const target =
-      sessionStorage.getItem("scroll-target") ||
-      (sessionStorage.getItem("scroll_to_about") ? "about" : null) ||
-      (sessionStorage.getItem("scroll_to_experiences") ? "experiences" : null) ||
-      (sessionStorage.getItem("scroll_to_projects") ? "projects" : null) ||
-      (sessionStorage.getItem("scroll_to_achievements") ? "achievements" : null) ||
-      (sessionStorage.getItem("scroll_to_blogs") ? "blogs" : null) ||
-      (sessionStorage.getItem("scroll_to_contact") ? "contact" : null) ||
-      hashTarget;
-
-    if (!target) return;
-
-    // Ensure body/html overflow are unlocked
-    document.body.style.overflow = "";
-    document.documentElement.style.overflow = "";
-
-    const performScroll = () => {
-      const element = document.getElementById(target);
-      if (element) {
-        element.scrollIntoView({ behavior: "smooth" });
-      }
-    };
-
-    // Retry scroll across render lifecycle to guarantee target is reached even while components mount
-    const t0 = setTimeout(performScroll, 50);
-    const t1 = setTimeout(performScroll, 200);
-    const t2 = setTimeout(performScroll, 500);
-    const t3 = setTimeout(performScroll, 900);
-
-    // Clean URL hash & sessionStorage after smooth scroll has initiated
-    const cleanTimer = setTimeout(() => {
-      sessionStorage.removeItem("scroll-target");
-      sessionStorage.removeItem("scroll_to_about");
-      sessionStorage.removeItem("scroll_to_experiences");
-      sessionStorage.removeItem("scroll_to_projects");
-      sessionStorage.removeItem("scroll_to_achievements");
-      sessionStorage.removeItem("scroll_to_blogs");
-      sessionStorage.removeItem("scroll_to_contact");
-      if (window.location.hash) {
-        window.history.replaceState(null, "", window.location.pathname);
-      }
-    }, 1200);
-
-    return () => {
-      clearTimeout(t0);
-      clearTimeout(t1);
-      clearTimeout(t2);
-      clearTimeout(t3);
-      clearTimeout(cleanTimer);
-    };
-  }, []);
-
-  const handleScrollToAbout = (e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    const element = document.getElementById("about");
-    if (element) {
-      element.scrollIntoView({ behavior: "smooth" });
-    }
-  };
 
   const handleScrollToContact = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -200,7 +108,7 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
       ? locale === "id"
         ? roles[currentRoleIndex]?.role_id
         : roles[currentRoleIndex]?.role_en
-      : "";
+      : "Full-Stack Developer";
 
   const socialLinks = [
     { url: contact?.linkedin_url, icon: LinkedInIcon, label: "LinkedIn" },
@@ -210,63 +118,37 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
   ].filter((link) => link.url);
 
   return (
-    <motion.section
-      id="hero"
-      className="relative min-h-0 flex flex-col items-center justify-start px-3.5 sm:px-12 md:px-24 lg:px-36 pt-16 md:pt-24 pb-12 overflow-hidden bg-transparent"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-    >
-      <div className="w-full max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-4 lg:gap-12 items-center h-auto relative z-10">
-        
-        {/* Left Column: Badge, Greeting & Name, Bio, CTAs, Social Icons */}
-        <div className="flex flex-col justify-center items-start text-left order-1 lg:col-span-7 z-10 relative gap-6 py-4">
+    <div className="relative w-full pt-10 pb-8 md:pt-12 md:pb-10 flex flex-col">
+      <motion.section
+        id="hero"
+        className="flex flex-col justify-start items-start text-left z-10 w-full"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <div className="flex flex-col items-start gap-6 w-full">
           
-          {/* Top: Badge */}
-          {badges.length > 0 && (
-            <motion.div variants={fadeUpVariants} className="w-fit">
-              <span className="inline-flex items-center gap-2 rounded-lg border border-neutral-200 bg-white/50 px-4 py-2 text-sm text-neutral-600 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-400 backdrop-blur-sm">
-                <span className="relative flex h-2 w-2">
-                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                  <span className="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
-                </span>
-                <AnimatePresence mode="wait">
-                  <motion.span
-                    key={currentBadgeIndex}
-                    initial={{ y: 5, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -5, opacity: 0 }}
-                    transition={{ duration: 0.25, ease: "easeInOut" }}
-                    className="inline-block"
-                  >
-                    {badgeText || tMain(locale, "available")}
-                  </motion.span>
-                </AnimatePresence>
-              </span>
-            </motion.div>
-          )}
-
-          {/* Name & Role Section */}
-          <div className="flex flex-col gap-2 w-full mt-2">
-            <motion.p variants={fadeUpVariants} className="text-neutral-500 dark:text-neutral-400 font-medium text-sm md:text-base">
+          {/* Greeting, Name & Role */}
+          <div className="flex flex-col gap-2 w-full">
+            <motion.p variants={fadeUpVariants} className="text-neutral-500 dark:text-neutral-400 font-medium text-sm sm:text-base">
               {tMain(locale, "hello")}
             </motion.p>
-            <motion.h1 variants={fadeUpVariants} className="text-5xl md:text-6xl lg:text-[76px] font-bold tracking-tight text-neutral-900 dark:text-white leading-[1.05] max-w-2xl">
+            <motion.h1 variants={fadeUpVariants} className="text-4xl sm:text-6xl md:text-7xl lg:text-[76px] font-bold tracking-tight text-neutral-900 dark:text-white leading-[1.08]">
               {profile?.full_name || "Fadil Bafagih"}
             </motion.h1>
             
-            {/* Role with cycling animation */}
-            <motion.div variants={fadeUpVariants} className="h-8 md:h-9 overflow-hidden flex items-center justify-start">
+            {/* Dynamic cycling role */}
+            <motion.div variants={fadeUpVariants} className="h-8 md:h-10 overflow-hidden flex items-center justify-start">
               <AnimatePresence mode="wait">
                 <motion.h2
                   key={currentRoleIndex}
-                  initial={{ y: 15, opacity: 0 }}
+                  initial={{ y: 14, opacity: 0 }}
                   animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -15, opacity: 0 }}
+                  exit={{ y: -14, opacity: 0 }}
                   transition={{ duration: 0.35, ease: "easeInOut" }}
-                  className="text-lg md:text-xl text-neutral-600 dark:text-neutral-300 font-regular"
+                  className="text-lg sm:text-2xl text-neutral-600 dark:text-neutral-300 font-normal"
                 >
-                  {currentRole || "Full-Stack Developer"}
+                  {currentRole}
                 </motion.h2>
               </AnimatePresence>
             </motion.div>
@@ -275,7 +157,7 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
           {/* Bio text */}
           <motion.p
             variants={fadeUpVariants}
-            className="hidden md:block text-neutral-500 dark:text-neutral-400 text-sm md:text-[15px] leading-relaxed max-w-[520px] -mt-2"
+            className="text-neutral-500 dark:text-neutral-400 text-sm sm:text-base leading-relaxed w-full"
           >
             {bioText || (locale === "id" 
               ? "Mengubah ide menjadi solusi digital kreatif yang menginspirasi dan menarik, dengan fokus pada kegunaan, inovasi, dan desain yang berpusat pada manusia."
@@ -284,30 +166,32 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
           </motion.p>
 
           {/* CTA Buttons */}
-          <motion.div variants={fadeUpVariants} className="flex flex-row flex-wrap items-center gap-3 w-full mt-2 z-20">
+          <motion.div variants={fadeUpVariants} className="flex flex-row flex-wrap items-center gap-3 w-full pt-1">
             <Link
               href="#contact"
               onClick={handleScrollToContact}
-              className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-xs md:text-sm cursor-pointer w-fit"
+              className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-xs sm:text-sm cursor-pointer shadow-xs"
             >
               <Mail className="h-4 w-4" />
               <span>{tMain(locale, "lets_work")}</span>
             </Link>
 
-            <Link
-              href="#about"
-              onClick={handleScrollToAbout}
-              className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-medium hover:bg-neutral-50 active:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 text-xs md:text-sm cursor-pointer w-fit"
-            >
-              <span>{tMain(locale, "more_about_me")}</span>
-              <ArrowRight className="h-4 w-4 transition-transform duration-200 group-hover:translate-x-0.5" strokeWidth={2.5} />
-            </Link>
+            {about?.cv_url && (
+              <button
+                type="button"
+                onClick={() => setIsCvPdfOpen(true)}
+                className="group flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-medium hover:bg-neutral-50 active:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 text-xs sm:text-sm cursor-pointer shadow-xs"
+              >
+                <Download className="h-4 w-4" />
+                <span>{tMain(locale, "download_cv")}</span>
+              </button>
+            )}
           </motion.div>
 
-          {/* Social links */}
+          {/* Social icons */}
           {socialLinks.length > 0 && (
             <TooltipProvider>
-              <div className="flex items-center gap-3 mt-4">
+              <motion.div variants={fadeUpVariants} className="flex items-center gap-2.5 pt-2">
                 {socialLinks.map(({ url, icon: Icon, label }, index) => (
                   <Tooltip key={label}>
                     <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
@@ -315,20 +199,11 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
                         href={url!}
                         target="_blank"
                         rel="noopener noreferrer"
-                        initial={{ opacity: 0, y: 16 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 1.05 }}
-                        transition={{
-                          duration: 0.35,
-                          ease: "easeOut" as const,
-                          delay: 0.6 + index * 0.06,
-                        }}
-                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors duration-200 hover:bg-neutral-100 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800"
+                        whileHover={{ scale: 1.06 }}
+                        whileTap={{ scale: 0.96 }}
+                        className="flex h-11 w-11 items-center justify-center rounded-xl border border-neutral-200 bg-white text-neutral-700 transition-colors duration-200 hover:bg-neutral-100 dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 shadow-2xs"
                         aria-label={label}
-                        onClick={(e) => {
-                          e.currentTarget.blur();
-                        }}
+                        onClick={(e) => e.currentTarget.blur()}
                       >
                         <Icon className="h-5 w-5" />
                       </motion.a>
@@ -338,35 +213,22 @@ export function MainHero({ profile, roles, badges = [], about, contact, locale }
                     </TooltipContent>
                   </Tooltip>
                 ))}
-              </div>
+              </motion.div>
             </TooltipProvider>
           )}
 
         </div>
+      </motion.section>
 
-        {/* Right Column: Photo with Grayscale Filter & Fade-out overlay */}
-        <div className="flex justify-center items-end relative min-h-0 lg:min-h-[580px] w-full order-2 lg:col-span-5 z-20 pointer-events-none mt-2 lg:mt-0">
-          <motion.div
-            variants={fadeUpVariants}
-            whileHover={{ scale: 1.01, transition: { duration: 0.5, ease: "easeOut" } }}
-            whileTap={{ scale: 1.01, transition: { duration: 0.3, ease: "easeOut" } }}
-            className="relative w-full max-w-[320px] sm:max-w-[360px] lg:w-[520px] lg:max-w-none lg:aspect-4/5 flex items-end justify-center overflow-visible lg:absolute lg:bottom-0 lg:left-1/2 lg:-translate-x-1/2 origin-bottom pointer-events-auto"
-          >
-            <Image
-              src={heroImage}
-              alt={profile?.full_name || "Fadil Bafagih"}
-              priority
-              draggable={false}
-              onContextMenu={(e) => e.preventDefault()}
-              className="object-contain max-h-[380px] sm:max-h-[430px] lg:max-h-[620px] w-auto pointer-events-auto select-none profile-image-grayscale"
-            />
-            {/* High-fidelity 13-stop easing gradient to match page background with ultra-smooth transition at both ends */}
-            <div className="absolute bottom-[-2px] left-0 right-0 h-28 lg:h-36 pointer-events-none z-10 bg-[linear-gradient(to_top,#fff_0%,rgba(255,255,255,0.99)_3%,rgba(255,255,255,0.97)_8%,rgba(255,255,255,0.92)_15%,rgba(255,255,255,0.82)_25%,rgba(255,255,255,0.65)_38%,rgba(255,255,255,0.45)_52%,rgba(255,255,255,0.27)_66%,rgba(255,255,255,0.15)_78%,rgba(255,255,255,0.07)_87%,rgba(255,255,255,0.02)_94%,rgba(255,255,255,0.005)_97%,transparent_100%)] dark:bg-[linear-gradient(to_top,#0a0a0a_0%,rgba(10,10,10,0.99)_3%,rgba(10,10,10,0.97)_8%,rgba(10,10,10,0.92)_15%,rgba(10,10,10,0.82)_25%,rgba(10,10,10,0.65)_38%,rgba(10,10,10,0.45)_52%,rgba(10,10,10,0.27)_66%,rgba(10,10,10,0.15)_78%,rgba(10,10,10,0.07)_87%,rgba(10,10,10,0.02)_94%,rgba(10,10,10,0.005)_97%,transparent_100%)]" />
-          </motion.div>
-        </div>
-
-      </div>
-
-    </motion.section>
+      {/* CV PDF Viewer Modal */}
+      {about?.cv_url && (
+        <PdfViewerModal
+          isOpen={isCvPdfOpen}
+          onClose={() => setIsCvPdfOpen(false)}
+          pdfUrl={toStorageUrl(about.cv_url)}
+          fileName={extractPdfFileName(about.cv_url) || "CV / Resume"}
+        />
+      )}
+    </div>
   );
 }

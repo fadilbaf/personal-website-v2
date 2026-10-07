@@ -138,16 +138,9 @@
   body[data-scroll-locked],
   body[data-radix-scroll-lock],
   body.overflow-hidden,
-  html[data-scroll-locked],
-  html[data-radix-scroll-lock],
-  html.overflow-hidden,
-  html:has([data-slot="dialog-overlay"]),
   body:has([data-slot="dialog-overlay"]),
-  html:has([data-slot="alert-dialog-overlay"]),
   body:has([data-slot="alert-dialog-overlay"]),
-  html:has([data-slot="sheet-overlay"]),
   body:has([data-slot="sheet-overlay"]),
-  html:has([data-nav-menu="open"]),
   body:has([data-nav-menu="open"]) {
     overflow: hidden !important;
     overscroll-behavior: none !important;
@@ -156,23 +149,16 @@
   }
 
   /* Zero-shift fixed header alignment when scroll lock is active */
-  body[data-scroll-locked] header.fixed,
-  html[data-scroll-locked] header.fixed {
+  body[data-scroll-locked] header.fixed {
     right: var(--removed-body-scroll-bar-size, 0px) !important;
   }
 
   /* Webkit scrollbar complete hide when modal/overlay is open */
   body[data-scroll-locked]::-webkit-scrollbar,
-  html[data-scroll-locked]::-webkit-scrollbar,
   body.overflow-hidden::-webkit-scrollbar,
-  html.overflow-hidden::-webkit-scrollbar,
-  html:has([data-slot="dialog-overlay"])::-webkit-scrollbar,
   body:has([data-slot="dialog-overlay"])::-webkit-scrollbar,
-  html:has([data-slot="alert-dialog-overlay"])::-webkit-scrollbar,
   body:has([data-slot="alert-dialog-overlay"])::-webkit-scrollbar,
-  html:has([data-slot="sheet-overlay"])::-webkit-scrollbar,
   body:has([data-slot="sheet-overlay"])::-webkit-scrollbar,
-  html:has([data-nav-menu="open"])::-webkit-scrollbar,
   body:has([data-nav-menu="open"])::-webkit-scrollbar {
     display: none !important;
     width: 0 !important;

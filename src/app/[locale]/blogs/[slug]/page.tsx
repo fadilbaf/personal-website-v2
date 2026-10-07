@@ -2,8 +2,7 @@ import { BlogService } from "@/src/services/blog.service";
 import { LinksService } from "@/src/services/links.service";
 import { notFound } from "next/navigation";
 import { BlogDetailClient } from "./blog-detail-client";
-import { MainHeader } from "@/src/components/main/main-header";
-import { MainFooter } from "@/src/components/main/main-footer";
+import { MainPublicShell } from "@/src/components/main/main-public-shell";
 import { ScrollToTop } from "@/components/scroll-to-top";
 import type { MainLocale } from "@/src/lib/main-translations";
 import { extractBlogExcerpt } from "@/src/lib/blog-utils";
@@ -75,25 +74,25 @@ export default async function BlogDetailPage({
     notFound();
   }
 
-  const { about, contact } = await LinksService.getAll();
+  const { profile, roles, badges, about, contact } = await LinksService.getAll();
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 font-sans transition-colors duration-300">
-      <MainHeader locale={locale} hireMeEmail={contact?.email ?? null} />
-
-      <main className="w-full pt-14">
+    <MainPublicShell
+      profile={profile}
+      roles={roles}
+      badges={badges}
+      contact={contact}
+      about={about}
+      locale={locale}
+    >
+      <main className="w-full flex-1 flex flex-col overflow-x-hidden">
         <BlogDetailClient
           blog={blog}
           locale={locale}
         />
       </main>
 
-      <MainFooter
-        about={about}
-        contact={contact}
-        locale={locale}
-      />
       <ScrollToTop />
-    </div>
+    </MainPublicShell>
   );
 }

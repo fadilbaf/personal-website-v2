@@ -43,14 +43,14 @@ const formatIssueDate = (dateStr: string | null, locale: MainLocale): string => 
 
 export function MainAchievements({ achievements, locale }: MainAchievementsProps) {
   const [selectedAchievement, setSelectedAchievement] = useState<Achievement | null>(null);
-  const [cols, setCols] = useState(4);
+  const [cols, setCols] = useState(3);
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 640) setCols(1);
       else if (width < 1024) setCols(2);
-      else setCols(4);
+      else setCols(3);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -74,12 +74,12 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
   // Filter published achievements
   const publishedAchievements = achievements.filter((a) => a.is_published);
 
-  // Render max 8 on desktop/tablet, max 3 on mobile (handled responsively by CSS classes)
-  const displayedAchievements = publishedAchievements.slice(0, 8);
+  // Render max 6 on desktop/tablet, max 3 on mobile (handled responsively by CSS classes)
+  const displayedAchievements = publishedAchievements.slice(0, 6);
 
   return (
-    <section id="achievements" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-4 pb-6 md:pt-6 md:pb-8 bg-transparent">
-      <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8">
+    <section id="achievements" className="scroll-mt-20 w-full pt-4 pb-8 md:pt-6 md:pb-12 bg-transparent">
+      <div className="w-full flex flex-col gap-6 sm:gap-8">
         {/* Section Header */}
         <div className="flex flex-row items-center justify-between gap-4">
           <motion.div
@@ -127,8 +127,8 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
           </motion.div>
         </div>
 
-        {/* Achievements Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        {/* Achievements Grid (3 cards per row on desktop) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {displayedAchievements.map((item, index) => {
             // Determine dynamic visibility: hide from index >= 3 on mobile
             const visibilityClass = index >= 3 ? "hidden sm:flex" : "flex";

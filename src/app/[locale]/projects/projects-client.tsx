@@ -82,13 +82,10 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
       const width = window.innerWidth;
       if (width < 768) {
         setCols(1);
-        setPageSize(5);
-      } else if (width < 1024) {
-        setCols(2);
-        setPageSize(15);
+        setPageSize(6);
       } else {
-        setCols(3);
-        setPageSize(15);
+        setCols(2);
+        setPageSize(10);
       }
     };
     handleResize();
@@ -181,7 +178,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
   }, [filteredProjects.length, page, pageSize, locale]);
 
   return (
-    <div className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-6 md:pt-8 pb-3 md:pb-4 bg-transparent">
+    <div className="w-full pt-6 md:pt-8 pb-8 md:pb-12 bg-transparent">
       <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6">
         {/* Back button */}
         <motion.div
@@ -396,7 +393,7 @@ export function ProjectsClient({ projects, types, categories, locale }: Projects
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.25 }}
-              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8 w-full"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6 w-full"
             >
               {paginatedProjects.map((item, index) => {
                 // Extract sorted images and first image url

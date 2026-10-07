@@ -95,15 +95,15 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
     setMounted(true);
     const handleResize = () => {
       const width = window.innerWidth;
-      if (width < 768) {
+      if (width < 640) {
         setCols(1);
-        setPageSize(5);
+        setPageSize(6);
       } else if (width < 1024) {
         setCols(2);
-        setPageSize(20);
+        setPageSize(12);
       } else {
-        setCols(4);
-        setPageSize(20);
+        setCols(3);
+        setPageSize(18);
       }
     };
     handleResize();
@@ -196,7 +196,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
   }, [filteredAchievements.length, page, pageSize, locale]);
 
   return (
-    <div className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-6 md:pt-8 pb-3 md:pb-4 bg-transparent">
+    <div className="w-full pt-6 md:pt-8 pb-8 md:pb-12 bg-transparent">
       <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6">
         {/* Back button */}
         <motion.div
@@ -424,7 +424,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.3 }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 w-full"
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full"
             >
               {paginatedAchievements.map((item, index) => {
                 const title = locale === "id" ? item.title_id : item.title_en;

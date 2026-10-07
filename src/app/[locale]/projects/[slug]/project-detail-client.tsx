@@ -367,7 +367,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
   );
 
   return (
-    <div className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 py-8 bg-transparent">
+    <div className="w-full pt-6 pb-12 bg-transparent">
       <div className="w-full max-w-[1440px] mx-auto flex flex-col">
         {/* 1. Back button */}
         <motion.div

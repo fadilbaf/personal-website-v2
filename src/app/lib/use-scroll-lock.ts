@@ -14,7 +14,6 @@ export function lockScroll() {
     const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
 
     originalBodyOverflow = document.body.style.overflow;
-    originalHtmlOverflow = document.documentElement.style.overflow;
     originalBodyPaddingRight = document.body.style.paddingRight;
 
     // Set CSS custom property for fixed headers and other elements
@@ -28,7 +27,6 @@ export function lockScroll() {
     }
 
     document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
     document.body.classList.add("overflow-hidden");
     document.body.setAttribute("data-scroll-locked", "true");
   }
@@ -43,7 +41,6 @@ export function unlockScroll() {
 
   if (lockCount === 0) {
     document.body.style.overflow = originalBodyOverflow;
-    document.documentElement.style.overflow = originalHtmlOverflow;
     document.body.style.paddingRight = originalBodyPaddingRight;
     document.documentElement.style.removeProperty("--removed-body-scroll-bar-size");
     document.body.classList.remove("overflow-hidden");

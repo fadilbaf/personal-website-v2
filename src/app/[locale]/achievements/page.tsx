@@ -1,8 +1,7 @@
 import { AchievementService } from "@/src/services/achievement.service";
 import { LinksService } from "@/src/services/links.service";
 import { AchievementsClient } from "./achievements-client";
-import { MainHeader } from "@/src/components/main/main-header";
-import { MainFooter } from "@/src/components/main/main-footer";
+import { MainPublicShell } from "@/src/components/main/main-public-shell";
 import type { MainLocale } from "@/src/lib/main-translations";
 import { ScrollToTop } from "@/components/scroll-to-top";
 
@@ -32,7 +31,7 @@ export default async function AchievementsPage({
   const locale = rawLocale as MainLocale;
 
   // Fetch all required data concurrently
-  const [achievements, types, categories, { about, contact }] = await Promise.all([
+  const [achievements, types, categories, { profile, roles, badges, about, contact }] = await Promise.all([
     AchievementService.getAll(),
     AchievementService.getTypes(),
     AchievementService.getCategories(),
@@ -43,10 +42,15 @@ export default async function AchievementsPage({
   const publishedAchievements = achievements.filter((a) => a.is_published);
 
   return (
-    <div className="flex min-h-screen flex-col bg-white dark:bg-neutral-950 font-sans transition-colors duration-300">
-      <MainHeader locale={locale} hireMeEmail={contact?.email ?? null} />
-
-      <main className="w-full pt-14">
+    <MainPublicShell
+      profile={profile}
+      roles={roles}
+      badges={badges}
+      contact={contact}
+      about={about}
+      locale={locale}
+    >
+      <main className="w-full flex-1 flex flex-col overflow-x-hidden">
         <AchievementsClient
           achievements={publishedAchievements}
           types={types}
@@ -55,12 +59,7 @@ export default async function AchievementsPage({
         />
       </main>
 
-      <MainFooter
-        about={about}
-        contact={contact}
-        locale={locale}
-      />
       <ScrollToTop />
-    </div>
+    </MainPublicShell>
   );
 }

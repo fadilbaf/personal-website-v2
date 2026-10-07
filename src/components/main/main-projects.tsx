@@ -34,14 +34,13 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
   // Render max 6 on desktop, max 3 on mobile (handled by CSS to avoid hydration mismatch)
   const displayedProjects = publishedProjects.slice(0, 6);
 
-  const [cols, setCols] = useState(3);
+  const [cols, setCols] = useState(2);
 
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth;
       if (width < 768) setCols(1);
-      else if (width < 1024) setCols(2);
-      else setCols(3);
+      else setCols(2);
     };
     handleResize();
     window.addEventListener("resize", handleResize);
@@ -63,8 +62,8 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
   }, []);
 
   return (
-    <section id="projects" className="scroll-mt-20 w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-4 pb-6 md:pt-6 md:pb-8 bg-transparent">
-      <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6 sm:gap-8">
+    <section id="projects" className="scroll-mt-20 w-full pt-4 pb-8 md:pt-6 md:pb-12 bg-transparent">
+      <div className="w-full flex flex-col gap-6 sm:gap-8">
         {/* Section Header */}
         <div className="flex flex-row items-center justify-between gap-4">
           <motion.div
@@ -113,7 +112,7 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
         </div>
 
         {/* Projects Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
           {displayedProjects.map((item, index) => {
             // Determine dynamic visibility for desktop (max 6) vs mobile (max 3)
             const visibilityClass = index >= 3 ? "hidden md:flex" : "flex";

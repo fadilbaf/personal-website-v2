@@ -6,6 +6,7 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     switch_lang: "Bahasa Indonesia",
     theme_light: "Light Mode",
     theme_dark: "Dark Mode",
+    theme_system: "System Mode",
     hire_me: "Hire Me",
     menu: "Menu",
 
@@ -193,6 +194,7 @@ const mainTranslations: Record<MainLocale, Record<string, string>> = {
     switch_lang: "English",
     theme_light: "Mode Terang",
     theme_dark: "Mode Gelap",
+    theme_system: "Mode Sistem",
     hire_me: "Rekrut Saya",
     menu: "Menu",
 
