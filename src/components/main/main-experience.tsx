@@ -219,6 +219,8 @@ export function MainExperience({
     if (typeof window !== "undefined") {
       const scrollFlag = sessionStorage.getItem("scroll_to_experiences") === "true" || sessionStorage.getItem("scroll-target") === "experiences";
       if (scrollFlag) {
+        sessionStorage.removeItem("scroll_to_experiences");
+        sessionStorage.removeItem("scroll-target");
         setTimeout(() => {
           const element = document.getElementById("experiences");
           if (element) {

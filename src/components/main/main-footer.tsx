@@ -91,6 +91,16 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
       }
     } else {
       e.preventDefault();
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("scroll-target");
+        sessionStorage.removeItem("scroll_to_hero");
+        sessionStorage.removeItem("scroll_to_about");
+        sessionStorage.removeItem("scroll_to_experiences");
+        sessionStorage.removeItem("scroll_to_projects");
+        sessionStorage.removeItem("scroll_to_achievements");
+        sessionStorage.removeItem("scroll_to_blogs");
+        sessionStorage.removeItem("scroll_to_contact");
+      }
       sessionStorage.setItem("scroll-target", targetId);
       sessionStorage.setItem(`scroll_to_${targetId}`, "true");
       router.push(`/${locale}`, { scroll: false });

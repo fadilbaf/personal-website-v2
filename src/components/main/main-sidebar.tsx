@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -51,10 +51,46 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [email, setEmail] = useState("");
   const [loading, setLoading] = useState(false);
+  const menuContainerRef = useRef<HTMLDivElement>(null);
 
   const isHomePage = pathname === `/${locale}` || pathname === "/";
   const otherLocale = locale === "en" ? "id" : "en";
   const switchLangPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
+
+  // Auto-scroll sidebar menu to keep active section/page in view with comfortable padding
+  useEffect(() => {
+    const container = menuContainerRef.current;
+    if (!container) return;
+
+    if (activeSection === "hero" || (isHomePage && typeof window !== "undefined" && window.scrollY < 200)) {
+      container.scrollTo({
+        top: 0,
+        behavior: "smooth",
+      });
+      return;
+    }
+
+    const activeEl = container.querySelector<HTMLElement>("[data-sidebar-active='true']");
+    if (activeEl) {
+      const elRect = activeEl.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      const padding = 32;
+
+      if (elRect.top - padding < containerRect.top) {
+        const diff = containerRect.top - (elRect.top - padding);
+        container.scrollTo({
+          top: Math.max(0, container.scrollTop - diff),
+          behavior: "smooth",
+        });
+      } else if (elRect.bottom + padding > containerRect.bottom) {
+        const diff = (elRect.bottom + padding) - containerRect.bottom;
+        container.scrollTo({
+          top: container.scrollTop + diff,
+          behavior: "smooth",
+        });
+      }
+    }
+  }, [activeSection, pathname, isHomePage]);
 
   // Cycle through roles every 3 seconds
   useEffect(() => {
@@ -72,7 +108,7 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
         : roles[currentRoleIndex]?.role_en
       : "QA Engineer";
 
-  // Track active section on Homepage scroll
+  // Track active section on Homepage scroll (instant real-time detection via requestAnimationFrame & getBoundingClientRect)
   useEffect(() => {
     if (!isHomePage) {
       setActiveSection("");
@@ -89,38 +125,70 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
       "contact",
     ];
 
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200;
+    let ticking = false;
+
+    const updateActiveSection = () => {
+      const scrollY = window.scrollY;
+      if (scrollY < 100) {
+        setActiveSection("hero");
+        return;
+      }
+
+      // If scrolled near bottom of page, activate last section
+      if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 60) {
+        setActiveSection("contact");
+        return;
+      }
+
+      const triggerLine = window.innerHeight * 0.35;
       let current = "hero";
 
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerLine && rect.bottom > triggerLine) {
             current = id;
             break;
           }
         }
       }
 
-      if (window.scrollY < 200) {
-        current = "hero";
-      }
-
       setActiveSection(current);
     };
 
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveSection();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    updateActiveSection();
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHomePage]);
+
+  const clearScrollFlags = () => {
+    if (typeof window === "undefined") return;
+    sessionStorage.removeItem("scroll-target");
+    sessionStorage.removeItem("scroll_to_hero");
+    sessionStorage.removeItem("scroll_to_about");
+    sessionStorage.removeItem("scroll_to_experiences");
+    sessionStorage.removeItem("scroll_to_projects");
+    sessionStorage.removeItem("scroll_to_achievements");
+    sessionStorage.removeItem("scroll_to_blogs");
+    sessionStorage.removeItem("scroll_to_contact");
+  };
 
   const handleSectionClick = (id: string) => {
     if (isHomePage) {
       if (id === "hero") {
         window.scrollTo({ top: 0, behavior: "smooth" });
+        menuContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         const el = document.getElementById(id);
         if (el) {
@@ -128,6 +196,7 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
         }
       }
     } else {
+      clearScrollFlags();
       sessionStorage.setItem("scroll-target", id);
       sessionStorage.setItem(`scroll_to_${id}`, "true");
       router.push(`/${locale}`, { scroll: false });
@@ -254,11 +323,14 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
         </div>
       </div>
 
-      {/* Full-width Divider between Profile and Menu (touches sidebar border) */}
-      <div className="w-full h-px bg-neutral-200/60 dark:bg-white/10 shrink-0" />
+      {/* Divider between Profile and Menu (inset on left, reaches right border) */}
+      <div className="ml-5 h-px bg-neutral-200/60 dark:bg-white/10 shrink-0" />
 
       {/* 2. SCROLLABLE MIDDLE: Menu List ONLY (Single Scrollbar) */}
-      <div className="flex-1 overflow-y-auto scrollbar-custom min-h-0 py-3.5 px-5 flex flex-col gap-3">
+      <div
+        ref={menuContainerRef}
+        className="flex-1 overflow-y-auto scrollbar-custom min-h-0 py-3.5 px-5 flex flex-col gap-2.5"
+      >
         {/* Sections list */}
         <div className="flex flex-col gap-1">
           {sections.map((sec) => {
@@ -269,33 +341,74 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
               <button
                 key={sec.id}
                 type="button"
+                data-sidebar-active={isActive ? "true" : "false"}
                 onClick={() => handleSectionClick(sec.id)}
-                className={`group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
-                  isActive
-                    ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold shadow-xs"
-                    : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border border-transparent hover:border-neutral-200 dark:hover:border-white/10"
-                }`}
+                className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-medium cursor-pointer transition-colors duration-150"
               >
-                <div className="flex items-center gap-3">
+                {/* Smooth Animated Active Pill Background */}
+                {isActive && (
+                  <motion.div
+                    layoutId="sidebarActiveSectionPill"
+                    transition={{
+                      type: "spring",
+                      stiffness: 420,
+                      damping: 34,
+                      mass: 0.8,
+                    }}
+                    className="absolute inset-0 rounded-xl bg-neutral-900 dark:bg-white border border-neutral-900 dark:border-white shadow-xs z-0"
+                  />
+                )}
+
+                {/* Non-active hover border */}
+                {!isActive && (
+                  <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-neutral-200 dark:group-hover:border-white/10 pointer-events-none transition-colors duration-150 z-0" />
+                )}
+
+                {/* Content */}
+                <div className="relative z-10 flex items-center gap-3 min-w-0">
                   <Icon
                     className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                       isActive
                         ? "text-white dark:text-neutral-900"
-                        : "text-neutral-400 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
+                        : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
                     }`}
                   />
-                  <span className="leading-none">{sec.label}</span>
+                  <span
+                    className={`leading-5 truncate transition-colors duration-150 ${
+                      isActive
+                        ? "text-white dark:text-neutral-900 font-semibold"
+                        : "text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white"
+                    }`}
+                  >
+                    {sec.label}
+                  </span>
                 </div>
-                {isActive ? (
-                  <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900 transition-transform duration-200" />
-                ) : null}
+
+                <div className="relative z-10 flex items-center justify-end w-4 h-4 shrink-0">
+                  <AnimatePresence>
+                    {isActive && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -3 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -3 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900 shrink-0" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </button>
             );
           })}
         </div>
 
-        {/* Full-width Divider between Sections and Pages inside the single scrollable container */}
-        <div className="-mx-5 h-px bg-neutral-200/60 dark:bg-white/10 my-1" />
+        {/* Pages Section Header Label (PAGES / HALAMAN) */}
+        <div className="px-3.5 pt-3 pb-1 flex items-center">
+          <span className="text-[11px] font-regular uppercase tracking-wider text-neutral-400 dark:text-neutral-500 select-none">
+            {tMain(locale, "nav_pages_header")}
+          </span>
+        </div>
 
         {/* Pages list */}
         <div className="flex flex-col gap-1">
@@ -307,33 +420,69 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
               <Link
                 key={pg.id}
                 href={pg.href}
-                className={`group flex items-center justify-between w-full px-3.5 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
-                  isPageActive
-                    ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold shadow-xs"
-                    : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border border-transparent hover:border-neutral-200 dark:hover:border-white/10"
-                }`}
+                data-sidebar-active={isPageActive ? "true" : "false"}
+                className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-medium cursor-pointer transition-colors duration-150"
               >
-                <div className="flex items-center gap-3">
+                {/* Smooth Animated Active Pill Background */}
+                {isPageActive && (
+                  <motion.div
+                    layoutId="sidebarActivePagePill"
+                    transition={{
+                      type: "spring",
+                      stiffness: 420,
+                      damping: 34,
+                      mass: 0.8,
+                    }}
+                    className="absolute inset-0 rounded-xl bg-neutral-900 dark:bg-white border border-neutral-900 dark:border-white shadow-xs z-0"
+                  />
+                )}
+
+                {/* Non-active hover border */}
+                {!isPageActive && (
+                  <div className="absolute inset-0 rounded-xl border border-transparent group-hover:border-neutral-200 dark:group-hover:border-white/10 pointer-events-none transition-colors duration-150 z-0" />
+                )}
+
+                <div className="relative z-10 flex items-center gap-3 min-w-0">
                   <Icon
                     className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
                       isPageActive
                         ? "text-white dark:text-neutral-900"
-                        : "text-neutral-400 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
+                        : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
                     }`}
                   />
-                  <span className="leading-none">{pg.label}</span>
+                  <span
+                    className={`leading-5 truncate transition-colors duration-150 ${
+                      isPageActive
+                        ? "text-white dark:text-neutral-900 font-semibold"
+                        : "text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white"
+                    }`}
+                  >
+                    {pg.label}
+                  </span>
                 </div>
-                {isPageActive ? (
-                  <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900 transition-transform duration-200" />
-                ) : null}
+
+                <div className="relative z-10 flex items-center justify-end w-4 h-4 shrink-0">
+                  <AnimatePresence>
+                    {isPageActive && (
+                      <motion.div
+                        initial={{ opacity: 0, x: -3 }}
+                        animate={{ opacity: 1, x: 0 }}
+                        exit={{ opacity: 0, x: -3 }}
+                        transition={{ duration: 0.15 }}
+                      >
+                        <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900 shrink-0" />
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               </Link>
             );
           })}
         </div>
       </div>
 
-      {/* Full-width Divider between Menu and Bottom Controls (touches sidebar border) */}
-      <div className="w-full h-px bg-neutral-200/60 dark:bg-white/10 shrink-0" />
+      {/* Divider between Menu and Bottom Controls (inset on left, reaches right border) */}
+      <div className="ml-5 h-px bg-neutral-200/60 dark:bg-white/10 shrink-0" />
 
       {/* 3. STICKY BOTTOM: Toggle, Language Switch, Subscribe, Copyright */}
       <div className="shrink-0 pt-4 pb-5 px-5 flex flex-col gap-3.5">
@@ -421,8 +570,8 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
           </form>
         </div>
 
-        {/* Full-width Divider between Subscribe and Copyright */}
-        <div className="-mx-5 h-px bg-neutral-200/60 dark:bg-white/10" />
+        {/* Inset Divider between Subscribe and Copyright (touches right border) */}
+        <div className="-mr-5 h-px bg-neutral-200/60 dark:bg-white/10 my-0.5 shrink-0" />
 
         {/* Copyright & Bafdev with Animated Underline */}
         <div className="flex flex-col items-center justify-center text-center gap-1 text-[11px] text-neutral-400 dark:text-neutral-500 w-full">

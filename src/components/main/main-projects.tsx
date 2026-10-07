@@ -51,6 +51,8 @@ export function MainProjects({ projects, locale }: MainProjectsProps) {
     if (typeof window !== "undefined") {
       const scrollFlag = sessionStorage.getItem("scroll_to_projects") === "true" || sessionStorage.getItem("scroll-target") === "projects";
       if (scrollFlag) {
+        sessionStorage.removeItem("scroll_to_projects");
+        sessionStorage.removeItem("scroll-target");
         setTimeout(() => {
           const element = document.getElementById("projects");
           if (element) {

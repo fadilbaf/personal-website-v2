@@ -98,6 +98,16 @@ export function NavMenu({ isOpen, onClose, locale, hireMeEmail }: NavMenuProps) 
         el.scrollIntoView({ behavior: "smooth" });
       }
     } else {
+      if (typeof window !== "undefined") {
+        sessionStorage.removeItem("scroll-target");
+        sessionStorage.removeItem("scroll_to_hero");
+        sessionStorage.removeItem("scroll_to_about");
+        sessionStorage.removeItem("scroll_to_experiences");
+        sessionStorage.removeItem("scroll_to_projects");
+        sessionStorage.removeItem("scroll_to_achievements");
+        sessionStorage.removeItem("scroll_to_blogs");
+        sessionStorage.removeItem("scroll_to_contact");
+      }
       sessionStorage.setItem("scroll-target", id);
       sessionStorage.setItem(`scroll_to_${id}`, "true");
       router.push(`/${locale}`, { scroll: false });

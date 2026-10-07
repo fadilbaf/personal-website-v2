@@ -110,6 +110,8 @@ export function MainContact({ contact, locale }: MainContactProps) {
     if (typeof window !== "undefined") {
       const scrollFlag = sessionStorage.getItem("scroll_to_contact") === "true" || sessionStorage.getItem("scroll-target") === "contact";
       if (scrollFlag) {
+        sessionStorage.removeItem("scroll_to_contact");
+        sessionStorage.removeItem("scroll-target");
         setTimeout(() => {
           const element = document.getElementById("contact");
           if (element) {

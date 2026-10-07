@@ -61,6 +61,8 @@ export function MainAchievements({ achievements, locale }: MainAchievementsProps
     if (typeof window !== "undefined") {
       const scrollFlag = sessionStorage.getItem("scroll_to_achievements") === "true" || sessionStorage.getItem("scroll-target") === "achievements";
       if (scrollFlag) {
+        sessionStorage.removeItem("scroll_to_achievements");
+        sessionStorage.removeItem("scroll-target");
         setTimeout(() => {
           const element = document.getElementById("achievements");
           if (element) {

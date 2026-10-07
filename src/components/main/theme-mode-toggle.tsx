@@ -67,7 +67,7 @@ export function ThemeModeToggle({ locale }: ThemeModeToggleProps) {
                   <Icon className="h-3.5 w-3.5" />
                 </button>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs">
+              <TooltipContent side="top" className="text-xs">
                 <p>{opt.label}</p>
               </TooltipContent>
             </Tooltip>

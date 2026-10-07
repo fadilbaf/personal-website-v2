@@ -53,6 +53,8 @@ export function MainBlogs({ blogs, locale }: MainBlogsProps) {
     if (typeof window !== "undefined") {
       const scrollFlag = sessionStorage.getItem("scroll_to_blogs") === "true" || sessionStorage.getItem("scroll-target") === "blogs";
       if (scrollFlag) {
+        sessionStorage.removeItem("scroll_to_blogs");
+        sessionStorage.removeItem("scroll-target");
         setTimeout(() => {
           const element = document.getElementById("blogs");
           if (element) {
