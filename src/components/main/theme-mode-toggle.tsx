@@ -26,6 +26,11 @@ export function ThemeModeToggle({ locale }: ThemeModeToggleProps) {
 
   const options = [
     {
+      value: "system",
+      label: tMain(locale, "theme_system"),
+      icon: Laptop,
+    },
+    {
       value: "light",
       label: tMain(locale, "theme_light"),
       icon: Sun,
@@ -34,11 +39,6 @@ export function ThemeModeToggle({ locale }: ThemeModeToggleProps) {
       value: "dark",
       label: tMain(locale, "theme_dark"),
       icon: Moon,
-    },
-    {
-      value: "system",
-      label: tMain(locale, "theme_system"),
-      icon: Laptop,
     },
   ];
 

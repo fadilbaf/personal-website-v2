@@ -254,7 +254,7 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
   ];
 
   const pages = [
-    { id: "links", label: tMain(locale, "nav_links"), icon: Link2, href: `/${locale}/links`, isExternal: false },
+    { id: "links", label: tMain(locale, "nav_links"), icon: Link2, href: `/${locale}/links`, isExternal: true },
     { id: "all_projects", label: tMain(locale, "nav_all_projects"), icon: FolderGit2, href: `/${locale}/projects`, isExternal: false },
     { id: "all_achievements", label: tMain(locale, "nav_all_achievements"), icon: Award, href: `/${locale}/achievements`, isExternal: false },
     { id: "all_blogs", label: tMain(locale, "nav_all_articles"), icon: BookOpen, href: `/${locale}/blogs`, isExternal: false },
@@ -420,6 +420,8 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
               <Link
                 key={pg.id}
                 href={pg.href}
+                target={pg.isExternal ? "_blank" : undefined}
+                rel={pg.isExternal ? "noopener noreferrer" : undefined}
                 data-sidebar-active={isPageActive ? "true" : "false"}
                 className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-medium cursor-pointer transition-colors duration-150"
               >

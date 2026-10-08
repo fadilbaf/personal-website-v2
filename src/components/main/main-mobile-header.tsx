@@ -184,7 +184,7 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
   ];
 
   const pages = [
-    { id: "links", label: tMain(locale, "nav_links"), icon: Link2, href: `/${locale}/links`, isExternal: false },
+    { id: "links", label: tMain(locale, "nav_links"), icon: Link2, href: `/${locale}/links`, isExternal: true },
     { id: "all_projects", label: tMain(locale, "nav_all_projects"), icon: FolderGit2, href: `/${locale}/projects`, isExternal: false },
     { id: "all_achievements", label: tMain(locale, "nav_all_achievements"), icon: Award, href: `/${locale}/achievements`, isExternal: false },
     { id: "all_blogs", label: tMain(locale, "nav_all_articles"), icon: BookOpen, href: `/${locale}/blogs`, isExternal: false },
@@ -321,6 +321,8 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
                       <Link
                         key={pg.id}
                         href={pg.href}
+                        target={pg.isExternal ? "_blank" : undefined}
+                        rel={pg.isExternal ? "noopener noreferrer" : undefined}
                         onClick={() => setMenuOpen(false)}
                         className={`group flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
                           isPageActive
