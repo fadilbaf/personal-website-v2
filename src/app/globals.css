@@ -122,47 +122,39 @@
   * {
     @apply border-border outline-ring/50;
   }
-  html,
-  body {
-    max-width: 100%;
-    overflow-x: clip;
+  html {
+    @apply font-sans bg-background text-foreground;
   }
   body {
     @apply bg-background text-foreground;
   }
-  html {
-    @apply font-sans;
+
+  /* When any modal/dialog/overlay/scroll-lock is active: Lock scroll on html, removing the scrollbar cleanly */
+  html:has([data-slot="dialog-overlay"]),
+  html:has([data-slot="alert-dialog-overlay"]),
+  html:has([data-slot="sheet-overlay"]),
+  html:has([data-nav-menu="open"]),
+  html:has(body[data-scroll-locked]) {
+    overflow: hidden !important;
   }
 
-  /* Prevent background scroll leakage and hide scrollbar completely when modals/drawers/overlays are open */
+  /* Prevent margin-right (which causes white gap), but apply padding-right equal to the removed scrollbar width so centered content and sidebar never shift */
   body[data-scroll-locked],
   body[data-radix-scroll-lock],
-  body.overflow-hidden,
   body:has([data-slot="dialog-overlay"]),
   body:has([data-slot="alert-dialog-overlay"]),
-  body:has([data-slot="sheet-overlay"]),
-  body:has([data-nav-menu="open"]) {
-    overflow: hidden !important;
-    overscroll-behavior: none !important;
-    touch-action: none !important;
-    scrollbar-width: none !important;
+  body:has([data-slot="sheet-overlay"]) {
+    margin-right: 0px !important;
+    padding-right: var(--removed-body-scroll-bar-size, 10px) !important;
+    overflow: visible !important;
   }
 
   /* Zero-shift fixed header alignment when scroll lock is active */
-  body[data-scroll-locked] header.fixed {
-    right: var(--removed-body-scroll-bar-size, 0px) !important;
-  }
-
-  /* Webkit scrollbar complete hide when modal/overlay is open */
-  body[data-scroll-locked]::-webkit-scrollbar,
-  body.overflow-hidden::-webkit-scrollbar,
-  body:has([data-slot="dialog-overlay"])::-webkit-scrollbar,
-  body:has([data-slot="alert-dialog-overlay"])::-webkit-scrollbar,
-  body:has([data-slot="sheet-overlay"])::-webkit-scrollbar,
-  body:has([data-nav-menu="open"])::-webkit-scrollbar {
-    display: none !important;
-    width: 0 !important;
-    height: 0 !important;
+  body[data-scroll-locked] header.fixed,
+  body:has([data-slot="dialog-overlay"]) header.fixed,
+  body:has([data-slot="alert-dialog-overlay"]) header.fixed,
+  body:has([data-slot="sheet-overlay"]) header.fixed {
+    right: var(--removed-body-scroll-bar-size, 10px) !important;
   }
 
   /* Overlay & Dialog/Sheet Touch Action & Scroll Containment */

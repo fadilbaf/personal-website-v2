@@ -11,20 +11,8 @@ export function lockScroll() {
   if (typeof window === "undefined" || typeof document === "undefined") return;
 
   if (lockCount === 0) {
-    const scrollBarWidth = window.innerWidth - document.documentElement.clientWidth;
-
     originalBodyOverflow = document.body.style.overflow;
     originalBodyPaddingRight = document.body.style.paddingRight;
-
-    // Set CSS custom property for fixed headers and other elements
-    document.documentElement.style.setProperty(
-      "--removed-body-scroll-bar-size",
-      `${scrollBarWidth}px`
-    );
-
-    if (scrollBarWidth > 0) {
-      document.body.style.paddingRight = `${scrollBarWidth}px`;
-    }
 
     document.body.style.overflow = "hidden";
     document.body.classList.add("overflow-hidden");
