@@ -382,7 +382,7 @@ export function MainAbout({
 
       {/* Skills Modal using shadcn Dialog */}
       <Dialog open={isSkillsModalOpen} onOpenChange={setIsSkillsModalOpen}>
-        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200 dark:border-white/10 ring-0 shadow-2xl">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-lg md:max-w-3xl lg:max-w-4xl bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 ring-0 shadow-2xl">
           <DialogHeader className="mb-0">
             <div className="flex items-center gap-3 mb-1">
               <Code2 className="h-6 w-6 text-neutral-900 dark:text-white" />

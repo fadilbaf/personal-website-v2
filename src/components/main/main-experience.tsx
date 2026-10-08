@@ -976,7 +976,7 @@ export function MainExperience({
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-lg bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl border border-neutral-200 dark:border-white/10 ring-0 shadow-2xl p-6 rounded-2xl">
+        <DialogContent className="w-full max-w-[calc(100%-2rem)] sm:max-w-lg bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-white/10 ring-0 shadow-2xl p-6 rounded-2xl">
           {activeModalItem && (
             <div className="flex flex-col gap-3.5">
               <DialogHeader className="mb-0 text-left">
