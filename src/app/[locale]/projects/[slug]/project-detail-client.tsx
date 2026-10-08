@@ -88,6 +88,109 @@ function getEmbedUrl(url: string | null | undefined) {
   return null;
 }
 
+function StatMarqueeTitle({ text, className }: { text: string; className?: string }) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [overflowDistance, setOverflowDistance] = useState(0);
+  const [startAnimation, setStartAnimation] = useState(false);
+
+  useEffect(() => {
+    setStartAnimation(false);
+    let delayTimer: NodeJS.Timeout | null = null;
+
+    const measure = () => {
+      if (containerRef.current && measureRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const textWidth = measureRef.current.getBoundingClientRect().width;
+
+        if (textWidth > containerWidth + 1) {
+          const diff = Math.ceil(textWidth - containerWidth + 6);
+          setOverflowDistance(diff);
+          if (delayTimer) clearTimeout(delayTimer);
+          delayTimer = setTimeout(() => {
+            setStartAnimation(true);
+          }, 1200);
+        } else {
+          setOverflowDistance(0);
+          setStartAnimation(false);
+        }
+      }
+    };
+
+    measure();
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(measure);
+    }
+    const mountTimer = setTimeout(measure, 100);
+
+    const observer = new ResizeObserver(() => {
+      measure();
+    });
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (delayTimer) clearTimeout(delayTimer);
+      clearTimeout(mountTimer);
+      observer.disconnect();
+    };
+  }, [text]);
+
+  const duration = Math.max(3, overflowDistance / 18 + 2.5);
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative w-full overflow-hidden whitespace-nowrap flex items-center select-none",
+        overflowDistance > 0 ? "justify-start" : "justify-center",
+        className
+      )}
+    >
+      {/* Invisible measurement element with exact font styles to measure true width */}
+      <span
+        ref={measureRef}
+        aria-hidden="true"
+        className={cn(
+          "fixed -left-[9999px] -top-[9999px] opacity-0 pointer-events-none whitespace-nowrap font-medium text-[11px]",
+          className
+        )}
+      >
+        {text}
+      </span>
+
+      {overflowDistance > 0 ? (
+        <motion.span
+          key={`${text}-${overflowDistance}-${startAnimation}`}
+          className="inline-block whitespace-nowrap shrink-0"
+          initial={{ x: 0 }}
+          animate={
+            startAnimation
+              ? {
+                  x: [0, -overflowDistance, -overflowDistance, 0, 0],
+                }
+              : { x: 0 }
+          }
+          transition={{
+            duration: duration,
+            times: [0, 0.45, 0.55, 0.95, 1],
+            repeat: Infinity,
+            repeatDelay: 1.2,
+            ease: "easeInOut",
+          }}
+        >
+          {text}
+        </motion.span>
+      ) : (
+        <span className="inline-block whitespace-nowrap text-center">
+          {text}
+        </span>
+      )}
+    </div>
+  );
+}
+
 interface ProjectDetailClientProps {
   project: Project;
   contact: Contact | null;
@@ -885,29 +988,32 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
             {/* Quick Statistics (Row of 3 cards) */}
             <div className="grid grid-cols-3 gap-3 w-full">
-              <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/50 text-center">
+              <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/50 text-center overflow-hidden">
                 <span className="text-[22px] leading-none font-bold text-neutral-900 dark:text-white">
                   <AnimatedNumber value={project.project_responsibilities?.length || 0} />
                 </span>
-                <span className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 font-medium">
-                  {tMain(locale, "responsibilities_stat")}
-                </span>
+                <StatMarqueeTitle
+                  text={tMain(locale, "responsibilities_stat")}
+                  className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 font-medium"
+                />
               </div>
-              <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/50 text-center">
+              <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/50 text-center overflow-hidden">
                 <span className="text-[22px] leading-none font-bold text-neutral-900 dark:text-white">
                   <AnimatedNumber value={project.project_features?.length || 0} />
                 </span>
-                <span className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 font-medium">
-                  {tMain(locale, "features_stat")}
-                </span>
+                <StatMarqueeTitle
+                  text={tMain(locale, "features_stat")}
+                  className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 font-medium"
+                />
               </div>
-              <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/50 text-center">
+              <div className="flex flex-col items-center justify-center p-3 rounded-xl border border-neutral-200 dark:border-white/10 bg-white dark:bg-neutral-900/50 text-center overflow-hidden">
                 <span className="text-[22px] leading-none font-bold text-neutral-900 dark:text-white">
                   <AnimatedNumber value={project.project_skills?.length || 0} />
                 </span>
-                <span className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 font-medium">
-                  {tMain(locale, "technologies_stat")}
-                </span>
+                <StatMarqueeTitle
+                  text={tMain(locale, "technologies_stat")}
+                  className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1.5 font-medium"
+                />
               </div>
             </div>
 
@@ -988,7 +1094,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
           </div>
 
           {/* Video Viewport Container */}
-          <div className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden shadow-2xl border border-neutral-300 dark:border-neutral-700 z-50 pointer-events-auto bg-transparent">
+          <div className="relative w-full max-w-4xl aspect-video rounded-2xl overflow-hidden shadow-2xl z-50 pointer-events-auto bg-black">
             {(() => {
               const embedUrl = getEmbedUrl(project.video_url);
               if (embedUrl) {
