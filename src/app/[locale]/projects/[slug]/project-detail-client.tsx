@@ -153,7 +153,7 @@ function StatMarqueeTitle({ text, className }: { text: string; className?: strin
         ref={measureRef}
         aria-hidden="true"
         className={cn(
-          "fixed -left-[9999px] -top-[9999px] opacity-0 pointer-events-none whitespace-nowrap font-medium text-[11px]",
+          "fixed left-[-9999px] top-[-9999px] opacity-0 pointer-events-none whitespace-nowrap font-medium text-[11px]",
           className
         )}
       >

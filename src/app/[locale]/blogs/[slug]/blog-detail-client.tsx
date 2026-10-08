@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import {
@@ -26,6 +26,116 @@ import { BlogContentRenderer } from "@/components/main/blog-content-renderer";
 import { trackEvent, getVisitorHash } from "@/src/lib/track-event";
 import { calculateReadingTime } from "@/src/lib/blog-utils";
 import { toStorageUrl } from "@/src/lib/storage-url";
+
+function AutoMarqueeText({
+  text,
+  className,
+  delay = 1200,
+}: {
+  text: string;
+  className?: string;
+  delay?: number;
+}) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLSpanElement>(null);
+  const [overflowDistance, setOverflowDistance] = useState(0);
+  const [startAnimation, setStartAnimation] = useState(false);
+
+  useEffect(() => {
+    setStartAnimation(false);
+    let delayTimer: NodeJS.Timeout | null = null;
+
+    const measure = () => {
+      if (containerRef.current && measureRef.current) {
+        const containerWidth = containerRef.current.clientWidth;
+        const textWidth = measureRef.current.getBoundingClientRect().width;
+
+        if (textWidth > containerWidth + 1) {
+          const diff = Math.ceil(textWidth - containerWidth + 6);
+          setOverflowDistance(diff);
+          if (delayTimer) clearTimeout(delayTimer);
+          delayTimer = setTimeout(() => {
+            setStartAnimation(true);
+          }, delay);
+        } else {
+          setOverflowDistance(0);
+          setStartAnimation(false);
+        }
+      }
+    };
+
+    measure();
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(measure);
+    }
+    const mountTimer = setTimeout(measure, 100);
+
+    const observer = new ResizeObserver(() => {
+      measure();
+    });
+    if (containerRef.current) {
+      observer.observe(containerRef.current);
+    }
+
+    return () => {
+      if (delayTimer) clearTimeout(delayTimer);
+      clearTimeout(mountTimer);
+      observer.disconnect();
+    };
+  }, [text, delay]);
+
+  const duration = Math.max(3, overflowDistance / 18 + 2.5);
+
+  return (
+    <div
+      ref={containerRef}
+      className={cn(
+        "relative w-full overflow-hidden whitespace-nowrap flex items-center select-none",
+        overflowDistance > 0 ? "justify-start" : "justify-start",
+        className
+      )}
+    >
+      <span
+        ref={measureRef}
+        aria-hidden="true"
+        className={cn(
+          "fixed left-[-9999px] top-[-9999px] opacity-0 pointer-events-none whitespace-nowrap font-medium text-[11px]",
+          className
+        )}
+      >
+        {text}
+      </span>
+
+      {overflowDistance > 0 ? (
+        <motion.span
+          key={`${text}-${overflowDistance}-${startAnimation}`}
+          className="inline-block whitespace-nowrap shrink-0"
+          initial={{ x: 0 }}
+          animate={
+            startAnimation
+              ? {
+                  x: [0, -overflowDistance, -overflowDistance, 0, 0],
+                }
+              : { x: 0 }
+          }
+          transition={{
+            duration: duration,
+            times: [0, 0.45, 0.55, 0.95, 1],
+            repeat: Infinity,
+            repeatDelay: 1.2,
+            ease: "easeInOut",
+          }}
+        >
+          {text}
+        </motion.span>
+      ) : (
+        <span className="inline-block whitespace-nowrap truncate">
+          {text}
+        </span>
+      )}
+    </div>
+  );
+}
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -250,42 +360,51 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
   );
 
   // Sidebar item component
-  const SidebarArticleCard = ({ item }: { item: Blog }) => {
+  const SidebarArticleCard = ({ item, index = 0 }: { item: Blog; index?: number }) => {
     const itemTitle = (locale === "id" ? item.title_id : item.title_en) || item.title_id;
     const itemText = (locale === "id" ? item.content_id : item.content_en) || item.content_id || "";
     const itemReadTime = calculateReadingTime(itemText);
     const itemDate = formatDate(item.created_at, locale);
+    const metaString = `${itemDate} • ${itemReadTime} ${tMain(locale, "min_read")}`;
 
     return (
-      <Link
-        href={`/${locale}/blogs/${item.slug}`}
-        onClick={() => {
-          sessionStorage.setItem("prev_blog_page", "all");
-        }}
-        className="group flex items-start gap-3.5 py-1.5 transition-colors cursor-pointer"
+      <motion.div
+        initial={{ opacity: 0, filter: "blur(4px)", y: 12 }}
+        whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+        viewport={{ once: true, margin: "-20px" }}
+        transition={{ duration: 0.35, delay: index * 0.08 }}
       >
-        <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden shrink-0 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10">
-          {item.image_url ? (
-            <img
-              src={toStorageUrl(item.image_url)}
-              alt={itemTitle}
-              className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+        <Link
+          href={`/${locale}/blogs/${item.slug}`}
+          onClick={() => {
+            sessionStorage.setItem("prev_blog_page", "all");
+          }}
+          className="group flex items-start gap-3.5 py-1.5 transition-colors cursor-pointer"
+        >
+          <div className="relative w-20 h-14 sm:w-24 sm:h-16 rounded-xl overflow-hidden shrink-0 bg-neutral-100 dark:bg-neutral-900 border border-neutral-200 dark:border-white/10">
+            {item.image_url ? (
+              <img
+                src={toStorageUrl(item.image_url)}
+                alt={itemTitle}
+                className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-full flex items-center justify-center text-neutral-400 dark:text-neutral-600">
+                <Sparkles className="w-5 h-5 opacity-40" />
+              </div>
+            )}
+          </div>
+          <div className="flex-1 min-w-0 overflow-hidden">
+            <h4 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white line-clamp-2 leading-snug group-hover:underline group-active:underline underline-offset-2 transition-all">
+              {itemTitle}
+            </h4>
+            <AutoMarqueeText
+              text={metaString}
+              className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 font-medium"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center text-neutral-400 dark:text-neutral-600">
-              <Sparkles className="w-5 h-5 opacity-40" />
-            </div>
-          )}
-        </div>
-        <div className="flex-1 min-w-0">
-          <h4 className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white line-clamp-2 leading-snug group-hover:underline group-active:underline underline-offset-2 transition-all">
-            {itemTitle}
-          </h4>
-          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 mt-1 font-medium">
-            {itemDate} • {itemReadTime} {tMain(locale, "min_read")}
-          </p>
-        </div>
-      </Link>
+          </div>
+        </Link>
+      </motion.div>
     );
   };
 
@@ -475,61 +594,73 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           </motion.div>
 
           {/* Sidebar Column */}
-          <motion.div
-            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-            viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.45, delay: 0.1 }}
-            className="lg:col-span-4 text-left space-y-8 pt-8 border-t border-neutral-200 dark:border-white/10 lg:border-t-0 lg:pt-0"
-          >
+          <div className="lg:col-span-4 text-left space-y-8 pt-8 border-t border-neutral-200 dark:border-white/10 lg:border-t-0 lg:pt-0">
             {/* MOST POPULAR */}
             {sidebarData.popular.length > 0 && (
-              <div className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+                whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45 }}
+                className="space-y-4"
+              >
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                     {tMain(locale, "most_popular")}
                   </h3>
                 </div>
                 <div className="space-y-3">
-                  {sidebarData.popular.slice(0, 3).map((item) => (
-                    <SidebarArticleCard key={item.id} item={item} />
+                  {sidebarData.popular.slice(0, 3).map((item, idx) => (
+                    <SidebarArticleCard key={item.id} item={item} index={idx} />
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* RELATED */}
             {sidebarData.related.length > 0 && (
-              <div className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+                whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: 0.08 }}
+                className="space-y-4"
+              >
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                     {tMain(locale, "related")}
                   </h3>
                 </div>
                 <div className="space-y-3">
-                  {sidebarData.related.slice(0, 3).map((item) => (
-                    <SidebarArticleCard key={item.id} item={item} />
+                  {sidebarData.related.slice(0, 3).map((item, idx) => (
+                    <SidebarArticleCard key={item.id} item={item} index={idx} />
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
 
             {/* LATEST */}
             {sidebarData.latest.length > 0 && (
-              <div className="space-y-4">
+              <motion.div
+                initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
+                whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                viewport={{ once: true, margin: "-40px" }}
+                transition={{ duration: 0.45, delay: 0.12 }}
+                className="space-y-4"
+              >
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
                   <h3 className="text-xs font-bold uppercase tracking-wider text-neutral-900 dark:text-white">
                     {tMain(locale, "latest")}
                   </h3>
                 </div>
                 <div className="space-y-3">
-                  {sidebarData.latest.slice(0, 3).map((item) => (
-                    <SidebarArticleCard key={item.id} item={item} />
+                  {sidebarData.latest.slice(0, 3).map((item, idx) => (
+                    <SidebarArticleCard key={item.id} item={item} index={idx} />
                   ))}
                 </div>
-              </div>
+              </motion.div>
             )}
-          </motion.div>
+          </div>
         </div>
 
         {/* 5. Full-Width Bottom Bar: Left Tags, Right Actions */}
