@@ -42,7 +42,7 @@ export function MainPublicShell({
         />
 
         {/* Main Content Area */}
-        <div className="flex-1 min-w-0 w-full overflow-x-hidden pt-14 lg:pt-0 flex flex-col lg:pl-8 xl:pl-10">
+        <div className="flex-1 min-w-0 w-full pt-14 lg:pt-0 flex flex-col lg:pl-8 xl:pl-10">
           {children}
         </div>
       </div>

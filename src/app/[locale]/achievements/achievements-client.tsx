@@ -197,7 +197,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
 
   return (
     <div className="w-full pt-6 md:pt-8 pb-8 md:pb-12 bg-transparent">
-      <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6">
+      <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6 px-1">
         {/* Back button */}
         <motion.div
           initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
@@ -239,11 +239,11 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
 
       {/* 2. Search and Filter Bar */}
       <motion.div
-        initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-        whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+        initial={{ opacity: 0, y: 15 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true }}
         transition={{ duration: 0.5, delay: 0.05, ease: "easeOut" }}
-        className="flex items-center justify-between gap-4 relative z-30"
+        className="flex items-center justify-between gap-4 relative z-30 py-1"
       >
         {/* Search */}
         <div className="relative max-w-sm flex-1">
