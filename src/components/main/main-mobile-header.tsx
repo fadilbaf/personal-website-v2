@@ -339,7 +339,7 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="fixed inset-0 z-[45] flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white pt-14 lg:hidden overflow-hidden"
+            className="fixed inset-0 z-45 flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white pt-14 lg:hidden overflow-hidden"
           >
             {/* 1. STICKY TOP: Profile Section (Matches main-sidebar.tsx exactly) */}
             <div className="shrink-0 pt-5 pb-3 px-3.5 flex flex-col items-center text-center relative">
