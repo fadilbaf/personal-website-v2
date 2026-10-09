@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useRef, cloneElement } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo, cloneElement } from "react";
 import { motion, useInView } from "framer-motion";
 import { useTheme } from "next-themes";
 import { ChevronLeft, ChevronRight, Code2, Eye } from "lucide-react";
@@ -17,6 +17,112 @@ function GitHubIcon({ className }: { className?: string }) {
       <path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
     </svg>
   );
+}
+
+let cachedCanvas: HTMLCanvasElement | null = null;
+let cachedCtx: CanvasRenderingContext2D | null = null;
+
+function getPillWidth(name: string): number {
+  if (typeof window === "undefined") return 48 + name.length * 8;
+  if (!cachedCanvas) {
+    cachedCanvas = document.createElement("canvas");
+    cachedCtx = cachedCanvas.getContext("2d");
+  }
+  if (!cachedCtx) return 48 + name.length * 8;
+  cachedCtx.font = "400 14px system-ui, -apple-system, sans-serif";
+  return 48 + Math.ceil(cachedCtx.measureText(name).width);
+}
+
+function getViewAllPillWidth(text: string): number {
+  if (typeof window === "undefined") return 115;
+  if (!cachedCanvas) {
+    cachedCanvas = document.createElement("canvas");
+    cachedCtx = cachedCanvas.getContext("2d");
+  }
+  if (!cachedCtx) return 115;
+  cachedCtx.font = "400 14px system-ui, -apple-system, sans-serif";
+  return 44 + Math.ceil(cachedCtx.measureText(`+99 ${text}`).width);
+}
+
+function calculate3RowFit(
+  skillsList: Array<{ name: string }>,
+  containerWidth: number,
+  viewAllText: string
+): number {
+  if (skillsList.length === 0 || containerWidth <= 0) return skillsList.length;
+
+  const gap = 8;
+  const viewAllWidth = getViewAllPillWidth(viewAllText);
+  const pillWidths = skillsList.map((s) => getPillWidth(s.name));
+
+  // Check if ALL skills fit within 3 rows without View All
+  let row = 1;
+  let currentWidth = 0;
+
+  for (let i = 0; i < pillWidths.length; i++) {
+    const w = pillWidths[i];
+    if (currentWidth === 0) {
+      currentWidth = w;
+    } else if (currentWidth + gap + w <= containerWidth) {
+      currentWidth += gap + w;
+    } else {
+      row++;
+      currentWidth = w;
+    }
+  }
+
+  // If all fit in 3 rows or fewer, display all!
+  if (row <= 3) {
+    return skillsList.length;
+  }
+
+  // Otherwise, fill row 1 and row 2, and fill row 3 leaving room for View All
+  let currentRow = 1;
+  let lineWidth = 0;
+  let count = 0;
+
+  for (let i = 0; i < pillWidths.length; i++) {
+    const w = pillWidths[i];
+
+    if (currentRow === 1) {
+      if (lineWidth === 0) {
+        lineWidth = w;
+        count++;
+      } else if (lineWidth + gap + w <= containerWidth) {
+        lineWidth += gap + w;
+        count++;
+      } else {
+        // Wrap to Row 2
+        currentRow = 2;
+        lineWidth = w;
+        count++;
+      }
+    } else if (currentRow === 2) {
+      if (lineWidth + gap + w <= containerWidth) {
+        lineWidth += gap + w;
+        count++;
+      } else {
+        // Wrap to Row 3
+        currentRow = 3;
+        // Check if first item on Row 3 can fit with View All
+        if (w + gap + viewAllWidth <= containerWidth) {
+          lineWidth = w;
+          count++;
+        } else {
+          break;
+        }
+      }
+    } else if (currentRow === 3) {
+      if (lineWidth + gap + w + gap + viewAllWidth <= containerWidth) {
+        lineWidth += gap + w;
+        count++;
+      } else {
+        break;
+      }
+    }
+  }
+
+  return Math.max(1, count);
 }
 
 interface MainAboutProps {
@@ -47,7 +153,7 @@ export function MainAbout({
   
   const [isSkillsModalOpen, setIsSkillsModalOpen] = useState(false);
   const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
-  const [maxPreviewSkills, setMaxPreviewSkills] = useState(16);
+  const [maxPreviewSkills, setMaxPreviewSkills] = useState(24);
   const [skillsCardHeight, setSkillsCardHeight] = useState<number | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [selectedModalCategory, setSelectedModalCategory] = useState<string>("all");
@@ -92,8 +198,8 @@ export function MainAbout({
 
   const githubUsername = contact?.github_url?.replace(/\/$/, "").split("/").pop() || "fadilbafagih";
 
-  const activeSkills = skills.filter((s) => s.is_active);
-  const activeCategories = skillCategories.filter((c) => c.is_active);
+  const activeSkills = useMemo(() => skills.filter((s) => s.is_active), [skills]);
+  const activeCategories = useMemo(() => skillCategories.filter((c) => c.is_active), [skillCategories]);
 
   const handleCategoryClick = (e: React.MouseEvent<HTMLButtonElement>, categoryId: string) => {
     setSelectedCategory(categoryId);
@@ -113,9 +219,59 @@ export function MainAbout({
     });
   };
 
-  const displaySkills = selectedCategory === "all"
-    ? activeSkills
-    : activeSkills.filter((s) => s.category_id === selectedCategory);
+  const displaySkills = useMemo(() => {
+    return selectedCategory === "all"
+      ? activeSkills
+      : activeSkills.filter((s) => s.category_id === selectedCategory);
+  }, [activeSkills, selectedCategory]);
+
+  const viewAllLabel = tMain(locale, "view_all");
+
+  const recalculateVisibleSkills = useCallback(() => {
+    let containerWidth = 0;
+    if (pillsContainerRef.current && pillsContainerRef.current.clientWidth > 0) {
+      containerWidth = pillsContainerRef.current.clientWidth;
+    } else if (skillsCardRef.current && skillsCardRef.current.clientWidth > 0) {
+      const isSm = typeof window !== "undefined" && window.innerWidth >= 640;
+      containerWidth = skillsCardRef.current.clientWidth - (isSm ? 40 : 32);
+    }
+
+    if (containerWidth <= 0) return;
+
+    const fitCount = calculate3RowFit(displaySkills, containerWidth, viewAllLabel);
+    setMaxPreviewSkills(fitCount);
+  }, [displaySkills, viewAllLabel]);
+
+  useEffect(() => {
+    recalculateVisibleSkills();
+  }, [recalculateVisibleSkills]);
+
+  useEffect(() => {
+    const cardEl = skillsCardRef.current;
+    if (!cardEl) return;
+
+    const ro = new ResizeObserver(() => {
+      recalculateVisibleSkills();
+    });
+    ro.observe(cardEl);
+
+    const handleResize = () => {
+      recalculateVisibleSkills();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    if (typeof document !== "undefined" && document.fonts) {
+      document.fonts.ready.then(() => {
+        recalculateVisibleSkills();
+      });
+    }
+
+    return () => {
+      ro.disconnect();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [recalculateVisibleSkills]);
 
   const displayedSkillsPreview = displaySkills.slice(0, maxPreviewSkills);
   const hasMoreSkills = displaySkills.length > maxPreviewSkills;
@@ -155,7 +311,7 @@ export function MainAbout({
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.5, delay: 0.1, ease: "easeOut" }}
-            className="mt-5 rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 pt-3 pb-4 px-4 sm:pt-4 sm:pb-5 sm:px-5 transition-[height] duration-300"
+            className="mt-5 rounded-2xl border border-neutral-200 bg-white dark:border-white/10 dark:bg-neutral-900/50 pt-3 pb-4 px-4 sm:pt-4 sm:pb-5 sm:px-5 transition-[height] duration-300 relative"
           >
             {/* Category Nav */}
             <div className="flex flex-row flex-nowrap items-center gap-2 mb-0 overflow-x-auto pb-3 sm:pb-4 scrollbar-custom -mx-4 sm:-mx-5 px-4 sm:px-5">
