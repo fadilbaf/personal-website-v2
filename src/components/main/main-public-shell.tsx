@@ -5,6 +5,7 @@ import type { Profile, Role, Contact, About, Badge } from "@/src/types/database"
 import type { MainLocale } from "@/src/lib/main-translations";
 import { MainSidebar } from "@/src/components/main/main-sidebar";
 import { MainMobileHeader } from "@/src/components/main/main-mobile-header";
+import { NewsletterToast } from "@/src/components/main/newsletter-toast";
 
 interface MainPublicShellProps {
   profile: Profile | null;
@@ -46,6 +47,9 @@ export function MainPublicShell({
           {children}
         </div>
       </div>
+
+      {/* Floating Newsletter Toast/Popup */}
+      <NewsletterToast locale={locale} />
     </div>
   );
 }

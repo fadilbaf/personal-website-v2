@@ -106,7 +106,7 @@ export function ScrollToTop() {
             className={cn(
               "fixed bottom-6 right-3.5 sm:right-6 z-40 flex items-center justify-center w-12 h-12 rounded-xl sm:rounded-2xl",
               "bg-white/70 dark:bg-neutral-800/70 backdrop-blur-md",
-              "border border-neutral-300 dark:border-neutral-600 shadow-lg",
+              "border border-neutral-300 dark:border-neutral-600 shadow-md",
               "text-neutral-950 dark:text-neutral-50",
               "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95",
               "transition-all duration-300 ease-out cursor-pointer outline-none group",
