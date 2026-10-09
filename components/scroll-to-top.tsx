@@ -52,23 +52,21 @@ export function ScrollToTop() {
     }
 
     const toggleVisibility = () => {
-      // Use setTimeout to ensure Radix UI has finished updating DOM attributes
-      setTimeout(() => {
-        const isModalOpen = 
-          document.body.style.pointerEvents === "none" || 
-          document.body.hasAttribute("data-scroll-locked") ||
-          document.body.style.overflow === "hidden" ||
-          document.documentElement.style.overflow === "hidden" ||
-          !!document.querySelector('[data-nav-menu="open"]') ||
-          !!document.querySelector('[data-state="open"]');
+      const isModalOpen = 
+        document.body.style.pointerEvents === "none" || 
+        document.body.hasAttribute("data-scroll-locked") ||
+        document.body.style.overflow === "hidden" ||
+        document.documentElement.style.overflow === "hidden" ||
+        !!document.querySelector('[data-nav-menu="open"]') ||
+        !!document.querySelector('[data-mobile-menu="open"]') ||
+        !!document.querySelector('[data-state="open"]');
 
-        // Show button if scrolled down past 300px and no modals/sidebars are open
-        if (window.scrollY > 300 && !isModalOpen) {
-          setIsVisible(true);
-        } else {
-          setIsVisible(false);
-        }
-      }, 0);
+      // Show button if scrolled down past 300px and no modals/sidebars are open
+      if (window.scrollY > 300 && !isModalOpen) {
+        setIsVisible(true);
+      } else {
+        setIsVisible(false);
+      }
     };
 
     window.addEventListener("scroll", toggleVisibility, { passive: true });
@@ -109,10 +107,10 @@ export function ScrollToTop() {
               "border border-neutral-300 dark:border-neutral-600 shadow-md",
               "text-neutral-950 dark:text-neutral-50",
               "hover:bg-white/90 active:bg-white/90 dark:hover:bg-neutral-800/90 dark:active:bg-neutral-800/90 active:scale-95",
-              "transition-all duration-300 ease-out cursor-pointer outline-none group",
+              "cursor-pointer outline-none group",
               isVisible 
-                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto" 
-                : "opacity-0 translate-y-4 scale-90 pointer-events-none"
+                ? "opacity-100 translate-y-0 scale-100 pointer-events-auto transition-all duration-300 ease-out" 
+                : "opacity-0 translate-y-2 scale-90 pointer-events-none transition-all duration-150 ease-in"
             )}
           >
             <ChevronUp className="w-5 h-5 stroke-[2.5] transition-transform duration-300 group-hover:-translate-y-0.5" />
