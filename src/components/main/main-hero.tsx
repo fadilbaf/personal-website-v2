@@ -74,7 +74,7 @@ export function MainHero({ profile, badges = [], about, contact, locale }: MainH
   const descText = locale === "id" ? about?.description_id : about?.description_en;
 
   return (
-    <div className="relative w-full pt-8 pb-4 md:pt-10 md:pb-6 flex flex-col">
+    <div className="relative w-full pt-6 pb-4 md:pt-10 md:pb-6 flex flex-col">
       <motion.section
         id="about"
         className="scroll-mt-20 flex flex-col justify-start items-start text-left z-10 w-full"

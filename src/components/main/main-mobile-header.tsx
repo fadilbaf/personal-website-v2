@@ -2,10 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Home,
   User,
   Briefcase,
   FolderGit2,
@@ -14,13 +14,10 @@ import {
   Mail,
   Link2,
   ArrowRight,
-  Loader2,
-  X,
   Share2,
   Copy,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
 import { AnimatedHamburger } from "@/components/ui/animated-hamburger";
 import { ThemeModeToggle } from "@/src/components/main/theme-mode-toggle";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
@@ -31,11 +28,31 @@ import {
   DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { useScrollLock, forceUnlockScroll } from "@/src/app/lib/use-scroll-lock";
 import { trackEvent } from "@/src/lib/track-event";
+import { toStorageUrl } from "@/src/lib/storage-url";
+import type { Profile, Role } from "@/src/types/database";
 
 import logoBlack from "@/src/assets/images/fadilbaf-black.svg";
 import logoWhite from "@/src/assets/images/fadilbaf-white.svg";
+
+function VerifiedBadge() {
+  return (
+    <svg
+      className="h-4 w-4 text-blue-500 shrink-0"
+      viewBox="0 0 24 24"
+      fill="currentColor"
+    >
+      <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5a.749.749 0 01-1.041.208l-.115-.094-2.415-2.415a.75.75 0 111.06-1.06l1.77 1.767 3.825-5.74a.75.75 0 011.25.833z" />
+    </svg>
+  );
+}
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -63,20 +80,22 @@ function ThreadsIcon({ className }: { className?: string }) {
 
 interface MainMobileHeaderProps {
   locale: MainLocale;
+  profile?: Profile | null;
+  roles?: Role[];
 }
 
-export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
+export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState<string>("hero");
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [activeSection, setActiveSection] = useState<string>("about");
+  const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
+  const [isImageLoading, setIsImageLoading] = useState(false);
   const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
 
   const isHomePage = pathname === `/${locale}` || pathname === "/";
-  const otherLocale = locale === "en" ? "id" : "en";
-  const switchLangPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
+  const enPath = pathname.startsWith("/id") ? pathname.replace(/^\/id/, "/en") : (pathname === "/" ? "/en" : pathname);
+  const idPath = pathname.startsWith("/en") ? pathname.replace(/^\/en/, "/id") : (pathname === "/" ? "/id" : pathname);
 
   // Lock body scroll when overlay is open
   useScrollLock(menuOpen);
@@ -92,6 +111,22 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [menuOpen]);
 
+  // Cycle through roles every 3 seconds
+  useEffect(() => {
+    if (!roles || roles.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentRoleIndex((prev) => (prev + 1) % roles.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [roles]);
+
+  const currentRole =
+    roles && roles.length > 0
+      ? locale === "id"
+        ? roles[currentRoleIndex]?.role_id
+        : roles[currentRoleIndex]?.role_en
+      : "Full-Stack Developer";
+
   // Track active section on Homepage scroll
   useEffect(() => {
     if (!isHomePage) {
@@ -100,7 +135,6 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
     }
 
     const sectionIds = [
-      "hero",
       "about",
       "experiences",
       "projects",
@@ -109,31 +143,49 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
       "contact",
     ];
 
-    const handleScroll = () => {
-      const scrollPosition = window.scrollY + 200;
-      let current = "hero";
+    let ticking = false;
+
+    const updateActiveSection = () => {
+      const scrollY = window.scrollY;
+      if (scrollY < 150) {
+        setActiveSection("about");
+        return;
+      }
+
+      if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 60) {
+        setActiveSection("contact");
+        return;
+      }
+
+      const triggerLine = window.innerHeight * 0.35;
+      let current = "about";
 
       for (const id of sectionIds) {
         const el = document.getElementById(id);
         if (el) {
-          const top = el.offsetTop;
-          const height = el.offsetHeight;
-          if (scrollPosition >= top && scrollPosition < top + height) {
+          const rect = el.getBoundingClientRect();
+          if (rect.top <= triggerLine && rect.bottom > triggerLine) {
             current = id;
             break;
           }
         }
       }
 
-      if (window.scrollY < 200) {
-        current = "hero";
-      }
-
       setActiveSection(current);
     };
 
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(() => {
+          updateActiveSection();
+          ticking = false;
+        });
+        ticking = true;
+      }
+    };
+
     window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
+    updateActiveSection();
     return () => window.removeEventListener("scroll", handleScroll);
   }, [isHomePage]);
 
@@ -164,46 +216,6 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
       sessionStorage.setItem("scroll-target", id);
       sessionStorage.setItem(`scroll_to_${id}`, "true");
       router.push(`/${locale}`, { scroll: false });
-    }
-  };
-
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      toast.error(tMain(locale, "newsletter_required"));
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      toast.error(tMain(locale, "newsletter_error"));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: trimmedEmail,
-          locale,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        toast.success(result.message || tMain(locale, "newsletter_success"));
-        setEmail("");
-      } else {
-        toast.error(result.error || tMain(locale, "newsletter_error"));
-      }
-    } catch {
-      toast.error(tMain(locale, "newsletter_error"));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -274,11 +286,21 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
 
   return (
     <>
-      {/* Top Bar on Mobile */}
-      <header className="lg:hidden fixed top-0 inset-x-0 z-40 flex h-14 items-center justify-between px-4 sm:px-10 md:px-16 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10">
+      {/* Top Bar on Mobile with Entrance Animation (Always stays fixed at top, seamless solid background when menu is open) */}
+      <motion.header
+        initial={{ opacity: 0, y: -56 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className={`lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 border-b border-neutral-200/60 dark:border-white/10 transition-colors duration-200 ${
+          menuOpen
+            ? "bg-white dark:bg-neutral-950"
+            : "bg-white/70 backdrop-blur-xl dark:bg-neutral-950/70"
+        }`}
+      >
         <Link
           href={`/${locale}`}
           onClick={(e) => {
+            if (menuOpen) setMenuOpen(false);
             if (pathname === `/${locale}` || pathname === "/") {
               e.preventDefault();
               window.scrollTo({ top: 0, behavior: "smooth" });
@@ -297,196 +319,280 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
             className="hidden dark:block h-7 w-auto"
           />
         </Link>
+      </motion.header>
 
+      {/* Floating Animated Hamburger Button (Fixed coordinate, never shifts or re-renders) */}
+      <motion.div
+        initial={{ opacity: 0, y: -56 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-60 flex items-center justify-center pointer-events-auto"
+      >
         <AnimatedHamburger
           active={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={tMain(locale, "menu")}
         />
-      </header>
+      </motion.div>
 
-      {/* Mobile Drawer / Overlay Menu */}
+      {/* Mobile Drawer Menu (Directly below header, gentle fade in without sliding) */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.25, ease: "easeInOut" }}
-            className="fixed inset-0 z-50 flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2, ease: "easeInOut" }}
+            className="fixed top-14 inset-x-0 bottom-0 z-40 flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white lg:hidden overflow-hidden"
           >
-            {/* Header with Logo + Close (X) button */}
-            <div className="flex h-14 items-center justify-between px-4 sm:px-6 border-b border-neutral-200/60 dark:border-white/10 shrink-0">
-              <Link
-                href={`/${locale}`}
-                onClick={() => {
-                  setMenuOpen(false);
-                  if (pathname === `/${locale}` || pathname === "/") {
-                    window.scrollTo({ top: 0, behavior: "smooth" });
-                  }
-                }}
-                className="relative flex items-center h-7 cursor-pointer outline-none"
-              >
-                <img
-                  src={logoBlack.src}
-                  alt="Fadil Bafagih"
-                  className="dark:hidden h-7 w-auto"
-                />
-                <img
-                  src={logoWhite.src}
-                  alt="Fadil Bafagih"
-                  className="hidden dark:block h-7 w-auto"
-                />
-              </Link>
+            {/* 1. STICKY TOP: Profile Section (Matches main-sidebar.tsx exactly) */}
+            <div className="shrink-0 pt-5 pb-3 px-3.5 flex flex-col items-center text-center relative">
+              {/* Avatar (Exact copy from main-sidebar.tsx) */}
+              {profile?.photo_url && (
+                <motion.div
+                  whileHover={{ scale: 1.03 }}
+                  whileTap={{ scale: 1.03 }}
+                  className="mb-3 cursor-pointer shrink-0"
+                >
+                  <div className="profile-photo-shimmer relative h-[88px] w-[88px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-neutral-900 shadow-xs">
+                    {isImageLoading && (
+                      <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800 animate-pulse z-10" />
+                    )}
+                    <Image
+                      src={toStorageUrl(profile.photo_url)}
+                      alt={profile.full_name || "Profile"}
+                      fill
+                      className="object-cover select-none profile-image-grayscale"
+                      sizes="96px"
+                      priority
+                      onLoad={() => setIsImageLoading(false)}
+                      onContextMenu={(e) => e.preventDefault()}
+                      draggable={false}
+                    />
+                  </div>
+                </motion.div>
+              )}
 
-              <button
-                type="button"
-                onClick={() => setMenuOpen(false)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg border border-neutral-200 dark:border-white/10 bg-neutral-100/50 dark:bg-neutral-900/50 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-white cursor-pointer"
-                aria-label={tMain(locale, "close")}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            {/* Scrollable Content */}
-            <div className="flex-1 overflow-y-auto scrollbar-custom p-4 sm:p-6 flex flex-col justify-between gap-6">
-              
-              {/* Menu Sections & Pages */}
-              <div className="flex flex-col gap-4">
-                
-                {/* Sections List */}
-                <div className="flex flex-col gap-1.5">
-                  {sections.map((sec) => {
-                    const Icon = sec.icon;
-                    const isActive = isHomePage && activeSection === sec.id;
-
-                    return (
-                      <button
-                        key={sec.id}
-                        type="button"
-                        onClick={() => handleSectionClick(sec.id)}
-                        className={`group flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
-                          isActive
-                            ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold shadow-xs"
-                            : "text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border border-transparent hover:border-neutral-200 dark:hover:border-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <Icon
-                            className={`h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                              isActive
-                                ? "text-white dark:text-neutral-900"
-                                : "text-neutral-400 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
-                            }`}
-                          />
-                          <span className="leading-none">{sec.label}</span>
-                        </div>
-                        {isActive ? (
-                          <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900" />
-                        ) : null}
-                      </button>
-                    );
-                  })}
+              {/* Name + Verified Badge */}
+              <div className="relative flex justify-center w-full">
+                <div className="relative inline-flex items-center">
+                  <h2 className="text-[21px] font-semibold tracking-tight text-neutral-900 dark:text-white truncate">
+                    {profile?.full_name || "Fadil Bafagih"}
+                  </h2>
+                  <span className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 flex items-center shrink-0">
+                    <VerifiedBadge />
+                  </span>
                 </div>
-
-                {/* Divider */}
-                <div className="w-full h-px bg-neutral-200/60 dark:bg-white/10" />
-
-                {/* Pages List */}
-                <div className="flex flex-col gap-1.5">
-                  {pages.map((pg) => {
-                    const Icon = pg.icon;
-                    const isPageActive = pathname.startsWith(pg.href);
-
-                    return (
-                      <Link
-                        key={pg.id}
-                        href={pg.href}
-                        target={pg.isExternal ? "_blank" : undefined}
-                        rel={pg.isExternal ? "noopener noreferrer" : undefined}
-                        onClick={() => setMenuOpen(false)}
-                        className={`group flex items-center justify-between w-full px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 cursor-pointer ${
-                          isPageActive
-                            ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 font-semibold shadow-xs"
-                            : "text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border border-transparent hover:border-neutral-200 dark:hover:border-white/10"
-                        }`}
-                      >
-                        <div className="flex items-center gap-3.5">
-                          <Icon
-                            className={`h-4.5 w-4.5 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                              isPageActive
-                                ? "text-white dark:text-neutral-900"
-                                : "text-neutral-400 dark:text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
-                            }`}
-                          />
-                          <span className="leading-none">{pg.label}</span>
-                        </div>
-                        {isPageActive ? (
-                          <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900" />
-                        ) : null}
-                      </Link>
-                    );
-                  })}
-                </div>
-
               </div>
 
-              {/* Bottom: Theme, Lang, Newsletter, Copyright */}
-              <div className="flex flex-col gap-4 pt-4 border-t border-neutral-200/60 dark:border-white/10">
-                
-                {/* Controls: Theme toggle (3-mode) + Language switch + Share */}
-                <div className="flex items-center justify-between gap-2">
-                  <ThemeModeToggle locale={locale} />
+              {/* Cycling Role */}
+              <div className="h-6 overflow-hidden mt-1 w-full">
+                <AnimatePresence mode="wait" initial={false}>
+                  <motion.p
+                    key={currentRoleIndex}
+                    initial={{ y: 10, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -10, opacity: 0 }}
+                    transition={{ duration: 0.35, ease: "easeInOut" }}
+                    className="text-sm text-neutral-500 dark:text-neutral-400 font-normal truncate"
+                  >
+                    {currentRole}
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+            </div>
 
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      asChild
-                      className="h-9 w-9 rounded-lg border border-neutral-200 dark:border-white/10 relative cursor-pointer flex items-center justify-center"
-                      aria-label={tMain(locale, "switch_lang")}
+            {/* Thin Divider between Profile and Menu (full width) */}
+            <div className="w-full border-t border-neutral-200/60 dark:border-white/10 shrink-0" />
+
+            {/* 2. SCROLLABLE MIDDLE: Menu List ONLY (Symmetrical py-3 padding so it scrolls flush against top & bottom dividers) */}
+            <div className="flex-1 overflow-y-auto scrollbar-custom min-h-0 py-3 px-3.5 flex flex-col gap-2">
+              {/* Sections list */}
+              <div className="flex flex-col gap-1">
+                {sections.map((sec) => {
+                  const Icon = sec.icon;
+                  const isActive = isHomePage && activeSection === sec.id;
+
+                  return (
+                    <button
+                      key={sec.id}
+                      type="button"
+                      onClick={() => handleSectionClick(sec.id)}
+                      className={`group relative flex items-center justify-between w-full h-11 px-3.5 rounded-xl text-[15px] font-normal cursor-pointer transition-colors duration-150 ${
+                        isActive
+                          ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs"
+                          : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border border-transparent hover:border-neutral-200 dark:hover:border-white/10"
+                      }`}
                     >
-                      <Link
-                        href={switchLangPath}
-                        prefetch={false}
-                        onClick={() => {
-                          setMenuOpen(false);
-                          trackEvent("language_switch", otherLocale);
-                        }}
-                      >
-                        <svg
-                          className="h-4 w-4 text-neutral-600 dark:text-neutral-400"
-                          xmlns="http://www.w3.org/2000/svg"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
+                      <div className="relative z-10 flex items-center gap-3.5 min-w-0">
+                        <Icon
+                          className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                            isActive
+                              ? "text-white dark:text-neutral-900"
+                              : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
+                          }`}
+                        />
+                        <span
+                          className={`leading-5 truncate ${
+                            isActive
+                              ? "text-white dark:text-neutral-900 font-medium"
+                              : "text-neutral-600 dark:text-neutral-300"
+                          }`}
                         >
-                          <circle cx="12" cy="12" r="10" />
-                          <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                          <path d="M2 12h20" />
-                        </svg>
-                        <span className="absolute -bottom-1.5 -right-1.5 z-0 flex h-4 min-w-[16px] items-center justify-center rounded-[4px] bg-neutral-900 px-0.5 text-[8px] font-bold text-white border border-neutral-200 dark:bg-white dark:text-neutral-900 dark:border-neutral-800 leading-none select-none uppercase">
-                          {otherLocale}
+                          {sec.label}
                         </span>
-                      </Link>
-                    </Button>
+                      </div>
 
-                    {/* Share Button & Dropdown on Mobile */}
-                    <DropdownMenu open={shareDropdownOpen} onOpenChange={setShareDropdownOpen}>
-                      <DropdownMenuTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => trackEvent("share_click", "mobile_header")}
-                          className="h-9 w-9 rounded-lg border border-neutral-200 dark:border-white/10 relative cursor-pointer flex items-center justify-center text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors outline-none"
-                          aria-label={tMain(locale, "share")}
+                      <div className="relative z-10 flex items-center justify-end w-4 h-4 shrink-0">
+                        {isActive && (
+                          <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900 shrink-0" />
+                        )}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+
+              {/* Pages Section Header Label (PAGES / HALAMAN) */}
+              <div className="px-3.5 pt-2 pb-0.5 flex items-center">
+                <span className="text-[11px] font-normal uppercase tracking-wider text-neutral-400 dark:text-neutral-500 select-none">
+                  {tMain(locale, "nav_pages_header")}
+                </span>
+              </div>
+
+              {/* Pages list */}
+              <div className="flex flex-col gap-1">
+                {pages.map((pg) => {
+                  const Icon = pg.icon;
+                  const isPageActive = pathname.startsWith(pg.href);
+
+                  return (
+                    <Link
+                      key={pg.id}
+                      href={pg.href}
+                      target={pg.isExternal ? "_blank" : undefined}
+                      rel={pg.isExternal ? "noopener noreferrer" : undefined}
+                      onClick={() => setMenuOpen(false)}
+                      className={`group relative flex items-center justify-between w-full h-11 px-3.5 rounded-xl text-[15px] font-normal cursor-pointer transition-colors duration-150 ${
+                        isPageActive
+                          ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs"
+                          : "text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-white border border-transparent hover:border-neutral-200 dark:hover:border-white/10"
+                      }`}
+                    >
+                      <div className="relative z-10 flex items-center gap-3.5 min-w-0">
+                        <Icon
+                          className={`h-[18px] w-[18px] shrink-0 transition-transform duration-200 group-hover:scale-110 ${
+                            isPageActive
+                              ? "text-white dark:text-neutral-900"
+                              : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
+                          }`}
+                        />
+                        <span
+                          className={`leading-5 truncate ${
+                            isPageActive
+                              ? "text-white dark:text-neutral-900 font-medium"
+                              : "text-neutral-600 dark:text-neutral-300"
+                          }`}
                         >
-                          <Share2 className="h-4 w-4" />
-                        </button>
-                      </DropdownMenuTrigger>
+                          {pg.label}
+                        </span>
+                      </div>
+
+                      <div className="relative z-10 flex items-center justify-end w-4 h-4 shrink-0">
+                        {isPageActive && (
+                          <ArrowRight className="h-4 w-4 text-white dark:text-neutral-900 shrink-0" />
+                        )}
+                      </div>
+                    </Link>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Thin Divider between Menu and Controls (full width, sits outside scroll container so scroll touches bottom flush) */}
+            <div className="w-full border-t border-neutral-200/60 dark:border-white/10 shrink-0" />
+
+            {/* 3. STICKY BOTTOM: Toggle, Language Switch, Share & Copyright (Exact match to Links Page structure) */}
+            <div className="shrink-0 flex flex-col">
+              {/* Controls */}
+              <div className="pt-3 pb-3 px-3.5 flex items-center justify-between gap-1.5 w-full">
+                <ThemeModeToggle locale={locale} className="flex-3 h-10" />
+
+                {/* Language Toggle Switch [ EN | ID ] with Tooltip */}
+                <TooltipProvider delayDuration={200}>
+                  <div className="flex items-center p-1 rounded-lg border border-neutral-200 dark:border-white/10 bg-transparent h-10 flex-2 gap-0.5">
+                    <Tooltip>
+                      <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                        <Link
+                          href={enPath}
+                          prefetch={false}
+                          onClick={(e) => {
+                            if (locale === "en") e.preventDefault();
+                            else {
+                              setMenuOpen(false);
+                              trackEvent("language_switch", "en");
+                            }
+                          }}
+                          className={`flex-1 h-8 flex items-center justify-center rounded-md text-xs font-medium transition-all duration-200 select-none ${
+                            locale === "en"
+                              ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs cursor-default"
+                              : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
+                          }`}
+                          aria-label="English"
+                        >
+                          EN
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">
+                        <p>English</p>
+                      </TooltipContent>
+                    </Tooltip>
+
+                    <Tooltip>
+                      <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                        <Link
+                          href={idPath}
+                          prefetch={false}
+                          onClick={(e) => {
+                            if (locale === "id") e.preventDefault();
+                            else {
+                              setMenuOpen(false);
+                              trackEvent("language_switch", "id");
+                            }
+                          }}
+                          className={`flex-1 h-8 flex items-center justify-center rounded-md text-xs font-medium transition-all duration-200 select-none ${
+                            locale === "id"
+                              ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs cursor-default"
+                              : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
+                          }`}
+                          aria-label="Bahasa Indonesia"
+                        >
+                          ID
+                        </Link>
+                      </TooltipTrigger>
+                      <TooltipContent side="top" className="text-xs">
+                        <p>Bahasa Indonesia</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
+                </TooltipProvider>
+
+                {/* Share Button & Dropdown on Mobile */}
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip open={shareDropdownOpen ? false : undefined}>
+                    <DropdownMenu open={shareDropdownOpen} onOpenChange={setShareDropdownOpen}>
+                      <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                        <DropdownMenuTrigger asChild>
+                          <button
+                            type="button"
+                            onClick={() => trackEvent("share_click", "mobile_header")}
+                            className="h-10 w-10 shrink-0 rounded-lg border border-neutral-200 dark:border-white/10 relative cursor-pointer flex items-center justify-center text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors outline-none"
+                            aria-label={tMain(locale, "share")}
+                          >
+                            <Share2 className="h-4 w-4" />
+                          </button>
+                        </DropdownMenuTrigger>
+                      </TooltipTrigger>
 
                       <DropdownMenuContent
                         align="end"
@@ -520,63 +626,33 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
                         </button>
                       </DropdownMenuContent>
                     </DropdownMenu>
-                  </div>
-                </div>
-
-                {/* Newsletter section */}
-                <div className="flex flex-col gap-2">
-                  <p className="text-xs text-neutral-500 dark:text-neutral-400 leading-relaxed">
-                    {tMain(locale, "newsletter_desc")}
-                  </p>
-                  <form onSubmit={handleSubscribe} className="w-full" noValidate>
-                    <div className="flex h-11 items-center justify-between border border-neutral-200 dark:border-white/10 rounded-lg p-1 bg-transparent w-full focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 transition-all">
-                      <div className="flex h-full items-center gap-2.5 pl-2.5 flex-1 min-w-0">
-                        <Mail className="h-4 w-4 text-neutral-400 shrink-0" />
-                        <input
-                          type="email"
-                          value={email}
-                          onChange={(e) => setEmail(e.target.value)}
-                          placeholder={tMain(locale, "enter_email")}
-                          className="w-full h-full bg-transparent border-none p-0 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none dark:text-white dark:placeholder:text-neutral-500 transition-all"
-                          required
-                        />
-                      </div>
-                      <Button
-                        type="submit"
-                        disabled={loading}
-                        className="h-full rounded-md bg-neutral-900 px-4 text-sm font-semibold text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 whitespace-nowrap cursor-pointer transition-colors duration-200 inline-flex items-center justify-center gap-2"
-                      >
-                        {loading ? (
-                          <>
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                            <span>{tMain(locale, "subscribing")}</span>
-                          </>
-                        ) : (
-                          <span>{tMain(locale, "subscribe")}</span>
-                        )}
-                      </Button>
-                    </div>
-                  </form>
-                </div>
-
-                {/* Copyright & Bafdev */}
-                <div className="flex flex-col items-center sm:items-start gap-1 text-xs text-neutral-400 dark:text-neutral-500 text-center sm:text-left">
-                  <p>© {new Date().getFullYear()} Fadil Bafagih. {tMain(locale, "all_rights")}</p>
-                  <p>
-                    {tMain(locale, "build_with")}{" "}
-                    <a
-                      href="https://bafdev.id"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="font-bold text-neutral-900 dark:text-white transition-colors relative inline-block after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-px after:bg-neutral-900 dark:after:bg-white after:transition-all after:duration-300 hover:after:w-full cursor-pointer"
-                    >
-                      Bafdev
-                    </a>
-                  </p>
-                </div>
-
+                    <TooltipContent side="top">
+                      <p>{tMain(locale, "share")}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
 
+              {/* Divider above Copyright — EXACT SAME as Links Page */}
+              <div className="border-t border-neutral-200/60 dark:border-white/10" />
+
+              {/* Copyright — EXACT SAME as Links Page */}
+              <footer className="py-6 px-3.5 space-y-1 text-center">
+                <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                  © {new Date().getFullYear()} Fadil Bafagih. {tMain(locale, "all_rights")}
+                </p>
+                <p className="text-xs text-neutral-400 dark:text-neutral-500">
+                  {tMain(locale, "build_with")}{" "}
+                  <a
+                    href="https://bafdev.id/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block align-baseline relative font-bold text-neutral-900 dark:text-white transition-colors after:absolute after:bottom-0 after:left-0 after:h-px after:w-full after:bg-current after:scale-x-0 after:origin-left after:transition-transform after:duration-300 after:ease-out hover:after:scale-x-100 active:after:scale-x-100"
+                  >
+                    Bafdev
+                  </a>
+                </p>
+              </footer>
             </div>
           </motion.div>
         )}

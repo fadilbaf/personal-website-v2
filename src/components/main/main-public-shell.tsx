@@ -29,10 +29,14 @@ export function MainPublicShell({
   return (
     <div className="min-h-screen bg-white dark:bg-neutral-950 font-sans transition-colors duration-300">
       {/* Mobile Top Header */}
-      <MainMobileHeader locale={locale} />
+      <MainMobileHeader
+        locale={locale}
+        profile={profile}
+        roles={roles}
+      />
 
       {/* Balanced Page Container with Sidebar & Content */}
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-10 md:px-16 lg:px-24 xl:px-32 flex flex-col lg:flex-row min-h-screen">
+      <div className="w-full max-w-[1440px] mx-auto px-3.5 sm:px-6 md:px-10 lg:px-24 xl:px-32 flex flex-col lg:flex-row min-h-screen">
         {/* Desktop Sticky Sidebar */}
         <MainSidebar
           profile={profile}

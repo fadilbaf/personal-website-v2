@@ -61,7 +61,7 @@ export function ThemeModeToggle({ locale, className }: ThemeModeToggleProps) {
                     setThemeWithTransition(opt.value, resolvedTheme, setTheme);
                     e.currentTarget.blur();
                   }}
-                  className={`relative flex h-7 flex-1 min-w-[28px] items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
+                  className={`relative flex h-full min-h-[28px] flex-1 min-w-[28px] items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
                     isActive
                       ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs"
                       : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white"

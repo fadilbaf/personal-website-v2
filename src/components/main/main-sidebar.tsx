@@ -384,7 +384,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                 type="button"
                 data-sidebar-active={isActive ? "true" : "false"}
                 onClick={() => handleSectionClick(sec.id)}
-                className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-medium cursor-pointer transition-colors duration-150"
+                className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-normal cursor-pointer transition-colors duration-150"
               >
                 {/* Smooth Animated Active Pill Background */}
                 {isActive && (
@@ -415,7 +415,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                   />
                   <span
                     className={`leading-5 truncate transition-colors duration-150 ${isActive
-                        ? "text-white dark:text-neutral-900 font-semibold"
+                        ? "text-white dark:text-neutral-900 font-medium"
                         : "text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white"
                       }`}
                   >
@@ -444,7 +444,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
         {/* Pages Section Header Label (PAGES / HALAMAN) */}
         <div className="px-3.5 pt-3 pb-1 flex items-center">
-          <span className="text-[11px] font-regular uppercase tracking-wider text-neutral-400 dark:text-neutral-500 select-none">
+          <span className="text-[11px] font-normal uppercase tracking-wider text-neutral-400 dark:text-neutral-500 select-none">
             {tMain(locale, "nav_pages_header")}
           </span>
         </div>
@@ -462,7 +462,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                 target={pg.isExternal ? "_blank" : undefined}
                 rel={pg.isExternal ? "noopener noreferrer" : undefined}
                 data-sidebar-active={isPageActive ? "true" : "false"}
-                className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-medium cursor-pointer transition-colors duration-150"
+                className="group relative flex items-center justify-between w-full h-10 px-3.5 rounded-xl text-sm font-normal cursor-pointer transition-colors duration-150"
               >
                 {/* Smooth Animated Active Pill Background */}
                 {isPageActive && (
@@ -492,7 +492,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                   />
                   <span
                     className={`leading-5 truncate transition-colors duration-150 ${isPageActive
-                        ? "text-white dark:text-neutral-900 font-semibold"
+                        ? "text-white dark:text-neutral-900 font-medium"
                         : "text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white"
                       }`}
                   >
