@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -15,7 +14,7 @@ import {
   Mail,
   Link2,
   ArrowRight,
-  Loader2,
+  Download,
   Share2,
   Copy,
 } from "lucide-react";
@@ -34,15 +33,10 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { trackEvent } from "@/src/lib/track-event";
+import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
 
-/** Verified badge (blue checkmark) — identical to main-about.tsx */
-function VerifiedBadge() {
-  return (
-    <svg className="h-5 w-5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5a.749.749 0 01-1.041.208l-.115-.094-2.415-2.415a.75.75 0 111.06-1.06l1.77 1.767 3.825-5.74a.75.75 0 011.25.833z" />
-    </svg>
-  );
-}
+import logoBlack from "@/src/assets/images/fadilbaf-black.svg";
+import logoWhite from "@/src/assets/images/fadilbaf-white.svg";
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -76,14 +70,11 @@ interface MainSidebarProps {
   locale: MainLocale;
 }
 
-export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProps) {
+export function MainSidebar({ profile, roles, contact, about, locale }: MainSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<string>("hero");
-  const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
-  const [isImageLoading, setIsImageLoading] = useState(true);
-  const [email, setEmail] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
   const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
   const menuContainerRef = useRef<HTMLDivElement>(null);
 
@@ -125,22 +116,6 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
       }
     }
   }, [activeSection, pathname, isHomePage]);
-
-  // Cycle through roles every 3 seconds
-  useEffect(() => {
-    if (roles.length <= 1) return;
-    const interval = setInterval(() => {
-      setCurrentRoleIndex((prev) => (prev + 1) % roles.length);
-    }, 3000);
-    return () => clearInterval(interval);
-  }, [roles.length]);
-
-  const currentRole =
-    roles.length > 0
-      ? locale === "id"
-        ? roles[currentRoleIndex]?.role_id
-        : roles[currentRoleIndex]?.role_en
-      : "QA Engineer";
 
   // Track active section on Homepage scroll (instant real-time detection via requestAnimationFrame & getBoundingClientRect)
   useEffect(() => {
@@ -237,45 +212,6 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
     }
   };
 
-  const handleSubscribe = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const trimmedEmail = email.trim();
-    if (!trimmedEmail) {
-      toast.error(tMain(locale, "newsletter_required"));
-      return;
-    }
-
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(trimmedEmail)) {
-      toast.error(tMain(locale, "newsletter_error"));
-      return;
-    }
-
-    setLoading(true);
-    try {
-      const response = await fetch("/api/newsletter/subscribe", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: trimmedEmail,
-          locale,
-        }),
-      });
-
-      const result = await response.json();
-
-      if (response.ok && result.success) {
-        toast.success(result.message || tMain(locale, "newsletter_success"));
-        setEmail("");
-      } else {
-        toast.error(result.error || tMain(locale, "newsletter_error"));
-      }
-    } catch {
-      toast.error(tMain(locale, "newsletter_error"));
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const handleCopyUrl = async () => {
     try {
@@ -344,66 +280,37 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
   ];
 
   return (
-    <motion.aside
-      initial={{ x: -40, opacity: 0 }}
+    <>
+      <motion.aside
+        initial={{ x: -40, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="hidden lg:flex flex-col w-[300px] xl:w-[320px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl"
     >
-      {/* 1. STICKY TOP: Profile Section */}
-      <div className="shrink-0 pt-6 pb-5 px-5 flex flex-col gap-4">
-        <div className="flex items-center gap-4">
-          {/* Avatar (enlarged & balanced with text) */}
-          {profile?.photo_url && (
-            <motion.div
-              whileHover={{ scale: 1.03 }}
-              whileTap={{ scale: 1.03 }}
-              className="cursor-pointer shrink-0"
-            >
-              <div className="profile-photo-shimmer relative h-[84px] w-[84px] xl:h-[88px] xl:w-[88px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-neutral-900 shadow-xs">
-                {isImageLoading && (
-                  <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800 animate-pulse z-10" />
-                )}
-                <Image
-                  src={toStorageUrl(profile.photo_url)}
-                  alt={profile.full_name || "Profile"}
-                  fill
-                  className="object-cover select-none profile-image-grayscale"
-                  sizes="90px"
-                  priority
-                  onLoad={() => setIsImageLoading(false)}
-                  onContextMenu={(e) => e.preventDefault()}
-                  draggable={false}
-                />
-              </div>
-            </motion.div>
-          )}
-
-          {/* Name & Role */}
-          <div className="flex flex-col min-w-0 flex-1 justify-center">
-            <div className="flex items-center gap-1.5">
-              <h2 className="text-lg xl:text-[21px] font-bold tracking-tight text-neutral-900 dark:text-white truncate">
-                {profile?.full_name || "Fadil Bafagih"}
-              </h2>
-              <VerifiedBadge />
-            </div>
-
-            <div className="h-5 overflow-hidden mt-0.5">
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={currentRoleIndex}
-                  initial={{ y: 10, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -10, opacity: 0 }}
-                  transition={{ duration: 0.35, ease: "easeInOut" }}
-                  className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 font-normal truncate"
-                >
-                  {currentRole}
-                </motion.p>
-              </AnimatePresence>
-            </div>
-          </div>
-        </div>
+      {/* 1. STICKY TOP: Brand Logo Header */}
+      <div className="shrink-0 h-16 px-5 flex items-center">
+        <Link
+          href={`/${locale}`}
+          onClick={(e) => {
+            if (isHomePage) {
+              e.preventDefault();
+              window.scrollTo({ top: 0, behavior: "smooth" });
+              menuContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+            }
+          }}
+          className="relative flex items-center h-7 cursor-pointer outline-none"
+        >
+          <img
+            src={logoBlack.src}
+            alt="Fadil Bafagih"
+            className="dark:hidden h-7 w-auto"
+          />
+          <img
+            src={logoWhite.src}
+            alt="Fadil Bafagih"
+            className="hidden dark:block h-7 w-auto"
+          />
+        </Link>
       </div>
 
       {/* Divider between Profile and Menu (inset on left, reaches right border) */}
@@ -672,43 +579,30 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
           </TooltipProvider>
         </div>
 
-        {/* Subscribe Form (Exact focus & button styles from main-footer.tsx) */}
-        <div className="flex flex-col gap-2">
-          <p className="text-[11px] text-neutral-500 dark:text-neutral-400 leading-relaxed">
-            {tMain(locale, "newsletter_desc")}
-          </p>
-          <form onSubmit={handleSubscribe} className="w-full" noValidate>
-            <div className="flex h-10 items-center justify-between border border-neutral-200 dark:border-white/10 rounded-lg p-1 bg-transparent w-full focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 transition-all">
-              <div className="flex h-full items-center gap-2 pl-2 flex-1 min-w-0">
-                <Mail className="h-4 w-4 text-neutral-400 shrink-0" />
-                <input
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder={tMain(locale, "enter_email")}
-                  className="w-full h-full bg-transparent border-none p-0 text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none dark:text-white dark:placeholder:text-neutral-500 transition-all"
-                  required
-                />
-              </div>
-              <Button
-                type="submit"
-                disabled={loading}
-                className="h-full rounded-md bg-neutral-900 px-3 text-xs font-semibold text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 whitespace-nowrap cursor-pointer transition-colors duration-200 inline-flex items-center justify-center gap-1.5"
-              >
-                {loading ? (
-                  <>
-                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                    <span>{tMain(locale, "subscribing")}</span>
-                  </>
-                ) : (
-                  <span>{tMain(locale, "subscribe")}</span>
-                )}
-              </Button>
-            </div>
-          </form>
+        {/* CTAs: Let's Work Together & Download CV */}
+        <div className="flex flex-col gap-2 w-full">
+          <button
+            type="button"
+            onClick={() => handleSectionClick("contact")}
+            className="group w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-xs sm:text-sm cursor-pointer shadow-xs"
+          >
+            <Mail className="h-4 w-4 shrink-0" />
+            <span>{tMain(locale, "lets_work")}</span>
+          </button>
+
+          {about?.cv_url && (
+            <button
+              type="button"
+              onClick={() => setIsCvPdfOpen(true)}
+              className="group w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-medium hover:bg-neutral-50 active:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 text-xs sm:text-sm cursor-pointer shadow-xs"
+            >
+              <Download className="h-4 w-4 shrink-0" />
+              <span>{tMain(locale, "download_cv")}</span>
+            </button>
+          )}
         </div>
 
-        {/* Inset Divider between Subscribe and Copyright (touches right border) */}
+        {/* Inset Divider between CTAs and Copyright (touches right border) */}
         <div className="-mr-5 h-px bg-neutral-200/60 dark:bg-white/10 my-0.5 shrink-0" />
 
         {/* Copyright & Bafdev with Animated Underline */}
@@ -729,5 +623,16 @@ export function MainSidebar({ profile, roles, contact, locale }: MainSidebarProp
 
       </div>
     </motion.aside>
+
+    {/* CV PDF Viewer Modal */}
+    {about?.cv_url && (
+      <PdfViewerModal
+        isOpen={isCvPdfOpen}
+        onClose={() => setIsCvPdfOpen(false)}
+        pdfUrl={toStorageUrl(about.cv_url)}
+        fileName={extractPdfFileName(about.cv_url) || "CV / Resume"}
+      />
+    )}
+  </>
   );
 }
