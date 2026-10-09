@@ -36,9 +36,9 @@ const linksTranslations: Record<LinksLocale, Record<string, string>> = {
     get_in_touch_desc:
       "Feel free to reach out for collaborations or just a friendly hello",
     name: "Name",
-    name_placeholder: "Your name",
+    name_placeholder: "John Doe",
     email: "Email",
-    email_placeholder: "name@email.com",
+    email_placeholder: "johndoe@example.com",
     subject: "Subject",
     message: "Message",
     message_placeholder: "Tell me about your project or just say hi!",
@@ -105,9 +105,9 @@ const linksTranslations: Record<LinksLocale, Record<string, string>> = {
     get_in_touch_desc:
       "Jangan ragu untuk menghubungi untuk kolaborasi atau sekadar menyapa",
     name: "Nama",
-    name_placeholder: "Nama Anda",
+    name_placeholder: "John Doe",
     email: "Email",
-    email_placeholder: "nama@email.com",
+    email_placeholder: "johndoe@example.com",
     subject: "Subjek",
     message: "Pesan",
     message_placeholder: "Ceritakan tentang proyek Anda atau sekadar menyapa!",
