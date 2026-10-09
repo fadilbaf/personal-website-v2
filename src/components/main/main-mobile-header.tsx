@@ -97,9 +97,6 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
   const enPath = pathname.startsWith("/id") ? pathname.replace(/^\/id/, "/en") : (pathname === "/" ? "/en" : pathname);
   const idPath = pathname.startsWith("/en") ? pathname.replace(/^\/en/, "/id") : (pathname === "/" ? "/id" : pathname);
 
-  // Lock body scroll when overlay is open
-  useScrollLock(menuOpen);
-
   // Close on escape key
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -291,11 +288,7 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
         initial={{ opacity: 0, y: -56 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className={`lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 border-b border-neutral-200/60 dark:border-white/10 transition-colors duration-200 ${
-          menuOpen
-            ? "bg-white dark:bg-neutral-950"
-            : "bg-white/70 backdrop-blur-xl dark:bg-neutral-950/70"
-        }`}
+        className="lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10"
       >
         <Link
           href={`/${locale}`}
@@ -335,15 +328,18 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
         />
       </motion.div>
 
-      {/* Mobile Drawer Menu (Directly below header, gentle fade in without sliding) */}
+      {/* Mobile Drawer Menu (Proven architecture matching nav-menu.tsx: full inset-0 backdrop with pt-14) */}
       <AnimatePresence>
         {menuOpen && (
           <motion.div
+            data-nav-menu="open"
+            data-mobile-menu="open"
+            data-state="open"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            transition={{ duration: 0.2, ease: "easeInOut" }}
-            className="fixed top-14 inset-x-0 bottom-0 z-40 flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white lg:hidden overflow-hidden"
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="fixed inset-0 z-[45] flex flex-col bg-white dark:bg-neutral-950 text-neutral-900 dark:text-white pt-14 lg:hidden overflow-hidden"
           >
             {/* 1. STICKY TOP: Profile Section (Matches main-sidebar.tsx exactly) */}
             <div className="shrink-0 pt-5 pb-3 px-3.5 flex flex-col items-center text-center relative">
@@ -406,7 +402,7 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
             <div className="w-full border-t border-neutral-200/60 dark:border-white/10 shrink-0" />
 
             {/* 2. SCROLLABLE MIDDLE: Menu List ONLY (Symmetrical py-3 padding so it scrolls flush against top & bottom dividers) */}
-            <div className="flex-1 overflow-y-auto scrollbar-custom min-h-0 py-3 px-3.5 flex flex-col gap-2">
+            <div className="flex-1 overflow-y-auto scrollbar-custom overscroll-contain min-h-0 py-3 px-3.5 flex flex-col gap-2">
               {/* Sections list */}
               <div className="flex flex-col gap-1">
                 {sections.map((sec) => {
