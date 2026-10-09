@@ -542,7 +542,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                       if (locale === "en") e.preventDefault();
                       else trackEvent("language_switch", "en");
                     }}
-                    className={`flex-1 h-7 flex items-center justify-center rounded-md text-xs font-semibold transition-all duration-200 select-none ${locale === "en"
+                    className={`flex-1 h-7 flex items-center justify-center rounded-md text-xs font-medium transition-all duration-200 select-none ${locale === "en"
                         ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs cursor-default"
                         : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
                       }`}
@@ -565,7 +565,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                       if (locale === "id") e.preventDefault();
                       else trackEvent("language_switch", "id");
                     }}
-                    className={`flex-1 h-7 flex items-center justify-center rounded-md text-xs font-semibold transition-all duration-200 select-none ${locale === "id"
+                    className={`flex-1 h-7 flex items-center justify-center rounded-md text-xs font-medium transition-all duration-200 select-none ${locale === "id"
                         ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs cursor-default"
                         : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
                       }`}
@@ -635,7 +635,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
         </div>
 
         {/* Inset Divider between Controls and Copyright (touches right border) */}
-        <div className="-mr-5 h-px bg-neutral-200/60 dark:bg-white/10 my-0.5 shrink-0" />
+        <div className="-mr-5 border-t border-neutral-200/60 dark:border-white/10 shrink-0" />
 
         {/* Copyright & Bafdev with Animated Underline */}
         <div className="flex flex-col items-center justify-center text-center gap-1 text-[11px] text-neutral-400 dark:text-neutral-500 w-full">
