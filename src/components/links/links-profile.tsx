@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { MapPin, Globe } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { tLinks, type LinksLocale } from "@/src/lib/links-translations";
 import {
@@ -99,14 +98,7 @@ const textBlurVariants = {
   },
 };
 
-const slideUpVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: { duration: 0.4, ease: "easeOut" as const },
-  },
-};
+
 
 
 
@@ -179,7 +171,7 @@ export function LinksProfile({
 
       {/* Name + Verified Badge */}
       <motion.h1
-        className="text-2xl font-bold tracking-tight text-neutral-900 dark:text-white relative"
+        className="text-2xl font-semibold tracking-tight text-neutral-900 dark:text-white relative"
         variants={textBlurVariants}
       >
         <span className="relative inline-block">
@@ -207,23 +199,6 @@ export function LinksProfile({
             {currentRole}
           </motion.p>
         </AnimatePresence>
-      </motion.div>
-
-      {/* Location badges */}
-      <motion.div
-        className="flex items-center gap-2 mt-4 flex-wrap justify-center"
-        variants={slideUpVariants}
-      >
-        {contact?.location && (
-          <span className="inline-flex items-center justify-center gap-1.5 w-36 rounded-lg bg-transparent py-1.5 text-xs font-medium text-neutral-600 border border-neutral-200 dark:text-neutral-400 dark:border-white/10">
-            <MapPin className="h-3 w-3" />
-            {contact.location}
-          </span>
-        )}
-        <span className="inline-flex items-center justify-center gap-1.5 w-36 rounded-lg bg-transparent py-1.5 text-xs font-medium text-neutral-600 border border-neutral-200 dark:text-neutral-400 dark:border-white/10">
-          <Globe className="h-3 w-3" />
-          {tLinks(locale, "open_to_remote")}
-        </span>
       </motion.div>
 
       {/* Social media icons */}
