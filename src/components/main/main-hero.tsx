@@ -2,8 +2,12 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Download } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Profile, Contact, About, Role, Badge as HeroBadge } from "@/src/types/database";
+import { trackEvent } from "@/src/lib/track-event";
+import { toStorageUrl } from "@/src/lib/storage-url";
+import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
 
 interface MainHeroProps {
   profile: Profile | null;
@@ -39,6 +43,7 @@ const fadeUpVariants = {
 
 export function MainHero({ profile, badges = [], about, contact, locale }: MainHeroProps) {
   const [currentBadgeIndex, setCurrentBadgeIndex] = useState(0);
+  const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
 
   const activeBadges = badges.filter((b) => b.is_active);
 
@@ -131,8 +136,44 @@ export function MainHero({ profile, badges = [], about, contact, locale }: MainH
             />
           )}
 
+          {/* CTAs: Let's Work Together & Download CV */}
+          <motion.div
+            variants={fadeUpVariants}
+            className="flex flex-wrap items-center gap-3 pt-2"
+          >
+            <a
+              href={contact?.email ? `mailto:${contact.email}` : "mailto:fadilbafagih@gmail.com"}
+              onClick={() => trackEvent("contact_click", "hero_cta")}
+              className="group inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-sm cursor-pointer shadow-xs"
+            >
+              <Mail className="h-4 w-4 shrink-0" />
+              <span>{tMain(locale, "lets_work")}</span>
+            </a>
+
+            {about?.cv_url && (
+              <button
+                type="button"
+                onClick={() => setIsCvPdfOpen(true)}
+                className="group inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-medium hover:bg-neutral-50 active:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 text-sm cursor-pointer shadow-xs"
+              >
+                <Download className="h-4 w-4 shrink-0" />
+                <span>{tMain(locale, "download_cv")}</span>
+              </button>
+            )}
+          </motion.div>
+
         </div>
       </motion.section>
+
+      {/* CV PDF Viewer Modal */}
+      {about?.cv_url && (
+        <PdfViewerModal
+          isOpen={isCvPdfOpen}
+          onClose={() => setIsCvPdfOpen(false)}
+          pdfUrl={toStorageUrl(about.cv_url)}
+          fileName={extractPdfFileName(about.cv_url) || "CV / Resume"}
+        />
+      )}
     </div>
   );
 }

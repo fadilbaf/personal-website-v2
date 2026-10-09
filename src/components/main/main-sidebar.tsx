@@ -14,7 +14,6 @@ import {
   Mail,
   Link2,
   ArrowRight,
-  Download,
   Share2,
   Copy,
 } from "lucide-react";
@@ -33,7 +32,6 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { trackEvent } from "@/src/lib/track-event";
-import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
 
 /** Verified badge (blue checkmark) */
 function VerifiedBadge() {
@@ -82,13 +80,14 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
   const [activeSection, setActiveSection] = useState<string>("about");
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
   const [isImageLoading, setIsImageLoading] = useState(true);
-  const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
   const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
   const menuContainerRef = useRef<HTMLDivElement>(null);
 
   const isHomePage = pathname === `/${locale}` || pathname === "/";
   const otherLocale = locale === "en" ? "id" : "en";
   const switchLangPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
+  const enPath = pathname.startsWith("/id") ? pathname.replace(/^\/id/, "/en") : (pathname === "/" ? "/en" : pathname);
+  const idPath = pathname.startsWith("/en") ? pathname.replace(/^\/en/, "/id") : (pathname === "/" ? "/id" : pathname);
 
   // Cycle through roles every 3 seconds
   useEffect(() => {
@@ -302,12 +301,11 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
   ];
 
   return (
-    <>
-      <motion.aside
-        initial={{ x: -40, opacity: 0 }}
+    <motion.aside
+      initial={{ x: -40, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="hidden lg:flex flex-col w-[300px] xl:w-[320px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl"
+      className="hidden lg:flex flex-col w-[280px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl"
     >
       {/* 1. STICKY TOP: Profile Section (Vertical layout like links page) */}
       <div className="shrink-0 pt-6 pb-4 px-5 flex flex-col items-center text-center">
@@ -366,8 +364,8 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
         </div>
       </div>
 
-      {/* Divider between Profile and Menu (inset on left, reaches right border) */}
-      <div className="ml-5 h-px bg-neutral-200/60 dark:bg-white/10 shrink-0" />
+      {/* Divider between Profile and Menu */}
+      <div className="ml-5 h-px bg-neutral-200/60 dark:bg-white/10 my-0.5 shrink-0" />
 
       {/* 2. SCROLLABLE MIDDLE: Menu List ONLY (Single Scrollbar) */}
       <div
@@ -410,18 +408,16 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                 {/* Content */}
                 <div className="relative z-10 flex items-center gap-3 min-w-0">
                   <Icon
-                    className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                      isActive
+                    className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${isActive
                         ? "text-white dark:text-neutral-900"
                         : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
-                    }`}
+                      }`}
                   />
                   <span
-                    className={`leading-5 truncate transition-colors duration-150 ${
-                      isActive
+                    className={`leading-5 truncate transition-colors duration-150 ${isActive
                         ? "text-white dark:text-neutral-900 font-semibold"
                         : "text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white"
-                    }`}
+                      }`}
                   >
                     {sec.label}
                   </span>
@@ -489,18 +485,16 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
                 <div className="relative z-10 flex items-center gap-3 min-w-0">
                   <Icon
-                    className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${
-                      isPageActive
+                    className={`h-4 w-4 shrink-0 transition-transform duration-200 group-hover:scale-110 ${isPageActive
                         ? "text-white dark:text-neutral-900"
                         : "text-neutral-400 group-hover:text-neutral-900 dark:group-hover:text-white"
-                    }`}
+                      }`}
                   />
                   <span
-                    className={`leading-5 truncate transition-colors duration-150 ${
-                      isPageActive
+                    className={`leading-5 truncate transition-colors duration-150 ${isPageActive
                         ? "text-white dark:text-neutral-900 font-semibold"
                         : "text-neutral-600 dark:text-neutral-300 group-hover:text-neutral-900 dark:group-hover:text-white"
-                    }`}
+                      }`}
                   >
                     {pg.label}
                   </span>
@@ -526,57 +520,65 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
         </div>
       </div>
 
-      {/* Divider between Menu and Bottom Controls (inset on left, reaches right border) */}
-      <div className="ml-5 h-px bg-neutral-200/60 dark:bg-white/10 shrink-0" />
+      {/* Divider between Menu and Bottom Controls */}
+      <div className="ml-5 h-px bg-neutral-200/60 dark:bg-white/10 my-0.5 shrink-0" />
 
       {/* 3. STICKY BOTTOM: Toggle, Language Switch, Subscribe, Copyright */}
       <div className="shrink-0 pt-4 pb-5 px-5 flex flex-col gap-3.5">
-        
-        {/* Theme 3-mode, Language Switch & Share (grouped to the left) */}
-        <div className="flex items-center gap-2 justify-start w-full">
-          <ThemeModeToggle locale={locale} />
 
+        {/* Theme 3-mode, Language Toggle Switch [EN | ID] & Share (full width) */}
+        <div className="flex items-center justify-between gap-1.5 w-full">
+          <ThemeModeToggle locale={locale} className="flex-3 h-9" />
+
+          {/* Language Toggle Switch [ EN | ID ] with Tooltip */}
           <TooltipProvider delayDuration={200}>
-            {/* Language Switch */}
-            <Tooltip>
-              <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  asChild
-                  className="h-9 w-9 rounded-lg border border-neutral-200 dark:border-white/10 relative cursor-pointer flex items-center justify-center"
-                  aria-label={tMain(locale, "switch_lang")}
-                  onClick={(e) => e.currentTarget.blur()}
-                >
+            <div className="flex items-center p-1 rounded-lg border border-neutral-200 dark:border-white/10 bg-transparent h-9 flex-2 gap-0.5">
+              <Tooltip>
+                <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
                   <Link
-                    href={switchLangPath}
+                    href={enPath}
                     prefetch={false}
-                    onClick={() => trackEvent("language_switch", otherLocale)}
+                    onClick={(e) => {
+                      if (locale === "en") e.preventDefault();
+                      else trackEvent("language_switch", "en");
+                    }}
+                    className={`flex-1 h-7 flex items-center justify-center rounded-md text-xs font-semibold transition-all duration-200 select-none ${locale === "en"
+                        ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs cursor-default"
+                        : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
+                      }`}
+                    aria-label="English"
                   >
-                    <svg
-                      className="h-4 w-4 text-neutral-600 dark:text-neutral-400"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <circle cx="12" cy="12" r="10" />
-                      <path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20" />
-                      <path d="M2 12h20" />
-                    </svg>
-                    <span className="absolute -bottom-1.5 -right-1.5 z-0 flex h-4 min-w-[16px] items-center justify-center rounded-[4px] bg-neutral-900 px-0.5 text-[8px] font-bold text-white border border-neutral-200 dark:bg-white dark:text-neutral-900 dark:border-neutral-800 leading-none select-none uppercase">
-                      {otherLocale}
-                    </span>
+                    EN
                   </Link>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent side="top">
-                <p>{tMain(locale, "switch_lang")}</p>
-              </TooltipContent>
-            </Tooltip>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  <p>English</p>
+                </TooltipContent>
+              </Tooltip>
+
+              <Tooltip>
+                <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
+                  <Link
+                    href={idPath}
+                    prefetch={false}
+                    onClick={(e) => {
+                      if (locale === "id") e.preventDefault();
+                      else trackEvent("language_switch", "id");
+                    }}
+                    className={`flex-1 h-7 flex items-center justify-center rounded-md text-xs font-semibold transition-all duration-200 select-none ${locale === "id"
+                        ? "bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 shadow-xs cursor-default"
+                        : "text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white cursor-pointer"
+                      }`}
+                    aria-label="Bahasa Indonesia"
+                  >
+                    ID
+                  </Link>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="text-xs">
+                  <p>Bahasa Indonesia</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
 
             {/* Share Button & Dropdown */}
             <Tooltip open={shareDropdownOpen ? false : undefined}>
@@ -586,7 +588,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                     <button
                       type="button"
                       onClick={() => trackEvent("share_click", "sidebar")}
-                      className="h-9 w-9 rounded-lg border border-neutral-200 dark:border-white/10 relative cursor-pointer flex items-center justify-center text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors outline-none"
+                      className="h-9 w-9 shrink-0 rounded-lg border border-neutral-200 dark:border-white/10 relative cursor-pointer flex items-center justify-center text-neutral-600 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors outline-none"
                       aria-label={tMain(locale, "share")}
                     >
                       <Share2 className="h-4 w-4" />
@@ -594,7 +596,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                   </DropdownMenuTrigger>
                 </TooltipTrigger>
                 <DropdownMenuContent
-                  align="start"
+                  align="end"
                   side="top"
                   sideOffset={8}
                   collisionPadding={16}
@@ -632,30 +634,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
           </TooltipProvider>
         </div>
 
-        {/* CTAs: Let's Work Together & Download CV */}
-        <div className="flex flex-col gap-2 w-full">
-          <a
-            href={contact?.email ? `mailto:${contact.email}` : "mailto:fadilbafagih@gmail.com"}
-            onClick={() => trackEvent("contact_click", "sidebar_cta")}
-            className="group w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-xs sm:text-sm cursor-pointer shadow-xs"
-          >
-            <Mail className="h-4 w-4 shrink-0" />
-            <span>{tMain(locale, "lets_work")}</span>
-          </a>
-
-          {about?.cv_url && (
-            <button
-              type="button"
-              onClick={() => setIsCvPdfOpen(true)}
-              className="group w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-neutral-200 bg-white text-neutral-700 font-medium hover:bg-neutral-50 active:bg-neutral-50 transition-colors dark:border-white/10 dark:bg-neutral-900/50 dark:text-neutral-300 dark:hover:bg-neutral-800 dark:active:bg-neutral-800 text-xs sm:text-sm cursor-pointer shadow-xs"
-            >
-              <Download className="h-4 w-4 shrink-0" />
-              <span>{tMain(locale, "download_cv")}</span>
-            </button>
-          )}
-        </div>
-
-        {/* Inset Divider between CTAs and Copyright (touches right border) */}
+        {/* Inset Divider between Controls and Copyright (touches right border) */}
         <div className="-mr-5 h-px bg-neutral-200/60 dark:bg-white/10 my-0.5 shrink-0" />
 
         {/* Copyright & Bafdev with Animated Underline */}
@@ -676,16 +655,5 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
       </div>
     </motion.aside>
-
-    {/* CV PDF Viewer Modal */}
-    {about?.cv_url && (
-      <PdfViewerModal
-        isOpen={isCvPdfOpen}
-        onClose={() => setIsCvPdfOpen(false)}
-        pdfUrl={toStorageUrl(about.cv_url)}
-        fileName={extractPdfFileName(about.cv_url) || "CV / Resume"}
-      />
-    )}
-  </>
   );
 }
