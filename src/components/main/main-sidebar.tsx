@@ -2,10 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Home,
   User,
   Briefcase,
   FolderGit2,
@@ -35,8 +35,14 @@ import {
 import { trackEvent } from "@/src/lib/track-event";
 import { PdfViewerModal, extractPdfFileName } from "@/components/dashboard/pdf-viewer-modal";
 
-import logoBlack from "@/src/assets/images/fadilbaf-black.svg";
-import logoWhite from "@/src/assets/images/fadilbaf-white.svg";
+/** Verified badge (blue checkmark) */
+function VerifiedBadge() {
+  return (
+    <svg className="h-5 w-5 text-blue-500 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+      <path d="M22.5 12.5c0-1.58-.875-2.95-2.148-3.6.154-.435.238-.905.238-1.4 0-2.21-1.71-3.998-3.818-3.998-.47 0-.92.084-1.336.25C14.818 2.415 13.51 1.5 12 1.5s-2.816.917-3.437 2.25c-.415-.165-.866-.25-1.336-.25-2.11 0-3.818 1.79-3.818 4 0 .494.083.964.237 1.4-1.272.65-2.147 2.018-2.147 3.6 0 1.495.782 2.798 1.942 3.486-.02.17-.032.34-.032.514 0 2.21 1.708 4 3.818 4 .47 0 .92-.086 1.335-.25.62 1.334 1.926 2.25 3.437 2.25 1.512 0 2.818-.916 3.437-2.25.415.163.865.248 1.336.248 2.11 0 3.818-1.79 3.818-4 0-.174-.012-.344-.033-.513 1.158-.687 1.943-1.99 1.943-3.484zm-6.616-3.334l-4.334 6.5a.749.749 0 01-1.041.208l-.115-.094-2.415-2.415a.75.75 0 111.06-1.06l1.77 1.767 3.825-5.74a.75.75 0 011.25.833z" />
+    </svg>
+  );
+}
 
 function LinkedInIcon({ className }: { className?: string }) {
   return (
@@ -73,7 +79,9 @@ interface MainSidebarProps {
 export function MainSidebar({ profile, roles, contact, about, locale }: MainSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [activeSection, setActiveSection] = useState<string>("hero");
+  const [activeSection, setActiveSection] = useState<string>("about");
+  const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [isCvPdfOpen, setIsCvPdfOpen] = useState(false);
   const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
   const menuContainerRef = useRef<HTMLDivElement>(null);
@@ -82,12 +90,28 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
   const otherLocale = locale === "en" ? "id" : "en";
   const switchLangPath = pathname.replace(`/${locale}`, `/${otherLocale}`);
 
+  // Cycle through roles every 3 seconds
+  useEffect(() => {
+    if (roles.length <= 1) return;
+    const interval = setInterval(() => {
+      setCurrentRoleIndex((prev) => (prev + 1) % roles.length);
+    }, 3000);
+    return () => clearInterval(interval);
+  }, [roles.length]);
+
+  const currentRole =
+    roles.length > 0
+      ? locale === "id"
+        ? roles[currentRoleIndex]?.role_id
+        : roles[currentRoleIndex]?.role_en
+      : "Full-Stack Developer";
+
   // Auto-scroll sidebar menu to keep active section/page in view with comfortable padding
   useEffect(() => {
     const container = menuContainerRef.current;
     if (!container) return;
 
-    if (activeSection === "hero" || (isHomePage && typeof window !== "undefined" && window.scrollY < 200)) {
+    if (activeSection === "about" || (isHomePage && typeof window !== "undefined" && window.scrollY < 200)) {
       container.scrollTo({
         top: 0,
         behavior: "smooth",
@@ -125,7 +149,6 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
     }
 
     const sectionIds = [
-      "hero",
       "about",
       "experiences",
       "projects",
@@ -138,8 +161,8 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
     const updateActiveSection = () => {
       const scrollY = window.scrollY;
-      if (scrollY < 100) {
-        setActiveSection("hero");
+      if (scrollY < 150) {
+        setActiveSection("about");
         return;
       }
 
@@ -150,7 +173,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
       }
 
       const triggerLine = window.innerHeight * 0.35;
-      let current = "hero";
+      let current = "about";
 
       for (const id of sectionIds) {
         const el = document.getElementById(id);
@@ -195,7 +218,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
   const handleSectionClick = (id: string) => {
     if (isHomePage) {
-      if (id === "hero") {
+      if (id === "about") {
         window.scrollTo({ top: 0, behavior: "smooth" });
         menuContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
       } else {
@@ -263,7 +286,6 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
   ];
 
   const sections = [
-    { id: "hero", label: tMain(locale, "nav_home"), icon: Home, href: `/${locale}#hero` },
     { id: "about", label: tMain(locale, "nav_about"), icon: User, href: `/${locale}#about` },
     { id: "experiences", label: tMain(locale, "nav_experiences"), icon: Briefcase, href: `/${locale}#experiences` },
     { id: "projects", label: tMain(locale, "nav_projects"), icon: FolderGit2, href: `/${locale}#projects` },
@@ -287,30 +309,61 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
       transition={{ duration: 0.5, ease: "easeOut" }}
       className="hidden lg:flex flex-col w-[300px] xl:w-[320px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl"
     >
-      {/* 1. STICKY TOP: Brand Logo Header */}
-      <div className="shrink-0 h-16 px-5 flex items-center">
-        <Link
-          href={`/${locale}`}
-          onClick={(e) => {
-            if (isHomePage) {
-              e.preventDefault();
-              window.scrollTo({ top: 0, behavior: "smooth" });
-              menuContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-            }
-          }}
-          className="relative flex items-center h-7 cursor-pointer outline-none"
-        >
-          <img
-            src={logoBlack.src}
-            alt="Fadil Bafagih"
-            className="dark:hidden h-7 w-auto"
-          />
-          <img
-            src={logoWhite.src}
-            alt="Fadil Bafagih"
-            className="hidden dark:block h-7 w-auto"
-          />
-        </Link>
+      {/* 1. STICKY TOP: Profile Section (Vertical layout like links page) */}
+      <div className="shrink-0 pt-6 pb-4 px-5 flex flex-col items-center text-center">
+        {/* Avatar */}
+        {profile?.photo_url && (
+          <motion.div
+            whileHover={{ scale: 1.03 }}
+            whileTap={{ scale: 1.03 }}
+            className="mb-3 cursor-pointer shrink-0"
+          >
+            <div className="profile-photo-shimmer relative h-[88px] w-[88px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-neutral-900 shadow-xs">
+              {isImageLoading && (
+                <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800 animate-pulse z-10" />
+              )}
+              <Image
+                src={toStorageUrl(profile.photo_url)}
+                alt={profile.full_name || "Profile"}
+                fill
+                className="object-cover select-none profile-image-grayscale"
+                sizes="96px"
+                priority
+                onLoad={() => setIsImageLoading(false)}
+                onContextMenu={(e) => e.preventDefault()}
+                draggable={false}
+              />
+            </div>
+          </motion.div>
+        )}
+
+        {/* Name + Verified Badge (True centered name, badge positioned absolutely on right) */}
+        <div className="relative flex justify-center w-full">
+          <div className="relative inline-flex items-center">
+            <h2 className="text-lg xl:text-[20px] font-semibold tracking-tight text-neutral-900 dark:text-white truncate">
+              {profile?.full_name || "Fadil Bafagih"}
+            </h2>
+            <span className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 flex items-center shrink-0">
+              <VerifiedBadge />
+            </span>
+          </div>
+        </div>
+
+        {/* Role with cycling animation */}
+        <div className="h-5 overflow-hidden mt-0.5 w-full">
+          <AnimatePresence mode="wait">
+            <motion.p
+              key={currentRoleIndex}
+              initial={{ y: 10, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: -10, opacity: 0 }}
+              transition={{ duration: 0.35, ease: "easeInOut" }}
+              className="text-xs sm:text-sm text-neutral-500 dark:text-neutral-400 font-normal truncate"
+            >
+              {currentRole}
+            </motion.p>
+          </AnimatePresence>
+        </div>
       </div>
 
       {/* Divider between Profile and Menu (inset on left, reaches right border) */}
@@ -581,14 +634,14 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
         {/* CTAs: Let's Work Together & Download CV */}
         <div className="flex flex-col gap-2 w-full">
-          <button
-            type="button"
-            onClick={() => handleSectionClick("contact")}
+          <a
+            href={contact?.email ? `mailto:${contact.email}` : "mailto:fadilbafagih@gmail.com"}
+            onClick={() => trackEvent("contact_click", "sidebar_cta")}
             className="group w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 font-medium transition-colors text-xs sm:text-sm cursor-pointer shadow-xs"
           >
             <Mail className="h-4 w-4 shrink-0" />
             <span>{tMain(locale, "lets_work")}</span>
-          </button>
+          </a>
 
           {about?.cv_url && (
             <button

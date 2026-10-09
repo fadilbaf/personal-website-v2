@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef, cloneElement } from "react";
 import { motion, useInView } from "framer-motion";
 import { useTheme } from "next-themes";
-import { ChevronLeft, ChevronRight, User, Code2, Eye } from "lucide-react";
+import { ChevronLeft, ChevronRight, Code2, Eye } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
 import type { Profile, Role, Contact, About, Statistics, Skill, SkillCategory } from "@/src/types/database";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -54,7 +54,6 @@ export function MainAbout({
   const [activityYear, setActivityYear] = useState<number>(() => new Date().getFullYear() || 2026);
   const [hoveredActivity, setHoveredActivity] = useState<{ date: string; count: number } | null>(null);
 
-  const aboutMeRef = useRef<HTMLDivElement>(null);
   const skillsHeaderRef = useRef<HTMLDivElement>(null);
   const skillsCardRef = useRef<HTMLDivElement>(null);
   const pillsContainerRef = useRef<HTMLDivElement>(null);
@@ -91,7 +90,6 @@ export function MainAbout({
     return padded;
   };
 
-  const bioText = locale === "id" ? about?.description_id : about?.description_en;
   const githubUsername = contact?.github_url?.replace(/\/$/, "").split("/").pop() || "fadilbafagih";
 
   const activeSkills = skills.filter((s) => s.is_active);
@@ -127,50 +125,8 @@ export function MainAbout({
     : activeSkills.filter((s) => s.category_id === selectedModalCategory);
 
   return (
-    <section id="about" className="scroll-mt-20 w-full pt-6 pb-8 md:pt-8 md:pb-12 overflow-hidden">
+    <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 overflow-hidden">
       <div className="w-full flex flex-col gap-12">
-        
-        {/* 1. About Me Section */}
-        <div className="flex flex-col">
-          <motion.div 
-            ref={aboutMeRef}
-            initial={{ opacity: 0, y: 15 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5, ease: "easeOut" }}
-            className="flex flex-col gap-1.5"
-          >
-            <div className="flex items-center gap-2.5">
-              <User className="h-[22px] w-[22px] text-neutral-900 dark:text-white" />
-              <h2 className="text-[24px] leading-none font-medium tracking-tight text-neutral-900 dark:text-white">
-                {tMain(locale, "about_me")}
-              </h2>
-            </div>
-            <p className="text-[15px] font-regular text-neutral-500 dark:text-neutral-400">
-              {tMain(locale, "about_subtitle")}
-            </p>
-          </motion.div>
-          
-          <motion.hr 
-            initial={{ scaleX: 0 }}
-            whileInView={{ scaleX: 1 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6, ease: "easeInOut" }}
-            style={{ originX: 0 }}
-            className="border-neutral-200 dark:border-white/10 my-4" 
-          />
-
-          {bioText && (
-            <motion.div 
-              initial={{ filter: "blur(8px)", opacity: 0, y: 20 }}
-              whileInView={{ filter: "blur(0px)", opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: 0.15, ease: "easeOut" }}
-              className="prose prose-neutral dark:prose-invert max-w-none text-[15px] text-neutral-600 dark:text-neutral-400 leading-[1.8]"
-              dangerouslySetInnerHTML={{ __html: bioText.replace(/\n/g, '<br />') }}
-            />
-          )}
-        </div>
 
         {/* 2. Skills Section */}
         <div className="flex flex-col">

@@ -142,7 +142,7 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
     setMenuOpen(false);
 
     if (isHomePage) {
-      if (id === "hero") {
+      if (id === "about") {
         window.scrollTo({ top: 0, behavior: "smooth" });
       } else {
         const el = document.getElementById(id);
@@ -257,7 +257,6 @@ export function MainMobileHeader({ locale }: MainMobileHeaderProps) {
   ];
 
   const sections = [
-    { id: "hero", label: tMain(locale, "nav_home"), icon: Home, href: `/${locale}#hero` },
     { id: "about", label: tMain(locale, "nav_about"), icon: User, href: `/${locale}#about` },
     { id: "experiences", label: tMain(locale, "nav_experiences"), icon: Briefcase, href: `/${locale}#experiences` },
     { id: "projects", label: tMain(locale, "nav_projects"), icon: FolderGit2, href: `/${locale}#projects` },

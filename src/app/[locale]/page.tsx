@@ -64,6 +64,7 @@ export default async function Home({
         <MainHero 
           profile={profile}
           roles={roles}
+          badges={badges}
           about={about}
           contact={contact}
           locale={locale}
