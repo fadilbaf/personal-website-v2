@@ -5,13 +5,14 @@ import { useTheme } from "next-themes";
 import { Sun, Moon, Laptop } from "lucide-react";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
+import { setThemeWithTransition } from "@/src/app/lib/theme-transition";
 
 interface ThemeModeToggleProps {
   locale: MainLocale;
 }
 
 export function ThemeModeToggle({ locale }: ThemeModeToggleProps) {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -54,7 +55,7 @@ export function ThemeModeToggle({ locale }: ThemeModeToggleProps) {
                 <button
                   type="button"
                   onClick={(e) => {
-                    setTheme(opt.value);
+                    setThemeWithTransition(opt.value, resolvedTheme, setTheme);
                     e.currentTarget.blur();
                   }}
                   className={`relative flex h-7 w-7 items-center justify-center rounded-md transition-all duration-200 cursor-pointer ${
