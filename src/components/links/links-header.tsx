@@ -126,14 +126,14 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
 
   return (
     <TooltipProvider>
-      <header className="sticky max-md:top-0 md:relative z-30 flex h-14 items-center justify-between px-3.5 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 md:rounded-t-2xl">
+      <motion.header
+        initial={{ opacity: 0, y: -56 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.45, ease: "easeOut" }}
+        className="sticky max-md:top-0 md:relative z-30 flex h-14 items-center justify-between px-3.5 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 md:rounded-t-2xl"
+      >
         {/* Logo */}
-        <motion.div
-          initial={{ opacity: 0, x: -10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="flex items-center"
-        >
+        <div className="flex items-center">
           <Link
             href={`/${locale}/links`}
             prefetch={false}
@@ -157,15 +157,10 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
               className="hidden dark:block h-7 w-auto"
             />
           </Link>
-        </motion.div>
+        </div>
 
         {/* Right controls */}
-        <motion.div
-          initial={{ opacity: 0, x: 10 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.4, ease: "easeOut" }}
-          className="flex items-center gap-2"
-        >
+        <div className="flex items-center gap-2">
           {/* 1. Language switch */}
           <Tooltip>
             <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
@@ -291,8 +286,8 @@ export function LinksHeader({ locale, contact }: LinksHeaderProps) {
               <p>{tLinks(locale, "share")}</p>
             </TooltipContent>
           </Tooltip>
-        </motion.div>
-      </header>
+        </div>
+      </motion.header>
     </TooltipProvider>
   );
 }
