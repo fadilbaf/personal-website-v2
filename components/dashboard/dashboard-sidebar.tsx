@@ -21,11 +21,11 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthService } from "@/src/services/auth.service";
 import type { Profile } from "@/src/types/database";
+import { DashboardSwitches } from "@/components/dashboard/dashboard-switches";
 
 interface SidebarNavItemProps {
   item: NavItem;
@@ -335,9 +335,9 @@ export function DashboardSidebar({
                   side="top"
                   align="start"
                   sideOffset={12}
-                  className="w-48"
+                  className="w-60 p-2"
                 >
-                  <DropdownMenuLabel>
+                  <DropdownMenuLabel className="p-1.5 font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
                         {profile?.full_name || "Admin"}
@@ -347,21 +347,28 @@ export function DashboardSidebar({
                       </p>
                     </div>
                   </DropdownMenuLabel>
-                  <DropdownMenuSeparator />
+
+                  {/* Theme & Language Switch */}
+                  <div className="px-1 pt-1 pb-1.5">
+                    <DashboardSwitches />
+                  </div>
+
+                  <div className="-mx-2 border-t border-neutral-200/60 dark:border-white/10 my-1" />
+
                   <DropdownMenuItem
                     onClick={() => {
                       router.push("/dashboard/profile");
                       onMobileClose?.();
                     }}
-                    className="cursor-pointer"
+                    className="cursor-pointer py-2 px-2.5"
                   >
-                    <User className="mr-2 h-4 w-4" />
+                    <User className="mr-2 h-4 w-4 text-neutral-500" />
                     {t("header.my_profile")}
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     variant="destructive"
                     onClick={handleLogout}
-                    className="cursor-pointer"
+                    className="cursor-pointer py-2 px-2.5"
                   >
                     <LogOut className="mr-2 h-4 w-4" />
                     {t("header.logout")}

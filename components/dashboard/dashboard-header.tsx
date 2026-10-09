@@ -1,22 +1,19 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import { LogOut, User } from "lucide-react";
-import { ThemeToggle } from "@/components/dashboard/theme-toggle";
-import { LanguageToggle } from "@/components/dashboard/language-toggle";
+import { DashboardSwitches } from "@/components/dashboard/dashboard-switches";
 import { useLanguage } from "@/context/language-context";
 import { AuthService } from "@/src/services/auth.service";
 import type { Profile } from "@/src/types/database";
@@ -27,9 +24,6 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-
-import logoBlack from "@/src/assets/images/fadilbaf-black.svg";
-import logoWhite from "@/src/assets/images/fadilbaf-white.svg";
 
 interface ProfileDropdownProps {
   profile: Profile | null;
@@ -96,34 +90,41 @@ function ProfileDropdown({
         </TooltipTrigger>
         <DropdownMenuContent
           align={align}
-          className="w-48"
+          className="w-60 p-2"
           onCloseAutoFocus={(e) => e.preventDefault()}
         >
-          <DropdownMenuLabel>
+          <DropdownMenuLabel className="p-1.5 font-normal">
             <div className="flex flex-col space-y-1">
-              <p className="text-sm font-semibold text-neutral-900 dark:text-white">
+              <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
                 {profile?.full_name || "Admin"}
               </p>
-              <p className="text-xs text-neutral-500 font-normal">
-                {profile?.email}
+              <p className="text-xs text-neutral-500 font-normal truncate">
+                {profile?.email || ""}
               </p>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+
+          {/* Theme & Language Switch */}
+          <div className="px-1 pt-1 pb-1.5">
+            <DashboardSwitches />
+          </div>
+
+          <div className="-mx-2 border-t border-neutral-200/60 dark:border-white/10 my-1" />
+
           <DropdownMenuItem
             onClick={() => {
               router.push("/dashboard/profile");
               setTooltipOpen(false);
             }}
-            className="cursor-pointer"
+            className="cursor-pointer py-2 px-2.5"
           >
-            <User className="mr-2 h-4 w-4" />
+            <User className="mr-2 h-4 w-4 text-neutral-500" />
             {t("header.my_profile")}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"
             onClick={handleLogout}
-            className="cursor-pointer"
+            className="cursor-pointer py-2 px-2.5"
           >
             <LogOut className="mr-2 h-4 w-4" />
             {t("header.logout")}
@@ -155,7 +156,6 @@ export function DashboardHeader({
   onToggleMobileSidebar,
 }: DashboardHeaderProps) {
   const router = useRouter();
-  const pathname = usePathname();
   const { t } = useLanguage();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
@@ -241,36 +241,10 @@ export function DashboardHeader({
               </TooltipContent>
             </Tooltip>
           </div>
-
-          {/* Brand Logo */}
-          <Link
-            href="/dashboard"
-            onClick={(e) => {
-              if (pathname === "/dashboard") {
-                e.preventDefault();
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }
-            }}
-            className="relative flex items-center h-7"
-          >
-            <img
-              src={logoBlack.src}
-              alt="Fadil Bafagih"
-              className="dark:hidden h-7 w-auto"
-            />
-            <img
-              src={logoWhite.src}
-              alt="Fadil Bafagih"
-              className="hidden dark:block h-7 w-auto"
-            />
-          </Link>
         </div>
 
-        {/* Right side: Language, Theme, and Profile dropdown */}
+        {/* Right side: Profile dropdown */}
         <div className="flex items-center gap-2">
-          <LanguageToggle />
-          <ThemeToggle />
-
           {/* User Profile dropdown */}
           <ProfileDropdown
             profile={profile}
