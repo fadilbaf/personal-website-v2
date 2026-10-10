@@ -338,7 +338,7 @@ export function PdfViewerModal({
 
   return (
     <TooltipProvider>
-      <div className="fixed inset-0 isolate z-60 flex items-center justify-center p-3 sm:p-6 md:p-8 overscroll-contain">
+      <div className="fixed inset-0 isolate z-90 flex items-center justify-center p-3 sm:p-6 md:p-8 overscroll-contain">
         {/* Backdrop Blur */}
         <div
           onClick={onClose}
@@ -391,7 +391,7 @@ export function PdfViewerModal({
                     )}
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="z-70">
+                <TooltipContent side="bottom">
                   <p>{t("common.pdf_viewer.download")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -418,7 +418,7 @@ export function PdfViewerModal({
                     <ExternalLink className="h-4 w-4" />
                   </a>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="z-70">
+                <TooltipContent side="bottom">
                   <p>{t("common.pdf_viewer.open_tab")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -443,7 +443,7 @@ export function PdfViewerModal({
                     <X className="h-4 w-4" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="z-70">
+                <TooltipContent side="bottom">
                   <p>{t("common.pdf_viewer.close")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -536,7 +536,7 @@ export function PdfViewerModal({
                     <ZoomOut className="w-3.5 h-3.5" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="z-70">
+                <TooltipContent side="top">
                   <p>{t("common.pdf_viewer.zoom_out")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -553,7 +553,7 @@ export function PdfViewerModal({
                     {Math.round(zoomScale * 100)}%
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="z-70">
+                <TooltipContent side="top">
                   <p>{t("common.pdf_viewer.reset_zoom")}</p>
                 </TooltipContent>
               </Tooltip>
@@ -571,7 +571,7 @@ export function PdfViewerModal({
                     <ZoomIn className="w-3.5 h-3.5" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="z-70">
+                <TooltipContent side="top">
                   <p>{t("common.pdf_viewer.zoom_in")}</p>
                 </TooltipContent>
               </Tooltip>

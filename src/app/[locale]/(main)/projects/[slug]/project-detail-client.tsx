@@ -1055,7 +1055,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
       {/* 5. Video Demo Overlay Modal */}
       {videoOpen && (
-        <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 isolate z-90 flex items-center justify-center p-4">
           {/* Glassmorphic Backdrop */}
           <div
             onClick={() => setVideoOpen(false)}
@@ -1086,7 +1086,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                     <X className="w-5 h-5 stroke-[2.5]" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="z-70">
+                <TooltipContent side="bottom">
                   <p>{locale === "id" ? "Tutup" : "Close"}</p>
                 </TooltipContent>
               </Tooltip>
@@ -1124,7 +1124,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
       {/* 6. Fullscreen Image Viewer Modal */}
       {viewerOpen && mounted && createPortal(
         <TooltipProvider>
-          <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4 overscroll-contain">
+          <div className="fixed inset-0 isolate z-90 flex items-center justify-center p-4 overscroll-contain">
             {/* Premium Glassmorphic Backdrop */}
             <div
               onClick={() => setViewerOpen(false)}
@@ -1154,7 +1154,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                     <X className="w-5 h-5 stroke-[2.5]" />
                   </button>
                 </TooltipTrigger>
-                <TooltipContent side="bottom" className="z-70">
+                <TooltipContent side="bottom">
                   <p>{locale === "id" ? "Tutup" : "Close"}</p>
                 </TooltipContent>
               </Tooltip>
@@ -1188,7 +1188,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                     </button>
                   </TooltipTrigger>
                   {viewerIndex > 0 && (
-                    <TooltipContent side="right" className="z-70">
+                    <TooltipContent side="right">
                       <p>{locale === "id" ? "Sebelumnya" : "Previous"}</p>
                     </TooltipContent>
                   )}
@@ -1224,7 +1224,7 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
                     </button>
                   </TooltipTrigger>
                   {viewerIndex < images.length - 1 && (
-                    <TooltipContent side="left" className="z-70">
+                    <TooltipContent side="left">
                       <p>{locale === "id" ? "Selanjutnya" : "Next"}</p>
                     </TooltipContent>
                   )}

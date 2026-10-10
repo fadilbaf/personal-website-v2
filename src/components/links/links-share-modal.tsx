@@ -85,7 +85,7 @@ export function LinksShareModal({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm cursor-pointer"
+            className="fixed inset-0 z-60 bg-black/60 backdrop-blur-sm cursor-pointer"
             onClick={onClose}
           />
 
@@ -95,7 +95,7 @@ export function LinksShareModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: -10 }}
             transition={{ duration: 0.2, ease: "easeOut" }}
-            className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[280px] rounded-xl border border-neutral-200 bg-white p-5 shadow-xl dark:border-white/10 dark:bg-neutral-900 dark:shadow-white/5"
+            className="fixed top-20 left-1/2 -translate-x-1/2 z-60 w-[280px] rounded-xl border border-neutral-200 bg-white p-5 shadow-xl dark:border-white/10 dark:bg-neutral-900 dark:shadow-white/5"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-4">

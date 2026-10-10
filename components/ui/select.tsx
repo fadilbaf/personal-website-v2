@@ -278,7 +278,7 @@ function SelectContent({
     <div
       data-slot="select-content"
       className={cn(
-        "absolute left-0 top-full z-50 mt-1 max-h-60 w-full overflow-y-auto overflow-x-hidden rounded-md bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 p-1 min-w-36 origin-top duration-100 animate-in fade-in-0 zoom-in-95",
+        "absolute left-0 top-full z-70 mt-1 max-h-60 w-full overflow-y-auto overflow-x-hidden rounded-md bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 p-1 min-w-36 origin-top duration-100 animate-in fade-in-0 zoom-in-95",
         className
       )}
       {...props}

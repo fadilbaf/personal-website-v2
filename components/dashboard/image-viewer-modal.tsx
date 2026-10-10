@@ -188,7 +188,7 @@ export function ImageViewerModal({
 
   return createPortal(
     <TooltipProvider>
-      <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-4 overscroll-contain">
+      <div className="fixed inset-0 isolate z-90 flex items-center justify-center p-4 overscroll-contain">
         {/* Premium Glassmorphic Backdrop */}
         <div
           onClick={onClose}
@@ -230,7 +230,7 @@ export function ImageViewerModal({
                 <X className="w-5 h-5 stroke-[2.5]" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="z-70">
+            <TooltipContent side="bottom">
               <p>{language === "id" ? "Tutup" : "Close"}</p>
             </TooltipContent>
           </Tooltip>
@@ -264,7 +264,7 @@ export function ImageViewerModal({
                 </button>
               </TooltipTrigger>
               {currentIndex > 0 && (
-                <TooltipContent side="right" className="z-70">
+                <TooltipContent side="right">
                   <p>{language === "id" ? "Sebelumnya" : "Previous"}</p>
                 </TooltipContent>
               )}
@@ -300,7 +300,7 @@ export function ImageViewerModal({
                 </button>
               </TooltipTrigger>
               {currentIndex < images.length - 1 && (
-                <TooltipContent side="left" className="z-70">
+                <TooltipContent side="left">
                   <p>{language === "id" ? "Selanjutnya" : "Next"}</p>
                 </TooltipContent>
               )}

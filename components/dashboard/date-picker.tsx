@@ -120,7 +120,7 @@ export function DatePicker({
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[280px] p-3 z-50 bg-popover text-popover-foreground shadow-md rounded-lg border border-neutral-200 dark:border-neutral-800" align="start">
+      <PopoverContent className="w-[280px] p-3 z-70 bg-popover text-popover-foreground shadow-md rounded-lg border border-neutral-200 dark:border-neutral-800" align="start">
         {view === "day" && (
           <div>
             {/* Custom Header for Day View */}

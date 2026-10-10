@@ -123,7 +123,7 @@ function CustomCodeBlockNodeView({ node, updateAttributes }: any) {
               <ChevronDown className="h-3 w-3 opacity-60" />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto scrollbar-custom min-w-44 z-50">
+          <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto scrollbar-custom min-w-44 z-70">
             <DropdownMenuLabel className="text-[10px] font-mono font-semibold uppercase tracking-wider text-neutral-500">
               Select Language
             </DropdownMenuLabel>
@@ -1148,7 +1148,7 @@ export function RichTextEditor({
                 <ChevronDown className="h-3 w-3 opacity-60" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto scrollbar-custom min-w-40 z-50">
+            <DropdownMenuContent align="start" className="max-h-64 overflow-y-auto scrollbar-custom min-w-40 z-70">
               <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
                 {t("common.editor.language")}
               </DropdownMenuLabel>
@@ -1231,7 +1231,7 @@ export function RichTextEditor({
               <ChevronDown className="h-3 w-3 opacity-60" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="min-w-52 z-50">
+          <DropdownMenuContent align="start" className="min-w-52 z-70">
             <DropdownMenuLabel className="text-[11px] font-semibold uppercase tracking-wider text-neutral-500">
               {t("common.editor.table_options")}
             </DropdownMenuLabel>

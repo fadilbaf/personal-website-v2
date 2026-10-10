@@ -112,7 +112,7 @@ export function MultiSelectSkill({ options, selected, onChange, placeholder }: M
       </div>
 
       {open && (
-        <div className="absolute top-full z-50 mt-1 max-h-60 w-full overflow-y-auto overflow-x-hidden rounded-md bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 p-1">
+        <div className="absolute top-full z-70 mt-1 max-h-60 w-full overflow-y-auto overflow-x-hidden rounded-md bg-popover text-popover-foreground shadow-md ring-1 ring-foreground/10 p-1">
           {options.length === 0 ? (
             <div className="p-2 text-center text-sm text-muted-foreground">{t("common.multi_select.no_options")}</div>
           ) : filteredOptions.length === 0 ? (
