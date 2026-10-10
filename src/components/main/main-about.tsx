@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback, useMemo, cloneElement } from "react";
-import { motion, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { ChevronLeft, ChevronRight, Code2, Eye } from "lucide-react";
 import { tMain, type MainLocale } from "@/src/lib/main-translations";
@@ -23,25 +23,25 @@ let cachedCanvas: HTMLCanvasElement | null = null;
 let cachedCtx: CanvasRenderingContext2D | null = null;
 
 function getPillWidth(name: string): number {
-  if (typeof window === "undefined") return 48 + name.length * 8;
+  if (typeof window === "undefined") return 54 + name.length * 8.5;
   if (!cachedCanvas) {
     cachedCanvas = document.createElement("canvas");
     cachedCtx = cachedCanvas.getContext("2d");
   }
-  if (!cachedCtx) return 48 + name.length * 8;
-  cachedCtx.font = "400 14px system-ui, -apple-system, sans-serif";
-  return 48 + Math.ceil(cachedCtx.measureText(name).width);
+  if (!cachedCtx) return 54 + name.length * 8.5;
+  cachedCtx.font = "400 14px Inter, system-ui, -apple-system, sans-serif";
+  return 52 + Math.ceil(cachedCtx.measureText(name).width);
 }
 
-function getViewAllPillWidth(text: string): number {
-  if (typeof window === "undefined") return 115;
+function getViewAllPillWidth(count: number, text: string): number {
+  if (typeof window === "undefined") return 130;
   if (!cachedCanvas) {
     cachedCanvas = document.createElement("canvas");
     cachedCtx = cachedCanvas.getContext("2d");
   }
-  if (!cachedCtx) return 115;
-  cachedCtx.font = "400 14px system-ui, -apple-system, sans-serif";
-  return 44 + Math.ceil(cachedCtx.measureText(`+99 ${text}`).width);
+  if (!cachedCtx) return 130;
+  cachedCtx.font = "400 14px Inter, system-ui, -apple-system, sans-serif";
+  return 52 + Math.ceil(cachedCtx.measureText(`+${count} ${text}`).width);
 }
 
 function calculate3RowFit(
@@ -52,7 +52,6 @@ function calculate3RowFit(
   if (skillsList.length === 0 || containerWidth <= 0) return skillsList.length;
 
   const gap = 8;
-  const viewAllWidth = getViewAllPillWidth(viewAllText);
   const pillWidths = skillsList.map((s) => getPillWidth(s.name));
 
   // Check if ALL skills fit within 3 rows without View All
@@ -83,6 +82,8 @@ function calculate3RowFit(
 
   for (let i = 0; i < pillWidths.length; i++) {
     const w = pillWidths[i];
+    const remainingCount = skillsList.length - (count + 1);
+    const viewAllWidth = getViewAllPillWidth(remainingCount, viewAllText);
 
     if (currentRow === 1) {
       if (lineWidth === 0) {
@@ -109,6 +110,7 @@ function calculate3RowFit(
           lineWidth = w;
           count++;
         } else {
+          // Cannot fit any skill on Row 3 alongside View All, stop at Row 2!
           break;
         }
       }
@@ -280,6 +282,29 @@ export function MainAbout({
     ? activeSkills
     : activeSkills.filter((s) => s.category_id === selectedModalCategory);
 
+  // Strict post-render verification: enforce maximum 3 rows under any font/device conditions
+  useEffect(() => {
+    const container = pillsContainerRef.current;
+    if (!container || container.children.length === 0) return;
+
+    const children = Array.from(container.children) as HTMLElement[];
+    if (children.length === 0) return;
+
+    // Detect distinct row offsets (offsetTop)
+    const rowTops: number[] = [];
+    for (const child of children) {
+      const top = child.offsetTop;
+      if (!rowTops.some((t) => Math.abs(t - top) < 6)) {
+        rowTops.push(top);
+      }
+    }
+
+    // If wrapped to 4th row or more, decrement maxPreviewSkills to keep it at 3 rows
+    if (rowTops.length > 3 && maxPreviewSkills > 1) {
+      setMaxPreviewSkills((prev) => Math.max(1, prev - 1));
+    }
+  }, [maxPreviewSkills, displayedSkillsPreview.length]);
+
   return (
     <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 overflow-hidden">
       <div className="w-full flex flex-col gap-12">
@@ -343,38 +368,14 @@ export function MainAbout({
             <hr className="border-neutral-200 dark:border-white/10 -mx-4 sm:-mx-5 mb-4 mt-0" />
 
             {/* Skills Pills */}
-            <motion.div 
+            <div 
               key={selectedCategory}
               ref={pillsContainerRef} 
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: {
-                    staggerChildren: 0.03
-                  }
-                }
-              }}
-              className="flex flex-wrap gap-2"
+              className="flex flex-wrap gap-2 transition-opacity duration-200"
             >
               {displayedSkillsPreview.map((skill) => (
-                <motion.div 
+                <div 
                   key={skill.id}
-                  layout
-                  variants={{
-                    hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
-                    visible: { 
-                      opacity: 1, 
-                      filter: "blur(0px)", 
-                      y: 0,
-                      transition: {
-                        duration: 0.4,
-                        ease: "easeOut"
-                      }
-                    }
-                  }}
                   className="group flex items-center gap-2 px-3 py-1.5 rounded-lg border border-neutral-200 bg-transparent dark:border-white/10 text-sm font-normal text-neutral-700 dark:text-neutral-300 transition-colors duration-200 hover:bg-neutral-50/50 hover:border-neutral-300 dark:hover:bg-white/3 dark:hover:border-white/20 hover:text-black dark:hover:text-white active:bg-neutral-50/50 active:border-neutral-300 dark:active:bg-white/3 dark:active:border-white/20 active:text-black dark:active:text-white"
                 >
                   {skill.icon_url ? (
@@ -387,34 +388,23 @@ export function MainAbout({
                     <Code2 className="w-3.5 h-3.5 text-black dark:text-white transition-transform duration-200 group-hover:scale-110 group-hover:rotate-6" />
                   )}
                   <span>{skill.name}</span>
-                </motion.div>
+                </div>
               ))}
               
               {/* View All Pill */}
               {hasMoreSkills && (
-                <motion.button
+                <button
                   key="view-all"
-                  variants={{
-                    hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
-                    visible: { 
-                      opacity: 1, 
-                      filter: "blur(0px)", 
-                      y: 0,
-                      transition: {
-                        duration: 0.4,
-                        ease: "easeOut"
-                      }
-                    }
-                  }}
+                  type="button"
                   onClick={() => setIsSkillsModalOpen(true)}
                   className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-neutral-200 dark:border-white/10 bg-transparent text-sm font-normal text-neutral-500 hover:bg-neutral-50 active:bg-neutral-50 dark:hover:bg-white/5 dark:active:bg-white/5 transition-colors cursor-pointer"
                 >
                   <Eye className="w-3.5 h-3.5 text-neutral-500 dark:text-neutral-400" />
                   <span>+{displaySkills.length - maxPreviewSkills}</span>
                   <span>{tMain(locale, "view_all")}</span>
-                </motion.button>
+                </button>
               )}
-            </motion.div>
+            </div>
           </motion.div>
         </div>
 
