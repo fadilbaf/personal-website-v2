@@ -470,8 +470,8 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
   );
 
   return (
-    <div className="w-full pt-6 pb-12 bg-transparent">
-      <div className="w-full max-w-[1440px] mx-auto flex flex-col">
+    <div className="w-full pt-6 md:pt-8 pb-12 md:pb-16 bg-transparent">
+      <div className="w-full flex flex-col">
         {/* 1. Back button */}
         <motion.div
           initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}

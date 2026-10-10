@@ -188,8 +188,8 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
   }, [filteredBlogs.length, page, pageSize, locale]);
 
   return (
-    <div className="w-full pt-6 md:pt-8 pb-8 md:pb-12 bg-transparent">
-      <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-6 px-1">
+    <div className="w-full pt-6 md:pt-8 pb-12 md:pb-16 bg-transparent">
+      <div className="w-full flex flex-col gap-6">
         {/* Back button */}
         <motion.div
           initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
