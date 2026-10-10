@@ -46,7 +46,13 @@ export function ThemeModeToggle({ locale, className, initialTheme = "system" }: 
     },
   ];
 
-  const activeTheme = mounted ? (theme || initialTheme) : initialTheme;
+  // Langsung gunakan theme dari context atau storage browser jika sudah di client agar tidak flicker ke 'system' saat mount/buka dropdown
+  const activeTheme =
+    (theme && theme !== "")
+      ? theme
+      : typeof window !== "undefined"
+      ? (localStorage.getItem("theme") || document.documentElement.dataset.themeMode || initialTheme)
+      : (mounted ? (theme || initialTheme) : initialTheme);
 
   return (
     <TooltipProvider delayDuration={200}>

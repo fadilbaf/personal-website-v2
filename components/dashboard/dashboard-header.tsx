@@ -6,13 +6,12 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
-import { LogOut, User } from "lucide-react";
+import { LogOut, User, ChevronsUpDown } from "lucide-react";
 import { DashboardSwitches } from "@/components/dashboard/dashboard-switches";
 import { useLanguage } from "@/context/language-context";
 import { AuthService } from "@/src/services/auth.service";
@@ -42,99 +41,91 @@ function ProfileDropdown({
   t,
   align,
 }: ProfileDropdownProps) {
-  const [dropdownOpen, setDropdownOpen] = useState(false);
-  const [tooltipOpen, setTooltipOpen] = useState(false);
   const [imageStatus, setImageStatus] = useState<"idle" | "loading" | "loaded" | "error">("idle");
 
   const actualShowSkeleton = showSkeleton || (profile?.photo_url ? (imageStatus !== "loaded" && imageStatus !== "error") : false);
 
   return (
-    <Tooltip
-      open={dropdownOpen ? false : tooltipOpen}
-      onOpenChange={setTooltipOpen}
-    >
-      <DropdownMenu onOpenChange={setDropdownOpen}>
-        <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              disabled={actualShowSkeleton}
-              onClick={(e) => {
-                if (!actualShowSkeleton) {
-                  setTooltipOpen(false);
-                  e.currentTarget.blur();
-                }
-              }}
-              className={cn(
-                "h-9 w-9 rounded-lg p-0 border border-neutral-200 dark:border-white/10 hover:bg-transparent active:bg-neutral-100 dark:active:bg-white/10 active:scale-100 focus:ring-0 focus-visible:ring-0 relative overflow-hidden cursor-pointer",
-                actualShowSkeleton && "pointer-events-none cursor-default"
-              )}
-            >
-              <Avatar className={cn("h-full w-full", actualShowSkeleton && "invisible")}>
-                <AvatarImage
-                  src={profile?.photo_url || undefined}
-                  alt={profile?.full_name || "FB"}
-                  className="rounded-lg"
-                  onLoadingStatusChange={setImageStatus}
-                />
-                <AvatarFallback className="bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-lg flex items-center justify-center">
-                  <User className="h-4 w-4" />
-                </AvatarFallback>
-              </Avatar>
-              {actualShowSkeleton && (
-                <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
-        <DropdownMenuContent
-          align={align}
-          className="w-60 p-2"
-          onCloseAutoFocus={(e) => e.preventDefault()}
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <button
+          disabled={showSkeleton}
+          className={cn(
+            "flex items-center gap-2 sm:gap-2.5 p-1 sm:px-2.5 sm:py-1.5 rounded-lg hover:bg-neutral-100 active:bg-neutral-100 dark:hover:bg-white/10 dark:active:bg-white/10 transition-colors cursor-pointer outline-none focus:outline-none",
+            showSkeleton && "pointer-events-none cursor-default"
+          )}
         >
-          <DropdownMenuLabel className="p-1.5 font-normal">
-            <div className="flex flex-col space-y-1">
-              <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
-                {profile?.full_name || "Admin"}
-              </p>
-              <p className="text-xs text-neutral-500 font-normal truncate">
-                {profile?.email || ""}
-              </p>
-            </div>
-          </DropdownMenuLabel>
-
-          {/* Theme & Language Switch */}
-          <div className="px-1 pt-1 pb-1.5">
-            <DashboardSwitches />
+          {/* Avatar */}
+          <div className="relative h-8 w-8 shrink-0 overflow-hidden rounded-lg">
+            <Avatar className={cn("h-8 w-8 border border-neutral-200/60 dark:border-white/10 rounded-lg", actualShowSkeleton && "invisible")}>
+              <AvatarImage
+                src={profile?.photo_url || undefined}
+                alt={profile?.full_name || "FB"}
+                className="rounded-lg object-cover"
+                onLoadingStatusChange={setImageStatus}
+              />
+              <AvatarFallback className="bg-neutral-900 text-white dark:bg-white dark:text-neutral-900 rounded-lg flex items-center justify-center text-xs font-semibold">
+                <User className="h-4 w-4" />
+              </AvatarFallback>
+            </Avatar>
+            {actualShowSkeleton && (
+              <Skeleton className="absolute inset-0 h-full w-full rounded-lg" />
+            )}
           </div>
 
-          <div className="-mx-2 border-t border-neutral-200/60 dark:border-white/10 my-1" />
+          {/* Profile Name & Email */}
+          <div className="flex flex-col text-left min-w-0 max-w-[110px] sm:max-w-[160px] md:max-w-[200px]">
+            {showSkeleton ? (
+              <div className="space-y-1 py-0.5">
+                <Skeleton className="h-3 w-16 sm:w-20 rounded" />
+                <Skeleton className="h-2.5 w-20 sm:w-28 rounded" />
+              </div>
+            ) : (
+              <>
+                <p className="text-xs sm:text-sm font-semibold text-neutral-900 dark:text-white truncate leading-tight">
+                  {profile?.full_name || "Admin"}
+                </p>
+                <p className="text-[10px] sm:text-xs text-neutral-500 truncate leading-tight mt-0.5">
+                  {profile?.email || ""}
+                </p>
+              </>
+            )}
+          </div>
 
-          <DropdownMenuItem
-            onClick={() => {
-              router.push("/dashboard/profile");
-              setTooltipOpen(false);
-            }}
-            className="cursor-pointer py-2 px-2.5"
-          >
-            <User className="mr-2 h-4 w-4 text-neutral-500" />
-            {t("header.my_profile")}
-          </DropdownMenuItem>
-          <DropdownMenuItem
-            variant="destructive"
-            onClick={handleLogout}
-            className="cursor-pointer py-2 px-2.5"
-          >
-            <LogOut className="mr-2 h-4 w-4" />
-            {t("header.logout")}
-          </DropdownMenuItem>
-        </DropdownMenuContent>
-      </DropdownMenu>
-      <TooltipContent side="bottom">
-        <p>{t("header.profile")}</p>
-      </TooltipContent>
-    </Tooltip>
+          <ChevronsUpDown className="h-3.5 w-3.5 text-neutral-400 dark:text-neutral-500 shrink-0 ml-0.5" />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align={align}
+        className="w-56 p-1.5"
+        onCloseAutoFocus={(e) => e.preventDefault()}
+      >
+        {/* Theme & Language Switch */}
+        <div className="px-1 py-1">
+          <DashboardSwitches />
+        </div>
+
+        <div className="-mx-1.5 border-t border-neutral-200/60 dark:border-white/10 my-1" />
+
+        <DropdownMenuItem
+          onClick={() => {
+            router.push("/dashboard/profile");
+          }}
+          className="cursor-pointer py-2 px-2.5"
+        >
+          <User className="mr-2 h-4 w-4 text-neutral-500" />
+          {t("header.my_profile")}
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          variant="destructive"
+          onClick={handleLogout}
+          className="cursor-pointer py-2 px-2.5"
+        >
+          <LogOut className="mr-2 h-4 w-4" />
+          {t("header.logout")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 

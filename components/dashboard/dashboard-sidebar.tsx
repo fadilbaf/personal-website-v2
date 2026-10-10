@@ -20,7 +20,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { AuthService } from "@/src/services/auth.service";
@@ -335,25 +334,14 @@ export function DashboardSidebar({
                   side="top"
                   align="start"
                   sideOffset={12}
-                  className="w-60 p-2"
+                  className="w-60 p-1.5"
                 >
-                  <DropdownMenuLabel className="p-1.5 font-normal">
-                    <div className="flex flex-col space-y-1">
-                      <p className="text-sm font-semibold text-neutral-900 dark:text-white truncate">
-                        {profile?.full_name || "Admin"}
-                      </p>
-                      <p className="text-xs text-neutral-500 font-normal truncate">
-                        {profile?.email || ""}
-                      </p>
-                    </div>
-                  </DropdownMenuLabel>
-
                   {/* Theme & Language Switch */}
-                  <div className="px-1 pt-1 pb-1.5">
+                  <div className="px-1 py-1">
                     <DashboardSwitches />
                   </div>
 
-                  <div className="-mx-2 border-t border-neutral-200/60 dark:border-white/10 my-1" />
+                  <div className="-mx-1.5 border-t border-neutral-200/60 dark:border-white/10 my-1" />
 
                   <DropdownMenuItem
                     onClick={() => {
