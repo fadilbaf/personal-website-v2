@@ -2,8 +2,6 @@ import { ProjectService } from "@/src/services/project.service";
 import { LinksService } from "@/src/services/links.service";
 import { notFound } from "next/navigation";
 import { ProjectDetailClient } from "./project-detail-client";
-import { MainPublicShell } from "@/src/components/main/main-public-shell";
-import { ScrollToTop } from "@/components/scroll-to-top";
 import type { MainLocale } from "@/src/lib/main-translations";
 import { toStorageUrl } from "@/src/lib/storage-url";
 
@@ -61,26 +59,15 @@ export default async function ProjectDetailPage({
     notFound();
   }
 
-  const { profile, roles, badges, about, contact } = await LinksService.getAll();
+  const { contact } = await LinksService.getAll();
 
   return (
-    <MainPublicShell
-      profile={profile}
-      roles={roles}
-      badges={badges}
-      contact={contact}
-      about={about}
-      locale={locale}
-    >
-      <main className="w-full flex-1 flex flex-col overflow-visible">
-        <ProjectDetailClient
-          project={project}
-          contact={contact}
-          locale={locale}
-        />
-      </main>
-
-      <ScrollToTop />
-    </MainPublicShell>
+    <main className="w-full flex-1 flex flex-col overflow-visible">
+      <ProjectDetailClient
+        project={project}
+        contact={contact}
+        locale={locale}
+      />
+    </main>
   );
 }

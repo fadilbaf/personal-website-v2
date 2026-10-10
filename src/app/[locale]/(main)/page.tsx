@@ -7,7 +7,6 @@ import { OrganizationService } from "@/src/services/organization.service";
 import { ProjectService } from "@/src/services/project.service";
 import { AchievementService } from "@/src/services/achievement.service";
 import { BlogService } from "@/src/services/blog.service";
-import { MainPublicShell } from "@/src/components/main/main-public-shell";
 import { MainHero } from "@/src/components/main/main-hero";
 import { MainAbout } from "@/src/components/main/main-about";
 import { MainExperience } from "@/src/components/main/main-experience";
@@ -16,7 +15,6 @@ import { MainAchievements } from "@/src/components/main/main-achievements";
 import { MainBlogs } from "@/src/components/main/main-blogs";
 import { MainContact } from "@/src/components/main/main-contact";
 import type { MainLocale } from "@/src/lib/main-translations";
-import { ScrollToTop } from "@/components/scroll-to-top";
 
 export default async function Home({
   params,
@@ -52,64 +50,53 @@ export default async function Home({
   ]);
 
   return (
-    <MainPublicShell
-      profile={profile}
-      roles={roles}
-      badges={badges}
-      contact={contact}
-      about={about}
-      locale={locale}
-    >
-      <main className="w-full flex-1 flex flex-col overflow-visible">
-        <MainHero 
-          profile={profile}
-          roles={roles}
-          badges={badges}
-          about={about}
-          contact={contact}
-          locale={locale}
-        />
-        
-        <MainAbout
-          profile={profile}
-          roles={roles}
-          about={about}
-          contact={contact}
-          statistics={statistics}
-          skills={skills}
-          skillCategories={skillCategories}
-          locale={locale}
-        />
+    <main className="w-full flex-1 flex flex-col overflow-visible">
+      <MainHero 
+        profile={profile}
+        roles={roles}
+        badges={badges}
+        about={about}
+        contact={contact}
+        locale={locale}
+      />
+      
+      <MainAbout
+        profile={profile}
+        roles={roles}
+        about={about}
+        contact={contact}
+        statistics={statistics}
+        skills={skills}
+        skillCategories={skillCategories}
+        locale={locale}
+      />
 
-        <MainExperience
-          careers={careers}
-          educations={educations}
-          organizations={organizations}
-          locale={locale}
-        />
+      <MainExperience
+        careers={careers}
+        educations={educations}
+        organizations={organizations}
+        locale={locale}
+      />
 
-        <MainProjects
-          projects={projects}
-          locale={locale}
-        />
+      <MainProjects
+        projects={projects}
+        locale={locale}
+      />
 
-        <MainAchievements
-          achievements={achievements}
-          locale={locale}
-        />
+      <MainAchievements
+        achievements={achievements}
+        locale={locale}
+      />
 
-        <MainBlogs
-          blogs={blogs}
-          locale={locale}
-        />
+      <MainBlogs
+        blogs={blogs}
+        locale={locale}
+      />
 
-        <MainContact
-          contact={contact}
-          locale={locale}
-        />
-      </main>
-
-      <ScrollToTop />
-    </MainPublicShell>
+      <MainContact
+        contact={contact}
+        locale={locale}
+      />
+    </main>
   );
 }

@@ -1,9 +1,6 @@
 import { ProjectService } from "@/src/services/project.service";
-import { LinksService } from "@/src/services/links.service";
 import { ProjectsClient } from "./projects-client";
-import { MainPublicShell } from "@/src/components/main/main-public-shell";
 import type { MainLocale } from "@/src/lib/main-translations";
-import { ScrollToTop } from "@/components/scroll-to-top";
 
 export async function generateMetadata({
   params,
@@ -30,36 +27,24 @@ export default async function ProjectsPage({
   const { locale: rawLocale } = await params;
   const locale = rawLocale as MainLocale;
 
-  // Fetch all required data concurrently
-  const [projects, types, categories, { profile, roles, badges, about, contact }] = await Promise.all([
+  // Fetch only project-related data concurrently
+  const [projects, types, categories] = await Promise.all([
     ProjectService.getAll(),
     ProjectService.getTypes(),
     ProjectService.getCategories(),
-    LinksService.getAll(),
   ]);
 
   // Filter only published projects for the public page
   const publishedProjects = projects.filter((p) => p.is_published);
 
   return (
-    <MainPublicShell
-      profile={profile}
-      roles={roles}
-      badges={badges}
-      contact={contact}
-      about={about}
-      locale={locale}
-    >
-      <main className="w-full flex-1 flex flex-col overflow-visible">
-        <ProjectsClient
-          projects={publishedProjects}
-          types={types}
-          categories={categories}
-          locale={locale}
-        />
-      </main>
-
-      <ScrollToTop />
-    </MainPublicShell>
+    <main className="w-full flex-1 flex flex-col overflow-visible">
+      <ProjectsClient
+        projects={publishedProjects}
+        types={types}
+        categories={categories}
+        locale={locale}
+      />
+    </main>
   );
 }
