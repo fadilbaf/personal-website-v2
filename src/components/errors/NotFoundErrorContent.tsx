@@ -57,7 +57,7 @@ export default function NotFoundErrorContent() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-background relative overflow-hidden font-sans select-none px-6 py-12">
+    <div className="min-h-dvh w-full flex items-center justify-center bg-background relative overflow-hidden font-sans select-none px-6 py-12">
       {/* Decorative Glow Backgrounds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -left-20 -top-20 h-96 w-96 rounded-full bg-neutral-200/50 blur-3xl dark:bg-white/5" />
@@ -74,7 +74,7 @@ export default function NotFoundErrorContent() {
         {/* Metallic 404 */}
         <motion.h1
           variants={textBlurVariants}
-          className="text-8xl sm:text-9xl md:text-[10rem] font-extrabold tracking-tighter bg-linear-to-b from-neutral-800 via-neutral-800/80 via-60% to-background dark:from-white dark:via-white/80 dark:via-60% dark:to-background bg-clip-text text-transparent leading-none select-none"
+          className="text-8xl sm:text-9xl md:text-[10rem] font-extrabold tracking-tight bg-linear-to-b from-neutral-800 via-neutral-800/80 via-60% to-background dark:from-white dark:via-white/80 dark:via-60% dark:to-background bg-clip-text text-transparent leading-none select-none px-4 inline-block"
         >
           404
         </motion.h1>

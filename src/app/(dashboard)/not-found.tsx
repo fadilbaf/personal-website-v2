@@ -54,7 +54,7 @@ export default function DashboardNotFound() {
   const backText = isId ? "Kembali" : "Go Back";
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center min-h-[70vh] p-6 text-center relative overflow-hidden font-sans select-none">
+    <div className="min-h-dvh w-full flex flex-col items-center justify-center p-6 text-center relative overflow-hidden font-sans select-none">
       {/* Decorative Glow Backgrounds */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -left-20 -top-20 h-80 w-80 rounded-full bg-neutral-200/50 blur-3xl dark:bg-white/5" />
@@ -70,7 +70,7 @@ export default function DashboardNotFound() {
         {/* Metallic 404 */}
         <motion.h1
           variants={textBlurVariants}
-          className="text-7xl sm:text-8xl md:text-[8rem] font-extrabold tracking-tighter bg-linear-to-b from-neutral-800 via-neutral-800/80 via-60% to-background dark:from-white dark:via-white/80 dark:via-60% dark:to-background bg-clip-text text-transparent leading-none select-none"
+          className="text-7xl sm:text-8xl md:text-[8rem] font-extrabold tracking-tight bg-linear-to-b from-neutral-800 via-neutral-800/80 via-60% to-background dark:from-white dark:via-white/80 dark:via-60% dark:to-background bg-clip-text text-transparent leading-none select-none px-4 inline-block"
         >
           404
         </motion.h1>
