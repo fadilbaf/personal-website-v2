@@ -9,11 +9,10 @@ import {
   Sun,
   Eye,
   Share2,
-  MapPin,
-  Globe,
   Mail,
   Send,
   ChevronDown,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/src/app/lib/utils";
@@ -47,6 +46,7 @@ interface LinksLivePreviewProps {
   roles: Role[];
   badges?: ProfileBadge[];
   contact: Contact | null;
+  isLoading?: boolean;
 }
 
 /** Verified badge SVG */
@@ -249,7 +249,7 @@ function StaticProfileSection({
       )}
 
       {/* Name + Verified Badge */}
-      <h1 className={cn("text-2xl font-bold tracking-tight relative", isDark ? "text-white" : "text-neutral-900")}>
+      <h1 className={cn("text-2xl font-semibold tracking-tight relative", isDark ? "text-white" : "text-neutral-900")}>
         <span className="relative inline-block">
           {profile?.full_name || "Fadil Bafagih"}
           <span className="absolute left-full top-1/2 -translate-y-1/2 ml-1.5 flex items-center">
@@ -264,30 +264,6 @@ function StaticProfileSection({
           {currentRole}
         </p>
       )}
-
-      {/* Location badges */}
-      <div className="flex items-center gap-2 mt-4 flex-wrap justify-center">
-        {contact?.location && (
-          <span
-            className={cn(
-              "inline-flex items-center justify-center gap-1.5 w-36 rounded-lg bg-transparent py-1.5 text-xs font-medium border",
-              isDark ? "text-neutral-400 border-white/10" : "text-neutral-600 border-neutral-200"
-            )}
-          >
-            <MapPin className="h-3 w-3" />
-            {contact.location}
-          </span>
-        )}
-        <span
-          className={cn(
-            "inline-flex items-center justify-center gap-1.5 w-36 rounded-lg bg-transparent py-1.5 text-xs font-medium border",
-            isDark ? "text-neutral-400 border-white/10" : "text-neutral-600 border-neutral-200"
-          )}
-        >
-          <Globe className="h-3 w-3" />
-          {tLinks(locale, "open_to_remote")}
-        </span>
-      </div>
 
       {/* Social media icons */}
       {socialLinks.length > 0 && (
@@ -470,38 +446,42 @@ export function LinksLivePreview({
   profile,
   roles,
   contact,
+  isLoading = false,
 }: LinksLivePreviewProps) {
   const { t, language } = useLanguage();
-  const { resolvedTheme } = useTheme();
+  const { resolvedTheme, theme } = useTheme();
 
-  const [mounted, setMounted] = useState(false);
-  const [previewLocale, setPreviewLocale] = useState<"id" | "en">("id");
-  const [previewTheme, setPreviewTheme] = useState<"dark" | "light">("dark");
+  // Ambil default locale langsung dari language dashboard saat ini
+  const getInitialLocale = (): "id" | "en" => {
+    return language === "en" ? "en" : "id";
+  };
 
-  // Sync default values on client mount to eliminate any hydration mismatches
+  // Ambil default theme langsung dari theme dashboard saat ini
+  const getInitialTheme = (): "dark" | "light" => {
+    if (resolvedTheme === "light" || resolvedTheme === "dark") return resolvedTheme;
+    if (theme === "light" || theme === "dark") return theme;
+    if (typeof document !== "undefined") {
+      return document.documentElement.classList.contains("dark") ? "dark" : "light";
+    }
+    return "light";
+  };
+
+  const [previewLocale, setPreviewLocale] = useState<"id" | "en">(getInitialLocale);
+  const [previewTheme, setPreviewTheme] = useState<"dark" | "light">(getInitialTheme);
+
+  // Sync jika dashboard language berganti
   useEffect(() => {
-    setMounted(true);
     if (language === "en" || language === "id") {
       setPreviewLocale(language);
     }
-    if (resolvedTheme === "light" || resolvedTheme === "dark") {
+  }, [language]);
+
+  // Sync jika dashboard theme berganti
+  useEffect(() => {
+    if (resolvedTheme === "dark" || resolvedTheme === "light") {
       setPreviewTheme(resolvedTheme);
     }
-  }, []);
-
-  // Sync if dashboard language changes later
-  useEffect(() => {
-    if (mounted && (language === "id" || language === "en")) {
-      setPreviewLocale(language);
-    }
-  }, [language, mounted]);
-
-  // Sync if dashboard theme changes later
-  useEffect(() => {
-    if (mounted && (resolvedTheme === "dark" || resolvedTheme === "light")) {
-      setPreviewTheme(resolvedTheme);
-    }
-  }, [resolvedTheme, mounted]);
+  }, [resolvedTheme]);
 
   const isDark = previewTheme === "dark";
   const otherLocale = previewLocale === "en" ? "id" : "en";
@@ -640,8 +620,18 @@ export function LinksLivePreview({
               <div className="h-2 w-2 rounded-full bg-[#0d1b2a] ring-1 ring-blue-950/60" />
             </div>
 
-            {/* Scrollable Container */}
-            <div className="flex-1 overflow-y-auto scrollbar-none overscroll-contain">
+            {isLoading ? (
+              <div
+                className={cn(
+                  "flex-1 flex flex-col items-center justify-center gap-3 transition-colors",
+                  isDark ? "bg-neutral-950 text-neutral-400" : "bg-white text-neutral-500"
+                )}
+              >
+                <Loader2 className="h-7 w-7 animate-spin text-neutral-400 dark:text-neutral-500" />
+              </div>
+            ) : (
+              /* Scrollable Container */
+              <div className="flex-1 overflow-y-auto scrollbar-none overscroll-contain">
               {/* Header inside Phone (Exact match to LinksHeader, Static) */}
               <header
                 className={cn(
@@ -846,6 +836,7 @@ export function LinksLivePreview({
                 <StaticFooterSection locale={previewLocale} isDark={isDark} />
               </div>
             </div>
+            )}
           </div>
         </div>
       </div>

@@ -159,13 +159,17 @@ export function LinkItemRow({
             <Button
               variant="ghost"
               size="icon"
-              className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10 cursor-pointer"
+              className="h-8 w-8 text-neutral-500 hover:text-neutral-900 dark:hover:text-white data-[state=open]:bg-neutral-100 dark:data-[state=open]:bg-white/10 cursor-pointer focus:outline-none focus:ring-0 focus-visible:ring-0 focus-visible:ring-offset-0"
             >
               <MoreHorizontal className="h-4 w-4" />
               <span className="sr-only">Open menu</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44">
+          <DropdownMenuContent
+            align="end"
+            className="w-44"
+            onCloseAutoFocus={(e) => e.preventDefault()}
+          >
             {/* 1. Toggle Active / Inactive */}
             <DropdownMenuItem
               onClick={() => onToggleActive(item, !item.is_active)}

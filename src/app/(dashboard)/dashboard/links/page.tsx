@@ -94,8 +94,8 @@ export default function LinksDashboardPage() {
 
   // Combined Draggable Items List State
   const [listItems, setListItems] = useState<ListItem[]>([]);
-  const [isOrderDirty, setIsOrderDirty] = useState(false);
-  const [isSavingOrder, setIsSavingOrder] = useState(false);
+  const [isDirty, setIsDirty] = useState(false);
+  const [isSavingChanges, setIsSavingChanges] = useState(false);
 
   // Load custom groups & deleted groups from localStorage
   useEffect(() => {
@@ -116,7 +116,7 @@ export default function LinksDashboardPage() {
   });
 
   // 2. Fetch Public Profile & Context for Live Preview
-  const { data: publicData } = useQuery({
+  const { data: publicData, isLoading: isLoadingPublicData } = useQuery({
     queryKey: ["public-links-context"],
     queryFn: () => LinksService.getAll(),
   });
@@ -162,7 +162,7 @@ export default function LinksDashboardPage() {
 
   // Sync server links and groups into listItems state
   useEffect(() => {
-    if (!serverLinks) return;
+    if (!serverLinks || isDirty) return;
 
     const links = [...serverLinks].sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
     
@@ -209,8 +209,8 @@ export default function LinksDashboardPage() {
     });
 
     setListItems(items);
-    setIsOrderDirty(false);
-  }, [serverLinks, availableGroups]);
+    setIsDirty(false);
+  }, [serverLinks, availableGroups, isDirty]);
 
   // Extracted pure links from listItems for Live Preview and Stats
   const currentLinks = useMemo(() => {
@@ -475,7 +475,7 @@ export default function LinksDashboardPage() {
     }
 
     setListItems(newOrder);
-    setIsOrderDirty(true);
+    setIsDirty(true);
   };
 
   const handleMoveUp = (index: number) => {
@@ -485,7 +485,7 @@ export default function LinksDashboardPage() {
     newItems[index] = newItems[index - 1];
     newItems[index - 1] = target;
     setListItems(newItems);
-    setIsOrderDirty(true);
+    setIsDirty(true);
   };
 
   const handleMoveDown = (index: number) => {
@@ -495,38 +495,55 @@ export default function LinksDashboardPage() {
     newItems[index] = newItems[index + 1];
     newItems[index + 1] = target;
     setListItems(newItems);
-    setIsOrderDirty(true);
+    setIsDirty(true);
   };
 
-  // Save Order to Supabase (propagates group assignment based on position)
-  const handleSaveOrder = async () => {
-    if (!isOrderDirty || isSavingOrder) return;
-    setIsSavingOrder(true);
+  // Save all local list changes (order, active status, group assignments) to Supabase
+  const handleSaveChanges = async () => {
+    if (!isDirty || isSavingChanges) return;
+    setIsSavingChanges(true);
     try {
-      const linkUpdates = listItems
-        .filter((it): it is Extract<ListItem, { type: "link" }> => it.type === "link")
-        .map((it, idx) => ({
-          id: it.data.id,
-          sort_order: idx + 1,
-        }));
+      let currentGroupId = "Utama";
+      let currentGroupEn = "Main";
 
-      if (linkUpdates.length > 0) {
-        await LinksService.reorderLinks(linkUpdates);
+      const updates: Promise<any>[] = [];
+      let linkIndex = 0;
+
+      for (const item of listItems) {
+        if (item.type === "group") {
+          currentGroupId = item.name_id;
+          currentGroupEn = item.name_en;
+        } else if (item.type === "link") {
+          linkIndex++;
+          updates.push(
+            LinksService.updateLink(item.data.id, {
+              sort_order: linkIndex,
+              is_active: item.data.is_active,
+              group_name_id: currentGroupId,
+              group_name_en: currentGroupEn,
+            })
+          );
+        }
       }
 
-      toast.success(t("links.order_saved"));
-      setIsOrderDirty(false);
+      if (updates.length > 0) {
+        await Promise.all(updates);
+      }
+
+      toast.success(t("links.saved_success") || "Perubahan berhasil disimpan");
+      setIsDirty(false);
       queryClient.invalidateQueries({ queryKey: ["admin-links"] });
+      queryClient.invalidateQueries({ queryKey: ["links-stats"] });
       queryClient.invalidateQueries({ queryKey: ["public-links-context"] });
     } catch {
-      toast.error(t("links.order_failed"));
+      toast.error(t("links.saved_failed") || "Gagal menyimpan perubahan");
     } finally {
-      setIsSavingOrder(false);
+      setIsSavingChanges(false);
     }
   };
 
-  // Toggle Active Status on a Link
-  const handleToggleActive = async (link: LinkItem, active: boolean) => {
+  // Toggle Active Status on a Link (Local only, saved when Save Changes button is clicked)
+  const handleToggleActive = (link: LinkItem, active: boolean) => {
     setListItems((prev) =>
       prev.map((item) =>
         item.type === "link" && item.data.id === link.id
@@ -534,22 +551,7 @@ export default function LinksDashboardPage() {
           : item
       )
     );
-
-    try {
-      await LinksService.updateLink(link.id, { is_active: active });
-      queryClient.invalidateQueries({ queryKey: ["admin-links"] });
-      queryClient.invalidateQueries({ queryKey: ["links-stats"] });
-      queryClient.invalidateQueries({ queryKey: ["public-links-context"] });
-    } catch {
-      toast.error(t("common.update_status_failed"));
-      setListItems((prev) =>
-        prev.map((item) =>
-          item.type === "link" && item.data.id === link.id
-            ? { ...item, data: { ...item.data, is_active: link.is_active } }
-            : item
-        )
-      );
-    }
+    setIsDirty(true);
   };
 
   // Submit Add / Edit Link Form
@@ -924,11 +926,11 @@ export default function LinksDashboardPage() {
               <div className="flex justify-end pt-2">
                 <Button
                   type="button"
-                  onClick={handleSaveOrder}
-                  disabled={!isOrderDirty || isSavingOrder}
+                  onClick={handleSaveChanges}
+                  disabled={!isDirty || isSavingChanges}
                   className="bg-neutral-900 text-white hover:bg-neutral-800 active:bg-neutral-800 dark:bg-white dark:text-neutral-900 dark:hover:bg-neutral-200 dark:active:bg-neutral-200 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-2 font-medium"
                 >
-                  {isSavingOrder ? (
+                  {isSavingChanges ? (
                     <>
                       <Loader2 className="h-4 w-4 animate-spin" />
                       <span>{t("common.saving")}</span>
@@ -954,6 +956,7 @@ export default function LinksDashboardPage() {
             roles={publicData?.roles ?? []}
             badges={publicData?.badges ?? []}
             contact={publicData?.contact ?? null}
+            isLoading={isLoadingLinks || isLoadingPublicData || !publicData}
           />
         </div>
       </div>
