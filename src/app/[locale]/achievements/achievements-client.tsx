@@ -224,7 +224,7 @@ export function AchievementsClient({ achievements, types, categories, locale }: 
           whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, ease: "easeOut" }}
-          className="flex flex-col gap-1.5 text-left"
+          className="flex flex-col gap-1.5 text-left py-1 -my-1 overflow-visible"
         >
         <div className="flex items-center gap-2.5">
           <Award className="h-[22px] w-[22px] text-neutral-900 dark:text-white" />

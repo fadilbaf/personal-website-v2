@@ -27,7 +27,7 @@ export function MainPublicShell({
   children,
 }: MainPublicShellProps) {
   return (
-    <div className="min-h-screen bg-white dark:bg-neutral-950 font-sans transition-colors duration-300">
+    <div className="min-h-screen bg-white dark:bg-neutral-950 font-sans transition-colors duration-300 overflow-x-clip">
       {/* Mobile Top Header */}
       <MainMobileHeader
         locale={locale}

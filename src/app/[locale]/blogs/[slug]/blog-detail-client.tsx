@@ -439,7 +439,7 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
           initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
           animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
           transition={{ duration: 0.4, delay: 0.05 }}
-          className="mt-5 text-left"
+          className="mt-5 text-left py-1 -my-1 overflow-visible"
         >
           {/* Badges (Type & Category) */}
           {(blogType || blogCategory) && (

@@ -306,7 +306,7 @@ export function MainAbout({
   }, [maxPreviewSkills, displayedSkillsPreview.length]);
 
   return (
-    <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 overflow-hidden">
+    <section className="w-full pt-4 pb-8 md:pt-6 md:pb-12 overflow-visible">
       <div className="w-full flex flex-col gap-12">
 
         {/* 2. Skills Section */}

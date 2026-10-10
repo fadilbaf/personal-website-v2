@@ -164,7 +164,7 @@ export function MainFooter({ about, contact, locale }: MainFooterProps) {
   ];
 
   return (
-    <footer className="w-full border-t border-neutral-200/60 dark:border-white/10 bg-white dark:bg-neutral-950 mt-4 md:mt-6 overflow-hidden">
+    <footer className="w-full border-t border-neutral-200/60 dark:border-white/10 bg-white dark:bg-neutral-950 mt-4 md:mt-6 overflow-visible">
       <div className="w-full px-3.5 sm:px-12 md:px-24 lg:px-36 pt-6 pb-6 sm:pt-8 sm:pb-8">
         <div className="w-full max-w-[1440px] mx-auto">
         <div className="flex flex-col md:grid md:grid-cols-2 lg:flex lg:flex-row lg:justify-between gap-10 lg:gap-0">

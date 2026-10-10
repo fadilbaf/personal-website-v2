@@ -29,7 +29,7 @@ const containerVariants = {
 };
 
 const fadeUpVariants = {
-  hidden: { opacity: 0, y: 16, filter: "blur(6px)" },
+  hidden: { opacity: 0, y: 10, filter: "blur(6px)" },
   visible: {
     opacity: 1,
     y: 0,
@@ -74,22 +74,28 @@ export function MainHero({ profile, badges = [], about, contact, locale }: MainH
   const descText = locale === "id" ? about?.description_id : about?.description_en;
 
   return (
-    <div className="relative w-full pt-6 pb-4 md:pt-10 md:pb-6 flex flex-col">
+    <div className="relative w-full pt-6 pb-6 md:pt-10 md:pb-8 flex flex-col overflow-visible">
       <motion.section
         id="about"
-        className="scroll-mt-20 flex flex-col justify-start items-start text-left z-10 w-full"
+        className="scroll-mt-20 flex flex-col justify-start items-start text-left z-10 w-full overflow-visible"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
-        <div className="flex flex-col items-start gap-4 md:gap-4.5 w-full">
+        <div className="flex flex-col items-start gap-4 md:gap-4.5 w-full overflow-visible">
           
           {/* Greeting & Name */}
-          <div className="flex flex-col gap-1 w-full">
-            <motion.p variants={fadeUpVariants} className="text-neutral-500 dark:text-neutral-400 font-normal text-sm sm:text-base">
+          <div className="flex flex-col gap-1 w-full overflow-visible">
+            <motion.p 
+              variants={fadeUpVariants} 
+              className="text-neutral-500 dark:text-neutral-400 font-normal text-sm sm:text-base py-1 -my-1 overflow-visible"
+            >
               {tMain(locale, "hello")}
             </motion.p>
-            <motion.h1 variants={fadeUpVariants} className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-neutral-900 dark:text-white leading-[1.15]">
+            <motion.h1 
+              variants={fadeUpVariants} 
+              className="text-3xl sm:text-4xl md:text-5xl font-medium tracking-tight text-neutral-900 dark:text-white leading-[1.2] py-2 -my-2 overflow-visible"
+            >
               {profile?.full_name || "Fadil Bafagih"}
             </motion.h1>
           </div>
@@ -97,7 +103,7 @@ export function MainHero({ profile, badges = [], about, contact, locale }: MainH
           {/* Location & Dynamic Badge (Dot + Text) */}
           <motion.div
             variants={fadeUpVariants}
-            className="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 font-normal"
+            className="flex flex-wrap items-center gap-x-4 sm:gap-x-5 gap-y-2 text-xs sm:text-sm text-neutral-600 dark:text-neutral-400 font-normal py-1 -my-1 overflow-visible"
           >
             {locationText && (
               <div className="flex items-center gap-2">
@@ -131,7 +137,7 @@ export function MainHero({ profile, badges = [], about, contact, locale }: MainH
           {descText && (
             <motion.div
               variants={fadeUpVariants}
-              className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-[15px] leading-relaxed max-w-none pt-1"
+              className="text-neutral-600 dark:text-neutral-400 text-sm sm:text-[15px] leading-relaxed max-w-none pt-1 pb-2 -mb-2 overflow-visible"
               dangerouslySetInnerHTML={{ __html: descText.replace(/\n/g, '<br />') }}
             />
           )}
@@ -139,7 +145,7 @@ export function MainHero({ profile, badges = [], about, contact, locale }: MainH
           {/* CTAs: Let's Work Together & Download CV */}
           <motion.div
             variants={fadeUpVariants}
-            className="flex flex-wrap items-center gap-3 pt-2"
+            className="flex flex-wrap items-center gap-3 pt-2 pb-4 -mb-4 px-1 -mx-1 overflow-visible"
           >
             <a
               href={contact?.email ? `mailto:${contact.email}` : "mailto:fadilbafagih@gmail.com"}

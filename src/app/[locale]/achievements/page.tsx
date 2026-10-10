@@ -50,7 +50,7 @@ export default async function AchievementsPage({
       about={about}
       locale={locale}
     >
-      <main className="w-full flex-1 flex flex-col overflow-x-hidden">
+      <main className="w-full flex-1 flex flex-col overflow-visible">
         <AchievementsClient
           achievements={publishedAchievements}
           types={types}
