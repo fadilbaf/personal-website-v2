@@ -132,10 +132,10 @@ export function NewsletterToast({ locale }: NewsletterToastProps) {
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 8 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
-          className={`fixed right-4 sm:right-6 z-50 w-[calc(100%-2rem)] max-w-sm sm:max-w-[380px] transition-[bottom] duration-300 ease-out ${
+          className={`fixed right-3.5 sm:right-6 z-50 w-[calc(100%-1.75rem)] sm:w-auto max-w-sm sm:max-w-[380px] transition-[bottom] duration-300 ease-out ${
             hasScrollTop
               ? "bottom-[82px] sm:bottom-[88px]"
-              : "bottom-4 sm:bottom-6"
+              : "bottom-3.5 sm:bottom-6"
           }`}
         >
           <div className="relative rounded-2xl border border-neutral-200 dark:border-white/10 bg-white/95 dark:bg-neutral-900/95 backdrop-blur-xl p-4 sm:p-5 shadow-md">
