@@ -319,7 +319,7 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
         initial={{ opacity: 0, y: -56 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.45, ease: "easeOut" }}
-        className="lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-60 flex items-center justify-center pointer-events-auto"
+        className="lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-50 flex items-center justify-center pointer-events-auto"
       >
         <AnimatedHamburger
           active={menuOpen}

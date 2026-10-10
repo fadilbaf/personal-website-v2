@@ -338,7 +338,7 @@ export function PdfViewerModal({
 
   return (
     <TooltipProvider>
-      <div className="fixed inset-0 isolate z-50 flex items-center justify-center p-3 sm:p-6 md:p-8 overscroll-contain">
+      <div className="fixed inset-0 isolate z-60 flex items-center justify-center p-3 sm:p-6 md:p-8 overscroll-contain">
         {/* Backdrop Blur */}
         <div
           onClick={onClose}
@@ -351,7 +351,7 @@ export function PdfViewerModal({
             "relative w-full max-w-5xl h-[90vh] sm:h-[85vh]",
             "bg-neutral-100 dark:bg-neutral-900 rounded-[24px] sm:rounded-[28px]",
             "border border-neutral-200/80 dark:border-neutral-800 shadow-2xl",
-            "flex flex-col overflow-hidden z-50 animate-in zoom-in-95 duration-200"
+            "flex flex-col overflow-hidden z-60 animate-in zoom-in-95 duration-200"
           )}
         >
           {/* Custom Control Toolbar Header */}
