@@ -14,6 +14,7 @@ interface MainPublicShellProps {
   contact: Contact | null;
   about: About | null;
   locale: MainLocale;
+  initialTheme?: string;
   children: ReactNode;
 }
 
@@ -24,6 +25,7 @@ export function MainPublicShell({
   contact,
   about,
   locale,
+  initialTheme = "system",
   children,
 }: MainPublicShellProps) {
   return (
@@ -33,6 +35,7 @@ export function MainPublicShell({
         locale={locale}
         profile={profile}
         roles={roles}
+        initialTheme={initialTheme}
       />
 
       {/* Balanced Page Container with Sidebar & Content */}
@@ -44,6 +47,7 @@ export function MainPublicShell({
           contact={contact}
           about={about}
           locale={locale}
+          initialTheme={initialTheme}
         />
 
         {/* Main Content Area */}

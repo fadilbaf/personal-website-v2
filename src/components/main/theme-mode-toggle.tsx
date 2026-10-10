@@ -12,21 +12,21 @@ import { cn } from "@/lib/utils";
 interface ThemeModeToggleProps {
   locale: MainLocale;
   className?: string;
+  initialTheme?: string;
 }
 
-export function ThemeModeToggle({ locale, className }: ThemeModeToggleProps) {
+export function ThemeModeToggle({ locale, className, initialTheme = "system" }: ThemeModeToggleProps) {
   const { theme, setTheme, resolvedTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
-  }, []);
-
-  if (!mounted) {
-    return (
-      <div className={cn("flex items-center gap-1.5 h-9 w-[110px] animate-pulse", className)} />
-    );
-  }
+    const active = theme || localStorage.getItem("theme");
+    if (active) {
+      document.cookie = `theme=${active}; path=/; max-age=31536000; SameSite=Lax`;
+      document.documentElement.dataset.themeMode = active;
+    }
+  }, [theme]);
 
   const options = [
     {
@@ -46,18 +46,27 @@ export function ThemeModeToggle({ locale, className }: ThemeModeToggleProps) {
     },
   ];
 
+  const activeTheme = mounted ? (theme || initialTheme) : initialTheme;
+
   return (
     <TooltipProvider delayDuration={200}>
-      <div className={cn("flex items-center gap-1 p-1 rounded-lg border border-neutral-200 dark:border-white/10 bg-transparent", className)}>
+      <div
+        suppressHydrationWarning
+        className={cn("flex items-center gap-1 p-1 rounded-lg border border-neutral-200 dark:border-white/10 bg-transparent", className)}
+      >
         {options.map((opt) => {
           const Icon = opt.icon;
-          const isActive = theme === opt.value;
+          const isActive = activeTheme === opt.value;
           return (
             <Tooltip key={opt.value}>
               <TooltipTrigger asChild onFocus={(e) => e.preventDefault()}>
                 <button
                   type="button"
+                  data-theme-opt={opt.value}
+                  suppressHydrationWarning
                   onClick={(e) => {
+                    document.cookie = `theme=${opt.value}; path=/; max-age=31536000; SameSite=Lax`;
+                    document.documentElement.dataset.themeMode = opt.value;
                     setThemeWithTransition(opt.value, resolvedTheme, setTheme);
                     e.currentTarget.blur();
                   }}

@@ -32,6 +32,13 @@ export default function RootLayout({
       suppressHydrationWarning
       className={cn("h-full antialiased font-sans", inter.variable)}
     >
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem("theme")||"system";document.documentElement.dataset.themeMode=t;if(!document.cookie.includes("theme=")){document.cookie="theme="+t+";path=/;max-age=31536000;SameSite=Lax"}}catch(e){}})()`,
+          }}
+        />
+      </head>
       <body className="min-h-full flex flex-col">
         <ThemeProvider
           attribute="class"

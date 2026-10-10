@@ -38,6 +38,7 @@ import { useScrollLock, forceUnlockScroll } from "@/src/app/lib/use-scroll-lock"
 import { trackEvent } from "@/src/lib/track-event";
 import { toStorageUrl } from "@/src/lib/storage-url";
 import type { Profile, Role } from "@/src/types/database";
+import { cn } from "@/lib/utils";
 
 import logoBlack from "@/src/assets/images/fadilbaf-black.svg";
 import logoWhite from "@/src/assets/images/fadilbaf-white.svg";
@@ -82,9 +83,10 @@ interface MainMobileHeaderProps {
   locale: MainLocale;
   profile?: Profile | null;
   roles?: Role[];
+  initialTheme?: string;
 }
 
-export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHeaderProps) {
+export function MainMobileHeader({ locale, profile, roles = [], initialTheme = "system" }: MainMobileHeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,6 +98,11 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
   const isHomePage = pathname === `/${locale}` || pathname === "/";
   const enPath = pathname.startsWith("/id") ? pathname.replace(/^\/id/, "/en") : (pathname === "/" ? "/en" : pathname);
   const idPath = pathname.startsWith("/en") ? pathname.replace(/^\/en/, "/id") : (pathname === "/" ? "/id" : pathname);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    setHasMounted(true);
+  }, []);
 
   // Close on escape key
   useEffect(() => {
@@ -284,11 +291,11 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
   return (
     <>
       {/* Top Bar on Mobile with Entrance Animation (Always stays fixed at top, seamless solid background when menu is open) */}
-      <motion.header
-        initial={{ opacity: 0, y: -24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 will-change-transform will-change-opacity transform-gpu"
+      <header
+        className={cn(
+          "lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 bg-white/80 backdrop-blur-md border-b border-neutral-200/60 dark:bg-neutral-950/80 dark:border-white/10",
+          hasMounted ? "animate-mobile-header-in" : "opacity-0 -translate-y-3.5 pointer-events-none"
+        )}
       >
         <Link
           href={`/${locale}`}
@@ -312,21 +319,21 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
             className="hidden dark:block h-7 w-auto"
           />
         </Link>
-      </motion.header>
+      </header>
 
       {/* Floating Animated Hamburger Button (Fixed coordinate, never shifts or re-renders) */}
-      <motion.div
-        initial={{ opacity: 0, y: -24 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-        className="lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-50 flex items-center justify-center pointer-events-auto will-change-transform will-change-opacity transform-gpu"
+      <div
+        className={cn(
+          "lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-50 flex items-center justify-center",
+          hasMounted ? "animate-mobile-header-in pointer-events-auto" : "opacity-0 -translate-y-3.5 pointer-events-none"
+        )}
       >
         <AnimatedHamburger
           active={menuOpen}
           onClick={() => setMenuOpen(!menuOpen)}
           aria-label={tMain(locale, "menu")}
         />
-      </motion.div>
+      </div>
 
       {/* Mobile Drawer Menu (Proven architecture matching nav-menu.tsx: full inset-0 backdrop with pt-14) */}
       <AnimatePresence>
@@ -512,7 +519,7 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
             <div className="shrink-0 flex flex-col">
               {/* Controls */}
               <div className="pt-3 pb-3 px-3.5 flex items-center justify-between gap-1.5 w-full">
-                <ThemeModeToggle locale={locale} className="flex-3 h-10" />
+                <ThemeModeToggle locale={locale} initialTheme={initialTheme} className="flex-3 h-10" />
 
                 {/* Language Toggle Switch [ EN | ID ] with Tooltip */}
                 <TooltipProvider delayDuration={200}>

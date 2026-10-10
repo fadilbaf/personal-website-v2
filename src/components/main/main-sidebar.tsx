@@ -23,6 +23,7 @@ import { tLinks } from "@/src/lib/links-translations";
 import type { Profile, Role, Contact, About } from "@/src/types/database";
 import { toStorageUrl } from "@/src/lib/storage-url";
 import { ThemeModeToggle } from "@/src/components/main/theme-mode-toggle";
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -72,16 +73,23 @@ interface MainSidebarProps {
   contact: Contact | null;
   about: About | null;
   locale: MainLocale;
+  initialTheme?: string;
 }
 
-export function MainSidebar({ profile, roles, contact, about, locale }: MainSidebarProps) {
+export function MainSidebar({ profile, roles, contact, about, locale, initialTheme = "system" }: MainSidebarProps) {
   const pathname = usePathname();
   const router = useRouter();
   const [activeSection, setActiveSection] = useState<string>("about");
   const [currentRoleIndex, setCurrentRoleIndex] = useState(0);
-  const [isImageLoading, setIsImageLoading] = useState(true);
   const [shareDropdownOpen, setShareDropdownOpen] = useState(false);
   const menuContainerRef = useRef<HTMLDivElement>(null);
+  const isInitialRole = useRef(true);
+  const [hasMounted, setHasMounted] = useState(false);
+
+  useEffect(() => {
+    isInitialRole.current = false;
+    setHasMounted(true);
+  }, []);
 
   const isHomePage = pathname === `/${locale}` || pathname === "/";
   const otherLocale = locale === "en" ? "id" : "en";
@@ -111,10 +119,12 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
     if (!container) return;
 
     if (activeSection === "about" || (isHomePage && typeof window !== "undefined" && window.scrollY < 200)) {
-      container.scrollTo({
-        top: 0,
-        behavior: "smooth",
-      });
+      if (container.scrollTop > 0) {
+        container.scrollTo({
+          top: 0,
+          behavior: "smooth",
+        });
+      }
       return;
     }
 
@@ -161,13 +171,13 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
     const updateActiveSection = () => {
       const scrollY = window.scrollY;
       if (scrollY < 150) {
-        setActiveSection("about");
+        setActiveSection((prev) => (prev !== "about" ? "about" : prev));
         return;
       }
 
       // If scrolled near bottom of page, activate last section
       if (window.innerHeight + scrollY >= document.documentElement.scrollHeight - 60) {
-        setActiveSection("contact");
+        setActiveSection((prev) => (prev !== "contact" ? "contact" : prev));
         return;
       }
 
@@ -185,7 +195,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
         }
       }
 
-      setActiveSection(current);
+      setActiveSection((prev) => (prev !== current ? current : prev));
     };
 
     const handleScroll = () => {
@@ -199,8 +209,17 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
     };
 
     window.addEventListener("scroll", handleScroll, { passive: true });
-    updateActiveSection();
-    return () => window.removeEventListener("scroll", handleScroll);
+    let timeoutId: ReturnType<typeof setTimeout> | undefined;
+    if (typeof window !== "undefined" && window.scrollY > 150) {
+      updateActiveSection();
+    } else {
+      timeoutId = setTimeout(updateActiveSection, 550);
+    }
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+      if (timeoutId) clearTimeout(timeoutId);
+    };
   }, [isHomePage]);
 
   const clearScrollFlags = () => {
@@ -301,25 +320,29 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
   ];
 
   return (
-    <motion.aside
-      initial={{ x: -16, opacity: 0 }}
-      animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-      className="hidden lg:flex flex-col w-[280px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl will-change-transform will-change-opacity transform-gpu"
+    <aside
+      className={cn(
+        "hidden lg:flex flex-col w-[280px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white dark:bg-neutral-950",
+        hasMounted ? "animate-sidebar-in" : "opacity-0 -translate-x-4 pointer-events-none"
+      )}
     >
       {/* 1. STICKY TOP: Profile Section (Vertical layout like links page) */}
       <div className="shrink-0 pt-6 pb-4 px-5 flex flex-col items-center text-center">
-        {/* Avatar */}
+        {/* Avatar (Clickable to home / scrollToTop) */}
         {profile?.photo_url && (
-          <motion.div
-            whileHover={{ scale: 1.03 }}
-            whileTap={{ scale: 1.03 }}
-            className="mb-3 cursor-pointer shrink-0"
+          <Link
+            href={`/${locale}`}
+            onClick={(e) => {
+              if (pathname === `/${locale}` || pathname === "/") {
+                e.preventDefault();
+                window.scrollTo({ top: 0, behavior: "smooth" });
+                menuContainerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
+              }
+            }}
+            className="mb-3 cursor-pointer shrink-0 group block outline-none"
+            aria-label="Home"
           >
-            <div className="profile-photo-shimmer relative h-[88px] w-[88px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-neutral-900 shadow-xs">
-              {isImageLoading && (
-                <div className="absolute inset-0 bg-neutral-200 dark:bg-neutral-800 animate-pulse z-10" />
-              )}
+            <div className="profile-photo-shimmer relative h-[88px] w-[88px] rounded-2xl overflow-hidden border border-neutral-200 dark:border-white/10 bg-neutral-100 dark:bg-neutral-900 shadow-xs transition-transform duration-200 group-hover:scale-[1.03] group-active:scale-[0.98]">
               <Image
                 src={toStorageUrl(profile.photo_url)}
                 alt={profile.full_name || "Profile"}
@@ -327,12 +350,11 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
                 className="object-cover select-none profile-image-grayscale"
                 sizes="96px"
                 priority
-                onLoad={() => setIsImageLoading(false)}
                 onContextMenu={(e) => e.preventDefault()}
                 draggable={false}
               />
             </div>
-          </motion.div>
+          </Link>
         )}
 
         {/* Name + Verified Badge (True centered name, badge positioned absolutely on right) */}
@@ -349,10 +371,10 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
         {/* Role with cycling animation */}
         <div className="h-5 overflow-hidden mt-0.5 w-full">
-          <AnimatePresence mode="wait">
+          <AnimatePresence mode="wait" initial={false}>
             <motion.p
               key={currentRoleIndex}
-              initial={{ y: 10, opacity: 0 }}
+              initial={isInitialRole.current ? false : { y: 10, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: -10, opacity: 0 }}
               transition={{ duration: 0.35, ease: "easeInOut" }}
@@ -528,7 +550,7 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
         {/* Theme 3-mode, Language Toggle Switch [EN | ID] & Share (full width) */}
         <div className="flex items-center justify-between gap-1.5 w-full">
-          <ThemeModeToggle locale={locale} className="flex-3 h-9" />
+          <ThemeModeToggle locale={locale} initialTheme={initialTheme} className="flex-3 h-9" />
 
           {/* Language Toggle Switch [ EN | ID ] with Tooltip */}
           <TooltipProvider delayDuration={200}>
@@ -654,6 +676,6 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
         </div>
 
       </div>
-    </motion.aside>
+    </aside>
   );
 }

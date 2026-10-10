@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import type { ReactNode } from "react";
 import { LinksService } from "@/src/services/links.service";
 import { MainPublicShell } from "@/src/components/main/main-public-shell";
@@ -16,6 +17,8 @@ export default async function MainPublicLayout({
 
   // Single source of truth for public shell navigation and sidebar data
   const { profile, roles, badges, about, contact } = await LinksService.getAll();
+  const cookieStore = await cookies();
+  const initialTheme = cookieStore.get("theme")?.value || "system";
 
   return (
     <MainPublicShell
@@ -25,6 +28,7 @@ export default async function MainPublicLayout({
       contact={contact}
       about={about}
       locale={locale}
+      initialTheme={initialTheme}
     >
       {children}
       <ScrollToTop />
