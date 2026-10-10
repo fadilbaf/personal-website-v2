@@ -158,12 +158,11 @@ const dotVariants: Variants = {
 };
 
 const contentVariants: Variants = {
-  hidden: { opacity: 0, filter: "blur(6px)", y: 15 },
+  hidden: { opacity: 0, y: 12 },
   visible: (index: number) => ({
     opacity: 1,
-    filter: "blur(0px)",
     y: 0,
-    transition: { duration: 0.45, ease: "easeOut", delay: index * 0.38 + 0.22 }
+    transition: { duration: 0.35, ease: [0.16, 1, 0.3, 1], delay: index * 0.38 + 0.22 }
   })
 };
 
@@ -1022,14 +1021,13 @@ export function MainExperience({
                       <motion.div
                         key={cs.skill.id}
                         variants={{
-                          hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
+                          hidden: { opacity: 0, y: 6 },
                           visible: {
                             opacity: 1,
-                            filter: "blur(0px)",
                             y: 0,
                             transition: {
-                              duration: 0.4,
-                              ease: "easeOut"
+                              duration: 0.35,
+                              ease: [0.16, 1, 0.3, 1]
                             }
                           }
                         }}

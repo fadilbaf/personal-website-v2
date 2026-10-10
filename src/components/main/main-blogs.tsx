@@ -15,15 +15,14 @@ interface MainBlogsProps {
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
+  hidden: { opacity: 0, y: 12 },
   visible: (custom: { index: number }) => ({
     opacity: 1,
-    filter: "blur(0px)",
     y: 0,
     transition: {
-      duration: 0.4,
-      ease: "easeOut" as const,
-      delay: custom.index * 0.15,
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1] as const,
+      delay: custom.index * 0.1,
     },
   }),
 };

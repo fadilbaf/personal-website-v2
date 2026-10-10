@@ -364,14 +364,13 @@ export function MainAbout({
                   <motion.div 
                     key={skill.id}
                     variants={{
-                      hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
+                      hidden: { opacity: 0, y: 6 },
                       visible: { 
                         opacity: 1, 
-                        filter: "blur(0px)", 
                         y: 0,
                         transition: {
-                          duration: 0.4,
-                          ease: "easeOut"
+                          duration: 0.35,
+                          ease: [0.16, 1, 0.3, 1]
                         }
                       }
                     }}
@@ -396,14 +395,13 @@ export function MainAbout({
                     key="view-all"
                     type="button"
                     variants={{
-                      hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
+                      hidden: { opacity: 0, y: 6 },
                       visible: { 
                         opacity: 1, 
-                        filter: "blur(0px)", 
                         y: 0,
                         transition: {
-                          duration: 0.4,
-                          ease: "easeOut"
+                          duration: 0.35,
+                          ease: [0.16, 1, 0.3, 1]
                         }
                       }
                     }}
@@ -573,14 +571,13 @@ export function MainAbout({
                 <motion.div
                   key={skill.id}
                   variants={{
-                    hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
+                    hidden: { opacity: 0, y: 6 },
                     visible: { 
                       opacity: 1, 
-                      filter: "blur(0px)", 
                       y: 0,
                       transition: {
-                        duration: 0.4,
-                        ease: "easeOut"
+                        duration: 0.35,
+                        ease: [0.16, 1, 0.3, 1]
                       }
                     }
                   }}

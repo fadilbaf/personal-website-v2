@@ -285,10 +285,10 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
     <>
       {/* Top Bar on Mobile with Entrance Animation (Always stays fixed at top, seamless solid background when menu is open) */}
       <motion.header
-        initial={{ opacity: 0, y: -56 }}
+        initial={{ opacity: 0, y: -24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10"
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="lg:hidden fixed top-0 inset-x-0 z-50 flex h-14 items-center justify-between px-3.5 sm:px-6 md:px-10 bg-white/70 backdrop-blur-xl border-b border-neutral-200/60 dark:bg-neutral-950/70 dark:border-white/10 will-change-transform will-change-opacity transform-gpu"
       >
         <Link
           href={`/${locale}`}
@@ -316,10 +316,10 @@ export function MainMobileHeader({ locale, profile, roles = [] }: MainMobileHead
 
       {/* Floating Animated Hamburger Button (Fixed coordinate, never shifts or re-renders) */}
       <motion.div
-        initial={{ opacity: 0, y: -56 }}
+        initial={{ opacity: 0, y: -24 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: "easeOut" }}
-        className="lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-50 flex items-center justify-center pointer-events-auto"
+        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+        className="lg:hidden fixed top-2.5 right-3.5 sm:right-6 md:right-10 z-50 flex items-center justify-center pointer-events-auto will-change-transform will-change-opacity transform-gpu"
       >
         <AnimatedHamburger
           active={menuOpen}

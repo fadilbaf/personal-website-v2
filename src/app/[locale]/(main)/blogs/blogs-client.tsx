@@ -31,14 +31,13 @@ interface BlogsClientProps {
 }
 
 const cardVariants = {
-  hidden: { opacity: 0, filter: "blur(6px)", y: 6 },
+  hidden: { opacity: 0, y: 12 },
   visible: (custom: { index: number }) => ({
     opacity: 1,
-    filter: "blur(0px)",
     y: 0,
     transition: {
-      duration: 0.4,
-      ease: "easeOut" as const,
+      duration: 0.35,
+      ease: [0.16, 1, 0.3, 1] as const,
       delay: (custom.index % 5) * 0.1,
     },
   }),
@@ -192,9 +191,9 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
       <div className="w-full flex flex-col gap-6">
         {/* Back button */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
         >
           <Link
             href={`/${locale}`}
@@ -212,10 +211,10 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
 
         {/* 1. Header (Icon, Title, Description) */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="flex flex-col gap-1.5 text-left py-1 -my-1 overflow-visible"
         >
         <div className="flex items-center gap-2.5">
@@ -525,10 +524,10 @@ export function BlogsClient({ blogs, types, categories, locale }: BlogsClientPro
       {/* 4. Animated Pagination Footer */}
       {filteredBlogs.length > 0 && (
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ duration: 0.5, ease: "easeOut" }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="flex items-center justify-between gap-4 py-2 w-full"
         >
           <p className="text-xs font-medium text-neutral-500 dark:text-neutral-400 truncate">

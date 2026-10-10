@@ -302,10 +302,10 @@ export function MainSidebar({ profile, roles, contact, about, locale }: MainSide
 
   return (
     <motion.aside
-      initial={{ x: -40, opacity: 0 }}
+      initial={{ x: -16, opacity: 0 }}
       animate={{ x: 0, opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut" }}
-      className="hidden lg:flex flex-col w-[280px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl"
+      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+      className="hidden lg:flex flex-col w-[280px] shrink-0 h-screen sticky top-0 border-r border-neutral-200/60 dark:border-white/10 z-40 justify-between overflow-hidden bg-white/70 dark:bg-neutral-950/70 backdrop-blur-xl will-change-transform will-change-opacity transform-gpu"
     >
       {/* 1. STICKY TOP: Profile Section (Vertical layout like links page) */}
       <div className="shrink-0 pt-6 pb-4 px-5 flex flex-col items-center text-center">

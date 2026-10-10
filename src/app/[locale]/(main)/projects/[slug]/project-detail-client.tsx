@@ -474,9 +474,9 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
       <div className="w-full flex flex-col">
         {/* 1. Back button */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
         >
           <Link
             href={backUrl}
@@ -497,9 +497,9 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
         {/* 2. Title & Bio */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
           className="mt-5 text-left"
         >
           {/* Badges (Type & Category) */}
@@ -530,9 +530,9 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
         {/* 3. Metadata & Action Row */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
           className="flex items-center justify-between py-4 border-y border-neutral-200 dark:border-white/10 mt-6"
         >
           {/* Left: Date with Calendar Icon (Exactly matching Views & Likes styling) */}
@@ -728,10 +728,10 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
           {/* Kolom Kiri: Deskripsi & Deep Dives */}
           <motion.div
-            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.45, delay: 0.05 }}
+            transition={{ duration: 0.4, delay: 0.05, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-7 text-left space-y-8 order-2 lg:order-1"
           >
             {/* Overview */}
@@ -877,10 +877,10 @@ export function ProjectDetailClient({ project, contact, locale }: ProjectDetailC
 
           {/* Kolom Rantai Kanan: Carousel & Card stats */}
           <motion.div
-            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-            whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+            initial={{ opacity: 0, y: 12 }}
+            whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-40px" }}
-            transition={{ duration: 0.45, delay: 0.1 }}
+            transition={{ duration: 0.4, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-5 space-y-6 order-1 lg:order-2"
           >
             {/* Carousel */}

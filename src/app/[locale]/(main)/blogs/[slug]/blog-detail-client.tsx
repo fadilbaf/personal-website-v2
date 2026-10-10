@@ -369,8 +369,8 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
     return (
       <motion.div
-        initial={{ opacity: 0, filter: "blur(4px)", y: 12 }}
-        whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+        initial={{ opacity: 0, y: 10 }}
+        whileInView={{ opacity: 1, y: 0 }}
         viewport={{ once: true, margin: "-20px" }}
         transition={{ duration: 0.35, delay: index * 0.08 }}
       >
@@ -413,9 +413,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
       <div className="w-full flex flex-col">
         {/* 1. Back button */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: -10 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4 }}
+          initial={{ opacity: 0, y: -8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35 }}
         >
           <Link
             href={backUrl}
@@ -436,9 +436,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
         {/* 2. Title & Author Info */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4, delay: 0.05 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.05 }}
           className="mt-5 text-left py-1 -my-1 overflow-visible"
         >
           {/* Badges (Type & Category) */}
@@ -489,9 +489,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
         {/* 3. Metadata & Action Row */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-          transition={{ duration: 0.4, delay: 0.1 }}
+          initial={{ opacity: 0, y: 12 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.35, delay: 0.1 }}
           className="flex items-center justify-between py-4 border-y border-neutral-200 dark:border-white/10 mt-6"
         >
           {/* Left: Views and Likes */}
@@ -573,9 +573,9 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 mt-8">
           {/* Main Article Content Column */}
           <motion.div
-            initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-            animate={{ opacity: 1, filter: "blur(0px)", y: 0 }}
-            transition={{ duration: 0.45, delay: 0.15 }}
+            initial={{ opacity: 0, y: 12 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
             className="lg:col-span-8 text-left space-y-8"
           >
             {/* Featured Image */}
@@ -598,10 +598,10 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* MOST POPULAR */}
             {sidebarData.popular.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-                whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45 }}
+                transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-4"
               >
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
@@ -620,10 +620,10 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* RELATED */}
             {sidebarData.related.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-                whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45, delay: 0.08 }}
+                transition={{ duration: 0.4, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-4"
               >
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
@@ -642,10 +642,10 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
             {/* LATEST */}
             {sidebarData.latest.length > 0 && (
               <motion.div
-                initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-                whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+                initial={{ opacity: 0, y: 12 }}
+                whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: "-40px" }}
-                transition={{ duration: 0.45, delay: 0.12 }}
+                transition={{ duration: 0.4, delay: 0.12, ease: [0.16, 1, 0.3, 1] }}
                 className="space-y-4"
               >
                 <div className="border-b-[2.5px] border-neutral-900 dark:border-white pb-1 w-fit">
@@ -665,10 +665,10 @@ export function BlogDetailClient({ blog, locale }: BlogDetailClientProps) {
 
         {/* 5. Full-Width Bottom Bar: Left Tags, Right Actions */}
         <motion.div
-          initial={{ opacity: 0, filter: "blur(6px)", y: 15 }}
-          whileInView={{ opacity: 1, filter: "blur(0px)", y: 0 }}
+          initial={{ opacity: 0, y: 12 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-40px" }}
-          transition={{ duration: 0.45 }}
+          transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
           className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-6 pt-4 pb-0 border-t border-neutral-200 dark:border-white/10 mt-8"
         >
           {/* Left Column: Tags */}
